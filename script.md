@@ -28,22 +28,22 @@ Each of them chooses +1 or –1.
 
 Let’s call their choices:
 
-* \$s\_1\$ for Alice
-* \$s\_2\$ for Bob
+* $s_1$ for Alice
+* $s_2$ for Bob
 
-Now, let’s introduce a number, \$J\_{12}\$, to represent how their relationship works — specifically, how much **tension** or **comfort** exists when they agree or disagree.
+Now, let’s introduce a number, $J_{12}$, to represent how their relationship works — specifically, how much **tension** or **comfort** exists when they agree or disagree.
 
-You can think of \$J\_{12}\$ as a kind of **social tension dial**:
+You can think of $J_{12}$ as a kind of **social tension dial**:
 
-* If \$J\_{12} > 0\$, they **prefer to disagree**. Agreement feels tense.
-* If \$J\_{12} < 0\$, they **prefer to agree**. Disagreement feels awkward.
-* If \$J\_{12} = 0\$, they don’t influence each other at all.
+* If $J_{12} > 0$, they **prefer to disagree**. Agreement feels tense.
+* If $J_{12} < 0$, they **prefer to agree**. Disagreement feels awkward.
+* If $J_{12} = 0$, they don’t influence each other at all.
 
 Let’s see how this plays out.
 
 Here are all 4 possible combinations of their choices, and the corresponding “energy” of each — a number that tells us how comfortable or uncomfortable the system feels:
 
-| \$s\_1\$ | \$s\_2\$ |  \$s\_1 s\_2\$ | Energy if \$J\_{12} = +1\$ |
+| $s_1$ | $s_2$ |  $s_1$ $s_2$ | Energy if $J_{12} = +1$ |
 | -------- | -------- | -------------- | -------------------------- |
 | +1       | +1       | +1             |    +1                      |
 | +1       | –1       | –1             |    –1                      |
@@ -53,13 +53,13 @@ Here are all 4 possible combinations of their choices, and the corresponding “
 Lower energy = better.
 So in this case, the system **prefers disagreement**.
 
-Now flip the sign: set \$J\_{12} = -1\$. That means Alice and Bob **like being aligned**. The energies flip:
+Now flip the sign: set $J_{12} = -1$. That means Alice and Bob **like being aligned**. The energies flip:
 
 * Agreement becomes **energy –1** → preferred.
 * Disagreement becomes **energy +1** → not so cozy.
 
 You can think of it like this:
-When \$J\$ is negative, it’s like two cold people huddling for warmth. They find **comfort in alignment**.
+When $J$ is negative, it’s like two cold people huddling for warmth. They find **comfort in alignment**.
 
 ---
 
@@ -67,15 +67,15 @@ When \$J\$ is negative, it’s like two cold people huddling for warmth. They fi
 
 Now we have three people:
 
-* Alice (\$s\_1\$)
-* Bob (\$s\_2\$)
-* Charlie (\$s\_3\$)
+* Alice ($s_1$)
+* Bob ($s_2$)
+* Charlie ($s_3$)
 
 And three relationships:
 
-* \$J\_{12}\$ between Alice and Bob
-* \$J\_{13}\$ between Alice and Charlie
-* \$J\_{23}\$ between Bob and Charlie
+* $J_{12}$ between Alice and Bob
+* $J_{13}$ between Alice and Charlie
+* $J_{23}$ between Bob and Charlie
 
 Suppose they all prefer to agree. So we set:
 
@@ -85,7 +85,7 @@ $$
 
 Now let’s look at all **8 possible configurations** of their opinions and compute the energy:
 
-| \$s\_1\$ | \$s\_2\$ | \$s\_3\$ | \$s\_1 s\_2\$ | \$s\_1 s\_3\$ | \$s\_2 s\_3\$ | Total Energy |
+| $s_1$ | $s_2$ | $s_3$ | $s_1 s_2$ | $s_1 s_3$ | $s_2 s_3$ | Total Energy |
 | -------- | -------- | -------- | ------------- | ------------- | ------------- | ------------ |
 | +1       | +1       | +1       |  +1           |  +1           |  +1           | –3           |
 | +1       | +1       | –1       |  +1           |  –1           |  –1           | –1           |
@@ -127,7 +127,7 @@ But here’s the kicker:
 
 To *actually find* the best configuration — the one with the **lowest energy** — you’d have to check **every possible arrangement** of spins.
 
-And if you have \$N\$ people (or spins), each of whom can be either +1 or –1, then there are:
+And if you have $N$ people (or spins), each of whom can be either +1 or –1, then there are:
 
 $$
 2^N
@@ -161,7 +161,7 @@ Let’s look at a concrete example.
 
 Suppose I give you a list of numbers:
 
-**\[7, 3, 5, 9, 1]**
+**[7, 3, 5, 9, 1]**
 
 Your task: **divide them into two groups** so that the **sums of each group are as equal as possible**.
 
@@ -171,7 +171,7 @@ But here’s the fun part:
 
 We can *translate* this into an Ising model.
 
-Assign a spin \$s\_i = +1\$ if number \$i\$ goes into group A, and \$s\_i = -1\$ if it goes into group B.
+Assign a spin $s_i = +1$ if number $i$ goes into group A, and $s_i = -1$ if it goes into group B.
 Then define the Hamiltonian so that it punishes imbalanced group sums.
 
 Minimizing the energy of this spin system is **exactly** the same as solving the number partition problem.
