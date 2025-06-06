@@ -105,9 +105,7 @@ The system is happiest — most stable — when everyone agrees.
 
 All of this can be captured in a single formula, called the **Hamiltonian**:
 
-$$H = \sum_{i \le j} J_{ij} s_i s_j$$
-
-$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
+$$H = \sum_{i \lt j} J_{ij} s_i s_j$$
 
 
 This sums over all the relationships, multiplying each pair's alignment by the strength of their connection.
