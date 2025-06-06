@@ -43,7 +43,7 @@ Let’s see how this plays out.
 
 Here are all 4 possible combinations of their choices, and the corresponding “energy” of each — a number that tells us how comfortable or uncomfortable the system feels:
 
-| $s_1$ | $s_2$ |  $s_1$ $s_2$ | Energy if $J_{12} = +1$ |
+| $s_1$ | $s_2$ |  $s_1~s_2$ | Energy if $J_{12} = +1$ |
 | -------- | -------- | -------------- | -------------------------- |
 | +1       | +1       | +1             |    +1                      |
 | +1       | –1       | –1             |    –1                      |
