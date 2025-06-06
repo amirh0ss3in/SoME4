@@ -104,7 +104,6 @@ The system is happiest — most stable — when everyone agrees.
 ### **The big picture: the Hamiltonian**
 
 All of this can be captured in a single formula, called the **Hamiltonian**:
-
 $$ H = \sum_{i<j} J_{ij} s_i s_j $$
 
 This sums over all the relationships, multiplying each pair's alignment by the strength of their connection.
