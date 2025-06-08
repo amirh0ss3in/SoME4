@@ -420,4 +420,118 @@ class Introduction(Scene):
         self.play(FadeOut(question_group))
         self.wait(0.5)
 
-        # --- PART 3: THE INTERACTIVE TABLE ---
+        # --- PART 3: THE INTERACTIVE TABLE (REWRITTEN WITH CORRECT BUFFERS AND SPACING) ---
+
+        # A) Setup the main components
+        case_label = MathTex("J_{12}", "=", "?").scale(1.5).to_edge(UP, buff=1.0)
+
+        table = MathTable(
+            [["+1","+1",""],["+1","-1",""],["-1","+1",""],["-1","-1",""]],
+            col_labels=[MathTex("s_1"), MathTex("s_2"), MathTex("H", color=H_COLOR)],
+            include_outer_lines=True
+        ).scale(0.9).next_to(case_label, DOWN, buff=0.7)
+
+        # Helper function to create the s_gs vector display
+        def create_gs_vector(s1, s2):
+            s_gs_label = MathTex("s_{gs}", "=").set_color(YELLOW)
+            s1_val_text = MathTex(f"{s1:+}").set_color(WHITE)
+            s2_val_text = MathTex(f"{s2:+}").set_color(WHITE)
+            
+            vector_body = VGroup(
+                MathTex("["), s1_val_text, s2_val_text, MathTex("]")
+            ).arrange(RIGHT, buff=0.25)
+            
+            full_vector = VGroup(s_gs_label, vector_body).arrange(RIGHT, buff=0.3)
+            return full_vector
+
+        # B) Animate the appearance of the tools
+        self.play(Write(case_label))
+        self.play(Create(table))
+        self.wait(1)
+
+        # C) Case 1: J = -1 ("Cozy")
+        j_val_cozy = -1
+        new_case_label_cozy = MathTex("J_{12}", "=", f"{j_val_cozy}").scale(1.5).move_to(case_label)
+        new_case_label_cozy[0].set_color(J_COLOR)
+        new_case_label_cozy[2].set_color(PLUS_ONE_COLOR)
+        
+        s1_vals = [int(c.get_tex_string()) for c in table.get_columns()[0][1:]]
+        s2_vals = [int(c.get_tex_string()) for c in table.get_columns()[1][1:]]
+        h_col_data_cozy = VGroup(*[MathTex(f"{j_val_cozy * s1 * s2}", color=H_COLOR) for s1, s2 in zip(s1_vals, s2_vals)]).scale(0.9)
+        for i, item in enumerate(h_col_data_cozy):
+            item.move_to(table.get_cell((i+2, 3)))
+
+        self.play(Transform(case_label, new_case_label_cozy))
+        self.play(Write(h_col_data_cozy))
+        self.wait(1)
+        
+        # Point to the first ground state with correct spacing
+        gs1_row = table.get_rows()[1]
+        gs_vector_display = create_gs_vector(1, 1).next_to(gs1_row, LEFT, buff=1.5)
+        pointer = Arrow(
+            start=gs_vector_display.get_right() + RIGHT * 0.4, # Add gap on the left
+            end=gs1_row.get_left() + LEFT * 0.1,             # Add gap on the right
+            color=YELLOW
+        )
+
+        self.play(Write(gs_vector_display), GrowArrow(pointer))
+        self.wait(2)
+
+        # Move to the second ground state
+        gs2_row = table.get_rows()[4]
+        target_vector = create_gs_vector(-1, -1).next_to(gs2_row, LEFT, buff=1.5)
+        target_pointer = Arrow(
+            start=target_vector.get_right() + RIGHT * 0.4, # Add gap on the left
+            end=gs2_row.get_left() + LEFT * 0.1,             # Add gap on the right
+            color=YELLOW
+        )
+
+        self.play(
+            Transform(pointer, target_pointer),
+            Transform(gs_vector_display, target_vector)
+        )
+        self.wait(2)
+
+        # D) Case 2: J = +1 ("Tense")
+        self.play(FadeOut(pointer), FadeOut(gs_vector_display))
+        j_val_tense = 1
+        new_case_label_tense = MathTex("J_{12}", "=", f"+{j_val_tense}").scale(1.5).move_to(case_label)
+        new_case_label_tense[0].set_color(J_COLOR)
+        new_case_label_tense[2].set_color(MINUS_ONE_COLOR)
+        
+        h_col_data_tense = VGroup(*[MathTex(f"{j_val_tense * s1 * s2}", color=H_COLOR) for s1, s2 in zip(s1_vals, s2_vals)]).scale(0.9)
+        for i, item in enumerate(h_col_data_tense):
+            item.move_to(table.get_cell((i+2, 3)))
+
+        self.play(
+            Transform(case_label, new_case_label_tense),
+            Transform(h_col_data_cozy, h_col_data_tense),
+            run_time=1.5
+        )
+        self.wait(1)
+
+        # Point to the new ground states with correct spacing
+        gs1_row_new = table.get_rows()[2]
+        gs_vector_display = create_gs_vector(1, -1).next_to(gs1_row_new, LEFT, buff=1.5)
+        pointer = Arrow(
+            start=gs_vector_display.get_right() + RIGHT * 0.4, # Add gap on the left
+            end=gs1_row_new.get_left() + LEFT * 0.1,             # Add gap on the right
+            color=YELLOW
+        )
+        
+        self.play(Write(gs_vector_display), GrowArrow(pointer))
+        self.wait(2)
+        
+        gs2_row_new = table.get_rows()[3]
+        target_vector = create_gs_vector(-1, 1).next_to(gs2_row_new, LEFT, buff=1.5)
+        target_pointer = Arrow(
+            start=target_vector.get_right() + RIGHT * 0.4, # Add gap on the left
+            end=gs2_row_new.get_left() + LEFT * 0.1,             # Add gap on the right
+            color=YELLOW
+        )
+
+        self.play(
+            Transform(pointer, target_pointer),
+            Transform(gs_vector_display, target_vector)
+        )
+        self.wait(3)
