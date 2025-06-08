@@ -386,3 +386,38 @@ class Introduction(Scene):
             Transform(calculation_text, new_calc), run_time=1.5
         )
         self.wait(3)
+
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: FINDING THE GROUND STATE (CORRECTED DIAGRAM) ---
+        
+        # --- PART 1: CLEANUP AND RECAP ---
+        
+        all_previous_mobjects = VGroup(
+            connection_group, right_panel, formulas_group,
+            calculation_text, alice_spin, bob_spin, j_dot, h_dot
+        )
+        self.play(FadeOut(all_previous_mobjects))
+        self.wait(0.5)
+
+        DEFAULT_FONT_SIZE = 32
+        recap_text = MarkupText(
+            "The 'Conflict' depends on their choices and the 'Tension' between them.",
+            font_size=DEFAULT_FONT_SIZE
+        )
+        self.play(Write(recap_text))
+        self.wait(2)
+
+        # --- PART 2: POSE THE QUESTION ---
+
+        question_text_1 = Text("Now, let's assume the tension J is fixed.", font_size=DEFAULT_FONT_SIZE)
+        question_text_2 = MarkupText(f'The question is: what choices will they make to <span color="{H_COLOR}">minimize the conflict</span>?', font_size=DEFAULT_FONT_SIZE)
+        question_text_3 = MarkupText(f'This lowest-energy state is called the <span color="{YELLOW}">ground state</span>.', font_size=DEFAULT_FONT_SIZE)
+        question_group = VGroup(question_text_1, question_text_2, question_text_3).arrange(DOWN, buff=0.4)
+
+        self.play(ReplacementTransform(recap_text, question_group))
+        self.wait(4)
+        self.play(FadeOut(question_group))
+        self.wait(0.5)
+
+        # --- PART 3: THE INTERACTIVE TABLE ---
