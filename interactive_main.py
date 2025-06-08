@@ -535,3 +535,125 @@ class Introduction(Scene):
             Transform(gs_vector_display, target_vector)
         )
         self.wait(3)
+
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: THREE PEOPLE (FINAL POLISHED VERSION) ---
+        
+        # 1. Clean up all elements from the previous scene
+        all_table_elements = VGroup(case_label, table, h_col_data_cozy, pointer, gs_vector_display)
+        self.play(FadeOut(all_table_elements))
+        self.wait(0.5)
+
+        # 2. Pose the question
+        question_text = Text("You might wonder... what happens with three people?", font_size=36)
+        self.play(Write(question_text))
+        self.wait(2)
+        self.play(FadeOut(question_text))
+        self.wait(0.5)
+
+        # 3. Define helper functions with corrected, robust logic
+        node_radius = 0.3
+
+        def create_person(name, position):
+            circle = Circle(radius=node_radius, color=WHITE, fill_opacity=0.8)
+            text_name = Text(name, font_size=36).next_to(circle, DOWN, buff=0.2)
+            # Ensure names are drawn on top of lines
+            text_name.set_z_index(2)
+            # Add a background to prevent lines from cutting through the text
+            text_name.add_background_rectangle(opacity=1, buff=0.05)
+            return VGroup(circle, text_name).move_to(position)
+
+        def create_connection(node1, node2, label_text):
+            circle1 = node1.submobjects[0]
+            circle2 = node2.submobjects[0]
+            p1, p2 = circle1.get_center(), circle2.get_center()
+            direction_vector = p2 - p1
+            unit_direction = direction_vector / np.linalg.norm(direction_vector)
+            line = Line(p1 + unit_direction * node_radius, p2 - unit_direction * node_radius, z_index=-1, color=TEAL, stroke_width=3)
+            label = MathTex(label_text, color=J_COLOR).scale(1.2)
+            label.move_to(line.get_center())
+            line_angle = line.get_angle()
+            label.rotate(line_angle)
+            if (PI / 2) < abs(line_angle) < (3 * PI / 2):
+                label.rotate(PI)
+            label.add_background_rectangle(opacity=1, buff=0.1)
+            return VGroup(line, label)
+
+        # 4. Define the nodes in a triangle layout
+        alice_node = create_person("Alice", UP * 2.2)
+        bob_node = create_person("Bob", DOWN * 1.5 + LEFT * 2.5)
+        charlie_node = create_person("Charlie", DOWN * 1.5 + RIGHT * 2.5)
+        
+        all_nodes = VGroup(alice_node, bob_node, charlie_node)
+        self.play(Create(all_nodes))
+        self.wait(1)
+
+        # 5. Define and animate the connections using the new, smooth technique
+        connection_12 = create_connection(alice_node, bob_node, "J_{12}")
+        connection_13 = create_connection(alice_node, charlie_node, "J_{13}")
+        connection_23 = create_connection(bob_node, charlie_node, "J_{23}")
+
+        self.play(
+            LaggedStart(
+                Create(connection_12),
+                Create(connection_13),
+                Create(connection_23),
+                lag_ratio=0.6, # Start the next animation when the previous is 60% done
+                run_time=3     # The entire process takes 3 seconds
+            )
+        )
+        self.wait(3)
+    
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: BUILDING THE HAMILTONIAN (DEFINITIVE CORRECTED VERSION) ---
+
+        # 1. Group the entire system and move it to the left
+        triangle_system = VGroup(all_nodes, connection_12, connection_13, connection_23)
+        self.play(
+            triangle_system.animate.scale(0.8).to_edge(LEFT, buff=1.0)
+        )
+        self.wait(0.5)
+
+        # 2. Define the position for the formulas to appear on the right
+        formula_pos = RIGHT * 3.0
+
+        # 3. Create and animate the individual conflict formulas
+        
+        h12_formula = MathTex("H_{12}", "=", "s_1", "J_{12}", "s_2", tex_to_color_map={"H_{12}": H_COLOR, "J_{12}": J_COLOR}).scale(1.2).move_to(formula_pos)
+        self.play(Write(h12_formula))
+        self.wait(1.5)
+        self.play(FadeOut(h12_formula))
+
+        h13_formula = MathTex("H_{13}", "=", "s_1", "J_{13}", "s_3", tex_to_color_map={"H_{13}": H_COLOR, "J_{13}": J_COLOR}).scale(1.2).move_to(formula_pos)
+        self.play(Write(h13_formula))
+        self.wait(1.5)
+        self.play(FadeOut(h13_formula))
+
+        h23_formula = MathTex("H_{23}", "=", "s_2", "J_{23}", "s_3", tex_to_color_map={"H_{23}": H_COLOR, "J_{23}": J_COLOR}).scale(1.2).move_to(formula_pos)
+        self.play(Write(h23_formula))
+        self.wait(2)
+
+        # 4. Reveal the total Hamiltonian in a two-line format
+        
+        # Create each part of the equation separately
+        h_total_label = MathTex("H", "=").set_color_by_tex("H", H_COLOR)
+        term1 = MathTex("s_1 J_{12} s_2").set_color(J_COLOR)
+        plus_sign = MathTex("+").set_color(WHITE) # Use white for the plus sign
+        term2 = MathTex("s_1 J_{13} s_3").set_color(J_COLOR)
+        term3 = MathTex("+ s_2 J_{23} s_3").set_color(J_COLOR)
+        
+        # Arrange the first line
+        line1 = VGroup(h_total_label, term1, plus_sign, term2).arrange(RIGHT, buff=0.2)
+        
+        # Position the second line (term3) aligned under the start of term1
+        term3.next_to(line1, DOWN, buff=0.2, aligned_edge=LEFT)
+        term3.align_to(term1, LEFT)
+
+        # Group everything and move it into position
+        full_formula = VGroup(line1, term3)
+        full_formula.move_to(formula_pos)
+
+        self.play(ReplacementTransform(h23_formula, full_formula))
+        self.wait(4)
