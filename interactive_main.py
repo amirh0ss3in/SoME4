@@ -832,8 +832,15 @@ class Introduction(Scene):
 
         # 4. Show what s^T J s means visually in the newly cleared space
         
-        # A. Create the components for s^T, J, and s
-        s_T_vec = MathTex(r"[\, s_1 \,", r"\, s_2 \,", r"\, \dots \,", r"\, s_N \,]").set_color(PLUS_ONE_COLOR)
+        # --- THIS IS THE FIX ---
+        # A. Create the components for s^T, J, and s more robustly
+        s1_tex = MathTex("s_1")
+        s2_tex = MathTex("s_2")
+        dots_tex = MathTex(r"\dots")
+        sN_tex = MathTex("s_N")
+        s_T_vec = VGroup(
+            MathTex("["), s1_tex, s2_tex, dots_tex, sN_tex, MathTex("]")
+        ).arrange(RIGHT, buff=0.2).set_color(PLUS_ONE_COLOR)
         
         j_matrix = Matrix(
             [[r"J_{11}", r"J_{12}", r"\dots", r"J_{1N}"],
@@ -863,4 +870,187 @@ class Introduction(Scene):
                 lag_ratio=0.5
             )
         )
+        self.wait(5)
+
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: THE COMPLEXITY OF FINDING THE GROUND STATE (POLISHED VERSION) ---
+
+        # --- PART 1: Posing the Problem (The "Brute-Force" Approach) ---
+
+        # 1. Cleanup and focus on the spin vector
+        self.play(
+            FadeOut(one_half, j_matrix, s_vec), # Fade out everything except s^T vector and title
+            sTJs_formula.animate.fade(0.5)      # Dim the title
+        )
+        # s_T_vec is the horizontal vector from the previous scene
+        
+        # FIX: Add the "s^T =" label to the vector
+        s_T_label = MathTex(r"\mathbf{s}^T =").scale(1.5).set_color(PLUS_ONE_COLOR)
+        labeled_s_vector = VGroup(s_T_label, s_T_vec).arrange(RIGHT, buff=0.25)
+
+        self.play(labeled_s_vector.animate.move_to(ORIGIN))
+        self.wait(1)
+
+        # 2. Pose the question
+        # FIX: Reduce font size and justify text to prevent overflow
+        question = MarkupText(
+            "To find the ground state, which configuration of spins minimizes H?",
+            font_size=32,
+            justify=True
+        ).next_to(labeled_s_vector, UP, buff=1.0)
+        self.play(Write(question))
+        self.wait(2)
+
+        # 3. Count the choices for each spin
+        s1 = s_T_vec.submobjects[1]
+        s2 = s_T_vec.submobjects[2]
+        sN = s_T_vec.submobjects[4]
+
+        # FIX: Increase buff for a slightly larger highlight box
+        highlight_box = SurroundingRectangle(s1, color=YELLOW, buff=0.15)
+        choices_text = MarkupText("2 choices (+1 or –1)", font_size=28).next_to(labeled_s_vector, DOWN, buff=0.7)
+        self.play(Create(highlight_box), Write(choices_text))
+        self.wait(1)
+
+        self.play(highlight_box.animate.move_to(s2))
+        self.wait(0.5)
+        self.play(highlight_box.animate.move_to(sN))
+        self.wait(1)
+
+        # 4. Build the 2^N formula from the choices
+        multiplication_text = MathTex("2 \\times 2 \\times \\dots \\times 2", font_size=48)
+        n_times_label = MathTex("(N \\text{ times})", font_size=36).next_to(multiplication_text, DOWN)
+        multiplication_group = VGroup(multiplication_text, n_times_label).move_to(choices_text.get_center())
+        
+        self.play(ReplacementTransform(choices_text, multiplication_group))
+        self.wait(2)
+
+        # FIX: Use MathTex with \text{} to ensure proper spacing
+        final_configs_formula = MathTex(r"\text{Total Configurations} = 2^N", font_size=48)
+        final_configs_formula.move_to(multiplication_group.get_center())
+        
+        self.play(
+            ReplacementTransform(multiplication_group, final_configs_formula),
+            FadeOut(question, labeled_s_vector, highlight_box, sTJs_formula)
+        )
+        self.wait(1)
+
+        # --- PART 2: Visualizing Exponential Growth (Linear Scale) ---
+
+        # 1. Set the stage for the graph
+        self.play(final_configs_formula.animate.scale(0.7).to_edge(UP, buff=0.5))
+        
+        # FIX: Use a linear scale, we will move the graph to keep the dot in view.
+        ax = Axes(
+            x_range=[0, 32, 5],
+            y_range=[0, 40, 10], # Start with a small, manageable y-range
+            x_length=10,
+            y_length=5.5, # Make y-axis a bit shorter to give more vertical room
+            axis_config={"color": BLUE},
+            x_axis_config={"numbers_to_include": np.arange(0, 31, 5)},
+        )
+
+        x_label = ax.get_x_axis_label("N \\text{ (Number of People)}")
+        y_label = ax.get_y_axis_label("\\text{Configurations}", edge=LEFT, direction=UP)
+        y_label.next_to(ax.y_axis, UP, buff=0.2)
+        
+        # FIX: Group everything and scale it down slightly to fit well
+        graph_group = VGroup(ax, x_label, y_label).scale(0.95).move_to(ORIGIN)
+        self.play(Create(graph_group))
+        self.wait(1)
+
+        # 2. Plot the curve and animate its explosive growth
+        tracker = ValueTracker(2)
+        
+        # Create a graph that will be updated
+        graph = ax.plot(lambda x: 2**x, color=WHITE, x_range=[0,2])
+
+        # Create a dot that tracks the end of the graph
+        dot = Dot(color=YELLOW).move_to(graph.get_end())
+        
+        # Create a label for the dot
+        label = always_redraw(lambda: 
+            MathTex(f"2^{{{int(tracker.get_value())}}} = {int(2**tracker.get_value()):,}")
+            .scale(0.7).next_to(dot, UR, buff=0.1)
+        )
+
+        self.play(Create(graph), FadeIn(dot), FadeIn(label))
+        self.wait(1)
+
+        # Animate to N=5
+        self.play(
+            tracker.animate.set_value(5),
+            UpdateFromFunc(graph, lambda m: m.become(ax.plot(lambda x: 2**x, color=WHITE, x_range=[0, 5]))),
+            UpdateFromFunc(dot, lambda m: m.move_to(ax.c2p(5, 2**5))),
+            run_time=2
+        )
+        self.wait(1)
+        
+        # Animate to N=10, moving the graph down to keep the dot in frame
+        self.play(
+            tracker.animate.set_value(10),
+            UpdateFromFunc(graph, lambda m: m.become(ax.plot(lambda x: 2**x, color=WHITE, x_range=[0, 10]))),
+            # Animate the dot and the entire graph group simultaneously
+            dot.animate.move_to(ax.c2p(10, 2**10)),
+            graph_group.animate.shift(DOWN * 3),
+            run_time=3
+        )
+        self.wait(1)
+        
+        # Animate to N=30, showing the massive jump
+        self.play(
+            tracker.animate.set_value(30),
+            # We don't need to draw the full graph, just move the dot to its final position
+            # while the graph scrolls away, creating a sense of immense scale.
+            dot.animate.move_to(ax.c2p(30, 2**30)), 
+            graph_group.animate.shift(DOWN * 20), # Move graph way off-screen
+            run_time=4
+        )
+        self.wait(2)
+
+
+        # --- PART 3: The "Impossible" Punchline ---
+        
+        # 1. Clean up the graph elements
+        self.play(
+            FadeOut(graph_group, dot, label, graph, final_configs_formula)
+        )
+        self.wait(0.5)
+
+        # 2. Show the N=300 case
+        n300_text = MathTex("N = 300", font_size=72)
+        self.play(Write(n300_text))
+        self.wait(1)
+
+        # 3. Create the punchline text
+        line1 = MarkupText(
+            "For just 300 people, the number of configurations (2<sup>300</sup>)...", 
+            font_size=36
+        )
+        
+        # --- THIS IS THE FIX ---
+        # Create each line of the final sentence as a separate object
+        line2a = MarkupText(
+            "is greater than the number of atoms", 
+            font_size=42, color=YELLOW
+        )
+        line2b = MarkupText(
+            "in the known universe.",
+            font_size=42, color=YELLOW
+        )
+        # Arrange them in a VGroup, which will center them by default
+        line2_group = VGroup(line2a, line2b).arrange(DOWN, buff=0.2)
+        
+        # Group the entire punchline for positioning
+        punchline = VGroup(line1, line2_group).arrange(DOWN, buff=0.5)
+        
+        # 4. Animate the final text
+        self.play(
+            n300_text.animate.next_to(punchline, UP, buff=0.7)
+        )
+        self.play(Write(line1))
+        self.wait(1.5)
+        # Write the two-line group together
+        self.play(Write(line2_group))
         self.wait(5)
