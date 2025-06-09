@@ -1509,3 +1509,194 @@ class LinkToNPHardness(Scene):
         except FileNotFoundError:
             self.play(Write(Text("Image 'dwave_computer.jpeg' not found.", color=RED)))
             self.wait(3)
+
+
+# (This class can be added to the end of your interactive_main.py file)
+
+# Helper functions from the prompt, to be used inside the class or defined globally
+def calculate_min_H(J):
+    N = len(J)
+    # Generate all 2^(N-1) combinations for the first N-1 spins
+    # The last spin is fixed to -1 to break the s -> -s symmetry
+    # This is okay because we only care about the structure of one of the two ground states.
+    num_combos = 2**(N - 1)
+    # Using a direct array approach to build combinations
+    # This is more memory-intensive but conceptually clear for smaller N
+    combos = np.ones((num_combos, N), dtype=int)
+    for i in range(N - 1):
+        n = 2**(N - 1 - (i + 1))
+        combos[:, i] = np.tile(np.repeat(np.array([1, -1]), n), 2**i)
+    combos[:, -1] = -1
+
+    # Einsum is a very efficient way to compute the Hamiltonian for all combos at once
+    # H_i = s_i^T . J . s_i
+    H = 0.5 * np.einsum('ij,jk,ik->i', combos, J, combos)
+    min_H_index = np.argmin(H)
+    return np.min(H), combos[min_H_index]
+def J_order(N, d):
+    def f(i, j):
+        return ((i+1)/N)**d + ((j+1)/N)**d
+    mat = np.fromfunction(f, (N, N), dtype=float)
+    np.fill_diagonal(mat, 0)
+    return mat
+
+
+class OrderedJ(Scene):
+    def construct(self):
+        # --- CONFIGURATION ---
+        PLUS_ONE_COLOR = BLUE_D
+        MINUS_ONE_COLOR = RED_D
+        J_COLOR = YELLOW
+        H_COLOR = GREEN
+        
+        # --- SEQUENCE 1: THE SPARK OF AN IDEA ---
+
+        # 1. Opening text about J_ij
+        title_text = Text("The Ising model is defined by its matrix of tensions,", font_size=36)
+        hamiltonian_formula = MathTex(r"H = \sum_{i<j} J_{ij} s_i s_j", font_size=48).next_to(title_text, DOWN, buff=0.4)
+        hamiltonian_formula.set_color_by_tex("J_{ij}", J_COLOR)
+        
+        opening_group = VGroup(title_text, hamiltonian_formula).move_to(ORIGIN)
+        
+        self.play(Write(opening_group))
+        self.play(Indicate(hamiltonian_formula.get_part_by_tex("J_{ij}"), scale_factor=1.2, color=J_COLOR))
+        self.wait(3)
+        self.play(FadeOut(opening_group))
+        self.wait(0.5)
+
+        # 2. Pose the student's question
+        question = Text("A young physics student wondered...", font_size=36).to_edge(2*UP)
+        sub_question = Text(
+            "What if the interaction was not random,\nbut based on a simple, underlying rule?",
+            font_size=32, line_spacing=1.2
+        ).move_to(ORIGIN)
+
+        self.play(Write(question))
+        self.play(Write(sub_question))
+        self.wait(3)
+        self.play(FadeOut(question, sub_question))
+        self.wait(0.5)
+        
+        # --- SEQUENCE 2: THE WALL OF EVIDENCE (d=1) ---
+
+        # 1. Show the simple rule
+        rule_formula = MathTex("J_{ij} = i + j", font_size=48)
+        rule_formula.to_edge(UP, buff=1.0)
+        self.play(Write(rule_formula))
+        self.wait(2)
+
+        # 2. Pre-calculate ground states for d=1
+        ground_states = {}
+        for n in range(10, 16):
+            j_matrix = J_order(n, d=1)
+            _, s_g = calculate_min_H(j_matrix)
+            ground_states[n] = s_g
+
+        # 3. Animate the "Wall of Evidence"
+        dot_rows = VGroup()
+        for n in range(10, 16):
+            # Create the label and the row of dots
+            n_label = MathTex(f"N={n}", font_size=32)
+            dot_row = VGroup(*[Dot(radius=0.1, color=WHITE) for _ in range(n)]).arrange(RIGHT, buff=0.25)
+            
+            row_group = VGroup(n_label, dot_row).arrange(RIGHT, buff=0.5)
+            dot_rows.add(row_group)
+
+        dot_rows.arrange(DOWN, buff=0.4, aligned_edge=LEFT).move_to(ORIGIN)
+
+        # Animate each row appearing and resolving
+        for i, n in enumerate(range(10, 16)):
+            self.play(FadeIn(dot_rows[i]), run_time=0.5)
+            self.wait(0.5)
+            
+            s_g = ground_states[n]
+            animations = []
+            for j, spin in enumerate(s_g):
+                color = PLUS_ONE_COLOR if spin == 1 else MINUS_ONE_COLOR
+                animations.append(dot_rows[i][1][j].animate.set_color(color))
+            
+            self.play(LaggedStart(*animations, lag_ratio=0.1))
+            self.wait(1)
+
+        self.wait(3)
+
+
+        # --- SEQUENCE 3: GENERALIZING TO 'd' ---
+
+        # 1. Morph the formula to the general case
+        general_rule = MathTex(r"J_{ij} \propto i^d + j^d", font_size=48).move_to(rule_formula)
+        general_rule.set_color_by_tex("d", ORANGE)
+        self.play(Transform(rule_formula, general_rule))
+        self.wait(2)
+
+        # 2. Set up the interactive demonstration
+        # Make the "wall of evidence" fully opaque again for the main demonstration
+        self.play(dot_rows.animate.fade(0))
+
+        # Create the dial for 'd' below the rows
+        d_dial = NumberLine(
+            x_range=[-8, 8, 1], # Adjusted for better visual spacing of ticks
+            length=10,
+            include_numbers=True,
+            label_direction=UP
+        ).next_to(dot_rows, DOWN, buff=0.8)
+        d_label = MathTex("d", color=ORANGE).next_to(d_dial, DOWN)
+        
+        self.play(Create(d_dial), Write(d_label))
+        self.wait(1)
+
+        # 3. Pre-calculate the TRUE ground states for different 'd' for ALL Ns
+        def get_M(n, d):
+            j_mat = J_order(n, d)
+            _, s_g = calculate_min_H(j_mat)
+            return np.sum(s_g == 1)
+
+        M_values = {}
+        d_points = [-1.0, 3.0, 6.0] # The points we will visit, d=1 is already shown
+        all_n_values = range(10, 16)
+
+        for d_val in d_points:
+            M_values[d_val] = {}
+            for n_val in all_n_values:
+                M_values[d_val][n_val] = get_M(n_val, d_val)
+
+        # 4. Animate the pointer and ALL state changes simultaneously
+        pointer = Arrow(start=d_dial.n2p(1) + UP*0.5, end=d_dial.n2p(1), color=ORANGE, buff=0)
+        self.play(GrowArrow(pointer))
+        self.wait(1)
+
+        # Helper function to generate the list of animations for any 'd'
+        def get_update_animations(d_val):
+            anims = []
+            for i, n in enumerate(all_n_values):
+                M = M_values[d_val][n]
+                # Get the dot VGroup for the current row
+                current_dots = dot_rows[i][1]
+                for j in range(n):
+                    color = PLUS_ONE_COLOR if j < M else MINUS_ONE_COLOR
+                    anims.append(current_dots[j].animate.set_color(color))
+            return anims
+
+        # Animate to d=6
+        self.play(
+            pointer.animate.move_to(d_dial.n2p(6) + UP*0.25),
+            LaggedStart(*get_update_animations(6.0), lag_ratio=0.01),
+            run_time=2.5
+        )
+        self.wait(1)
+        
+        # Animate to d=3.0
+        self.play(
+            pointer.animate.move_to(d_dial.n2p(3) + UP*0.25),
+            LaggedStart(*get_update_animations(3.0), lag_ratio=0.01),
+            run_time=3.0
+        )
+        self.wait(1)
+
+        # Animate to d=-1
+        self.play(
+            pointer.animate.move_to(d_dial.n2p(-1) + UP*0.25),
+            LaggedStart(*get_update_animations(-1.0), lag_ratio=0.01),
+            run_time=2.0
+        )
+        self.wait(2)
