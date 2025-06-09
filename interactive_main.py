@@ -749,3 +749,118 @@ class Introduction(Scene):
             n4_system.animate.fade(0.7)
         )
         self.wait(5)
+
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: THE MATRIX FORMULATION ---
+
+        # 1. Clean up the scene, leaving only the summation formula
+        self.play(
+            FadeOut(n4_system),
+            summation_formula.animate.move_to(ORIGIN).scale(1.2)
+        )
+        self.wait(1)
+
+        # 2. Define the components: s_i and J
+        s_i_def = MathTex(r"s_i \in \{+1, -1\}", font_size=36)
+        j_matrix_def = MarkupText(
+            f'J is an <span color="{J_COLOR}">N × N</span> matrix of tensions', 
+            font_size=36
+        )
+        
+        definitions_group = VGroup(s_i_def, j_matrix_def).arrange(DOWN, buff=0.5)
+        definitions_group.next_to(summation_formula, DOWN, buff=1.0)
+        
+        self.play(Write(definitions_group))
+        self.wait(3)
+
+        # 3. Introduce the symmetry argument
+        symmetry_text = MarkupText(
+            f'In the real world, the tension is mutual: <span color="{YELLOW}">J<sub>ij</sub> = J<sub>ji</sub></span>',
+            font_size=42
+        )
+        symmetry_text.move_to(definitions_group)
+
+        self.play(ReplacementTransform(definitions_group, symmetry_text))
+        self.wait(3)
+
+        # 4. Rewrite the formula into its final matrix-ready form
+        final_formula = MathTex(r"H = \frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} s_i J_{ij} s_j", font_size=60)
+        final_formula.set_color_by_tex_to_color_map({
+            "H": H_COLOR,
+            "J_{ij}": J_COLOR
+        })
+        final_formula.move_to(summation_formula)
+
+        n_explanation = MarkupText(
+            "where N is the number of people (spins)", 
+            font_size=32
+        ).next_to(final_formula, DOWN, buff=0.7)
+
+        self.play(
+            ReplacementTransform(summation_formula, final_formula),
+            ReplacementTransform(symmetry_text, n_explanation),
+            run_time=2
+        )
+        self.wait(5)
+
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: THE MATRIX-VECTOR FORM (REVISED LAYOUT) ---
+
+        # 1. Clean up the explanation text
+        self.play(FadeOut(n_explanation))
+        self.wait(0.5)
+
+        # 2. Transform the summation formula into the compact matrix form
+        sTJs_formula = MathTex(r"H = \frac{1}{2} \mathbf{s}^T \mathbf{J} \mathbf{s}", font_size=60)
+        sTJs_formula.set_color_by_tex_to_color_map({
+            "H": H_COLOR,
+            r"\mathbf{J}": J_COLOR,
+            r"\mathbf{s}": PLUS_ONE_COLOR
+        })
+        sTJs_formula.move_to(final_formula)
+
+        self.play(ReplacementTransform(final_formula, sTJs_formula))
+        self.wait(2)
+
+        # 3. Animate the main formula moving up to become a "title" for the explanation
+        self.play(
+            sTJs_formula.animate.scale(0.8).to_edge(UP, buff=1.0)
+        )
+        self.wait(0.5)
+
+        # 4. Show what s^T J s means visually in the newly cleared space
+        
+        # A. Create the components for s^T, J, and s
+        s_T_vec = MathTex(r"[\, s_1 \,", r"\, s_2 \,", r"\, \dots \,", r"\, s_N \,]").set_color(PLUS_ONE_COLOR)
+        
+        j_matrix = Matrix(
+            [[r"J_{11}", r"J_{12}", r"\dots", r"J_{1N}"],
+             [r"J_{21}", r"J_{22}", r"\dots", r"J_{2N}"],
+             [r"\vdots", r"\vdots", r"\ddots", r"\vdots"],
+             [r"J_{N1}", r"J_{N2}", r"\dots", r"J_{NN}"]],
+            h_buff=1.2, v_buff=0.7, bracket_h_buff=0.2
+        ).set_color(J_COLOR)
+        
+        s_vec = Matrix(
+            [[r"s_1"], [r"s_2"], [r"\vdots"], [r"s_N"]]
+        ).set_color(PLUS_ONE_COLOR)
+        
+        one_half = MathTex(r"\frac{1}{2}")
+
+        # B. Group and arrange them in the center of the screen
+        expanded_form = VGroup(one_half, s_T_vec, j_matrix, s_vec).arrange(RIGHT, buff=0.25)
+        expanded_form.scale(0.8).move_to(ORIGIN)
+
+        # C. Animate their appearance
+        self.play(
+            LaggedStart(
+                Write(one_half),
+                Write(s_T_vec),
+                Create(j_matrix),
+                Write(s_vec),
+                lag_ratio=0.5
+            )
+        )
+        self.wait(5)
