@@ -1,207 +1,109 @@
-## **Hello, and welcome!**
+# This weird approximation solves an impossible problem
 
-Today, we’re diving into a beautifully simple idea from physics — one that shows up in surprising places.
+(intro music)
 
-It helps explain how **magnets** work.
-It models how **opinions spread** through a social network.
-It even helps us **solve tough optimization problems** in machine learning and beyond.
+### Introduction
 
-This idea is called the **Ising model**.
+Let's imagine a situation where a group of people each has to make a simple, binary choice. They could be deciding "yes or no" on some question, or maybe they're choosing between two political candidates.
 
-At its core, the Ising model is about **binary choices** — simple yes-or-no decisions — and how those decisions **influence one another**.
+To make this mathematical, we'll call a "yes" a "+1" and a "no" a "–1".
 
----
+Let's start with just two people, Alice and Bob. Suppose they both vote "yes", which we'll show with their state as +1.
 
-### **A simple thought experiment**
+### Agreement and Disagreement
 
-Imagine a group of people, each deciding **yes or no** on some question. It doesn’t matter what the question is. We’ll call “yes” **+1** and “no” **–1**.
+Now, let's explore the possible outcomes of their choices. We can keep track of Alice's choice, which we'll call *s₁*, and Bob's choice, *s₂*.
 
-But here’s the twist:
-People don’t decide in isolation.
-They **care about what their neighbors think**.
+There's an interesting mathematical property here. What happens if we multiply their choices together?
 
----
+If Alice and Bob both choose +1, their product is +1. We can think of this as a state of 'agreement'.
 
-### **Let’s start small: Just two people. Alice and Bob.**
+If Alice chooses +1 and Bob chooses –1, their product is –1. This is a state of 'disagreement'.
 
-Each of them chooses +1 or –1.
+The same is true if their roles are reversed.
 
-Let’s call their choices:
+And if they both choose –1, the product is once again +1. They still 'agree', in this case, on "no". So the product *s₁* times *s₂* is a wonderful little measure of whether they agree or disagree.
 
-* $s_1$ for Alice
-* $s_2$ for Bob
+### Introducing Tension
 
-Now, let’s introduce a number, $J_{12}$, to represent how their relationship works — specifically, how much **tension** or **comfort** exists when they agree or disagree.
+But in the real world, people aren't isolated. Their decisions are often influenced by their relationship with others. You might say there's a... *tension* between them.
 
-You can think of $J_{12}$ as a kind of **social tension dial**:
+Let's represent this tension with a value, which we'll call *J₁₂*, that lives on the connection between Alice and Bob.
 
-* If $J_{12} > 0$, they **prefer to disagree**. Agreement feels tense.
-* If $J_{12} < 0$, they **prefer to agree**. Disagreement feels awkward.
-* If $J_{12} = 0$, they don’t influence each other at all.
+We can think of this tension value as a dial. If *J* is positive, let's say their relationship is 'tense'—they are rivals. If *J* is negative, their relationship is 'cozy' or friendly. And if *J* is zero, they have no influence on each other at all.
 
-Let’s see how this plays out.
+### Defining Conflict (The Hamiltonian)
 
-Here are all 4 possible combinations of their choices, and the corresponding “energy” of each — a number that tells us how comfortable or uncomfortable the system feels:
+So, how do we combine all these ideas? We have Alice's choice, Bob's choice, and the tension in their relationship.
 
-| $s_1$ | $s_2$ |  $s_1$ $s_2$ | Energy if $J_{12} = +1$ |
-| -------- | -------- | -------------- | -------------------------- |
-| +1       | +1       | +1             |    +1                      |
-| +1       | –1       | –1             |    –1                      |
-| –1       | +1       | –1             |    –1                      |
-| –1       | –1       | +1             |    +1                      |
+We can define a single number that captures the state of the whole system. Let's call it the "Conflict", or for those with a physics background, the Hamiltonian, denoted by a capital *H*.
 
-Lower energy = better.
-So in this case, the system **prefers disagreement**.
+The conflict is simply the product of Alice's choice, the tension, and Bob's choice.
 
-Now flip the sign: set $J_{12} = -1$. That means Alice and Bob **like being aligned**. The energies flip:
+Let's see what this means in practice. Suppose Alice and Bob have a cozy relationship, so *J* is negative one. If they both agree, and choose +1, the total conflict *H* is -1. A low conflict state.
 
-* Agreement becomes **energy –1** → preferred.
-* Disagreement becomes **energy +1** → not so cozy.
+But if Bob disagrees, the conflict becomes +1. This makes sense: in a cozy relationship, disagreement leads to higher conflict.
 
-You can think of it like this:
-When $J$ is negative, it’s like two cold people huddling for warmth. They find **comfort in alignment**.
+Now, what happens if we dial up the tension so their relationship is 'tense', with *J* equal to positive one? In this case, with them disagreeing, the conflict is actually low, at -1.
 
----
+But if they *agree* while in a tense relationship, the conflict becomes high. In this state, they're almost 'expected' to disagree.
 
-### **Let’s add one more person: Charlie.**
+### Finding the Ground State
 
-Now we have three people:
+This leads to a fascinating question. If the tension *J* is fixed, what choices will Alice and Bob naturally make to minimize the total conflict?
 
-* Alice ($s_1$)
-* Bob ($s_2$)
-* Charlie ($s_3$)
+This lowest-energy, lowest-conflict state has a special name: it's called the **ground state**.
 
-And three relationships:
+Let's try to find it. In the cozy case, where *J* is -1, we can calculate the conflict for all four possibilities. The lowest value, -1, occurs whenever they agree. This means `[+1, +1]` is a ground state...
 
-* $J_{12}$ between Alice and Bob
-* $J_{13}$ between Alice and Charlie
-* $J_{23}$ between Bob and Charlie
+...but so is `[–1, –1]`. This system has two ground states.
 
-Suppose they all prefer to agree. So we set:
+Now, what if their relationship is tense, with *J* equal to +1? The minimum conflict value is still -1, but this time it occurs when they *disagree*. So the ground states are `[+1, –1]`...
 
-$$
-J_{12} = J_{13} = J_{23} = -1
-$$
+...and `[–1, +1]`.
 
-Now let’s look at all **8 possible configurations** of their opinions and compute the energy:
+### Three People
 
-| $s_1$ | $s_2$ | $s_3$ | $s_1 s_2$ | $s_1 s_3$ | $s_2 s_3$ | Total Energy |
-| -------- | -------- | -------- | ------------- | ------------- | ------------- | ------------ |
-| +1       | +1       | +1       |  +1           |  +1           |  +1           | –3           |
-| +1       | +1       | –1       |  +1           |  –1           |  –1           | –1           |
-| +1       | –1       | +1       |  –1           |  +1           |  –1           | –1           |
-| +1       | –1       | –1       |  –1           |  –1           |  +1           | –1           |
-| –1       | +1       | +1       |  –1           |  –1           |  +1           | –1           |
-| –1       | +1       | –1       |  –1           |  +1           |  –1           | –1           |
-| –1       | –1       | +1       |  +1           |  –1           |  –1           | –1           |
-| –1       | –1       | –1       |  +1           |  +1           |  +1           | –3           |
+You might wonder... what happens with three people?
 
-Just like before, the configurations with **everyone aligned** have the lowest energy.
-The system is happiest — most stable — when everyone agrees.
+Let's introduce a third person, Charlie. Now there isn't just one relationship, but three: between Alice and Bob, Alice and Charlie, and Bob and Charlie. Each of these connections gets its own tension value: *J₁₂, J₁₃,* and *J₂₃*.
 
----
+The Total Conflict of the system is now just the sum of the conflicts from each individual pair. It’s the conflict between Alice and Bob... plus the conflict between Alice and Charlie... plus the conflict between Bob and Charlie.
 
-### **The big picture: the Hamiltonian**
+### Generalizing to N People
 
-All of this can be captured in a single formula, called the **Hamiltonian**:
+And this pattern continues. If we add a fourth person, Diana, we now have six connections in total. The Total Conflict is the sum of the conflicts over all six of these pairs.
 
-$$H = \sum_{i \lt j} J_{ij} s_i s_j$$
+As you can imagine, writing this out gets very long, very quickly. But mathematicians have a beautiful shorthand for this kind of sum.
 
+We can say the Hamiltonian, *H*, is the sum over all pairs of people *i* and *j*, of *sᵢ* times *Jᵢⱼ* times *sⱼ*.
 
-This sums over all the relationships, multiplying each pair's alignment by the strength of their connection.
+### The Matrix Formulation
 
-You can think of it as a kind of **global discomfort score**.
-The lower it is, the more “at peace” the whole system feels.
+This formula has two key components: the state of the spins, *sᵢ*, which for each person is either +1 or -1... and the tensions, *Jᵢⱼ*, which we can think of as the elements of an N-by-N matrix describing the entire network of relationships.
 
-And the configuration that gives the lowest possible energy — the **ground state** — is what the system naturally tends toward.
+Now, it's fair to assume that in the real world, the tension is mutual. The way Alice feels about Bob is the same as how Bob feels about Alice. In other words, *Jᵢⱼ* is equal to *Jⱼᵢ*. The tension matrix is symmetric.
 
+This symmetry allows us to rewrite the sum in a more general, and often more useful, way. Instead of summing over only the unique pairs where *i* is less than *j*, we can sum over all *i* and all *j*, as long as we multiply the whole thing by one-half to avoid double-counting each relationship.
 
+And for those of you familiar with linear algebra, you might recognize this structure. This entire expression is simply one-half times the vector of spins **s** transposed, times the matrix of tensions **J**, times the vector **s**.
 
+This is what that compact formula actually represents: a neat, clean way to capture all the pairwise interactions in the entire system.
 
-## **Part 2 — Complexity Creeps In**
+### The Complexity of Finding the Ground State
 
-In the last part, we saw how the Ising model gives us a way to score different configurations — based on how much agreement or disagreement exists between interacting "spins".
+So, we return to our central question: how do you find the ground state of a system like this? The most direct, brute-force approach would be to check the conflict value for every single possible configuration of spins.
 
-But here’s the kicker:
+But just how many configurations are there?
 
-To *actually find* the best configuration — the one with the **lowest energy** — you’d have to check **every possible arrangement** of spins.
+Well, the first person has two choices. For *each* of those choices, the second person has two choices. And so on, for all N people in the system. The total number of configurations is 2, multiplied by itself N times... or simply, 2 to the power of N.
 
-And if you have $N$ people (or spins), each of whom can be either +1 or –1, then there are:
+What does that number actually look like as N grows? For a small number of people, it seems manageable. At N=5, there are 32 configurations to check.
 
-$$
-2^N
-$$
+But as we increase N, this curve bends upwards with terrifying speed. This is the nature of exponential growth.
 
-possible configurations.
+By the time we get to N=10, we have over a thousand states. By N=30, the number of possibilities has exploded to over a billion. And the problem gets unimaginably big, incredibly fast.
 
-Just 10 spins? 1,024 possibilities.
-20 spins? Over a million.
-50 spins? You’re looking at more than a **quadrillion**.
+To put this in perspective, for a system of just 300 people, the number of possible configurations—2 to the 300—is a number so vast that it's greater than the estimated number of atoms in the entire known universe.
 
-And this number just keeps exploding.
-
-Now imagine trying to solve this for a system with **hundreds or thousands** of interacting parts.
-
----
-
-### **Why Does This Matter?**
-
-Because this isn’t just about magnets anymore.
-
-This kind of problem — minimizing the Ising Hamiltonian — shows up in **many real-world tasks** that are known to be **NP-hard**.
-
-That means: there’s *no known efficient algorithm* that can always find the best solution quickly. You’d have to try every possible configuration... which is hopelessly slow as the problem grows.
-
----
-
-### **A Real Example: The Number Partition Problem**
-
-Let’s look at a concrete example.
-
-Suppose I give you a list of numbers:
-
-**[7, 3, 5, 9, 1]**
-
-Your task: **divide them into two groups** so that the **sums of each group are as equal as possible**.
-
-That’s the **Number Partition Problem**, and it’s **NP-hard**.
-
-But here’s the fun part:
-
-We can *translate* this into an Ising model.
-
-Assign a spin $s_i = +1$ if number $i$ goes into group A, and $s_i = -1$ if it goes into group B.
-Then define the Hamiltonian so that it punishes imbalanced group sums.
-
-Minimizing the energy of this spin system is **exactly** the same as solving the number partition problem.
-
-So the Ising model isn't just a physics toy — it’s a **universal language for hard problems**.
-
----
-
-### **Other NP-Hard Problems**
-
-And it’s not alone.
-
-Many famous NP-hard problems can be **converted** into Ising form:
-
-* **Traveling Salesman Problem**
-* **Graph Coloring**
-* **Max-Cut**
-* **3-SAT**
-* **Subset Sum**
-
-All of these — and many more — can be *reduced* to each other.
-
-(We won’t dive into how reductions work here, but just know: they’re like mathematical “translations” from one problem to another.)
-
----
-
-### **Why Does That Matter?**
-
-Because it means:
-
-> **If you can solve the Ising model efficiently, you can solve all these problems.**
-
-And that’s a big deal — for computer science, optimization, AI, logistics, cryptography... you name it.
-
+So, simply checking every possibility is not just slow; for any reasonably sized problem, it's physically impossible. This is what makes finding the ground state of these systems such a profoundly difficult, and deeply interesting, problem in physics, computer science, and mathematics.
