@@ -1054,3 +1054,188 @@ class Introduction(Scene):
         # Write the two-line group together
         self.play(Write(line2_group))
         self.wait(5)
+
+
+class LinkToNPHardness(Scene):
+    def construct(self):
+        # --- CONFIGURATION (from previous scene) ---
+        PLUS_ONE_COLOR = BLUE_D
+        MINUS_ONE_COLOR = RED_D
+        TEXT_COLOR = YELLOW
+        J_COLOR = YELLOW
+        H_COLOR = GREEN
+        
+        # --- SEQUENCE 1: INTRO AND WHY WE CARE ---
+        
+        title_text = MarkupText(
+            'Why is this <span color="YELLOW">Ising Problem</span> important?',
+            font_size=42
+        )
+        subtitle_text = MarkupText(
+            "It's a <span color='TEAL'>universal puzzle</span> that describes many other hard problems.",
+            font_size=36
+        ).next_to(title_text, DOWN, buff=0.4)
+
+        self.play(Write(title_text))
+        self.wait(2)
+        self.play(Write(subtitle_text))
+        self.wait(3)
+        self.play(FadeOut(title_text, subtitle_text))
+        self.wait(0.5)
+
+        # --- SEQUENCE 2: THE NUMBER PARTITIONING PROBLEM ---
+        
+        problem_title = Text("The Number Partitioning Problem", font_size=38).to_edge(UP)
+        self.play(Write(problem_title))
+        self.wait(1)
+
+        numbers_list = [8, 7, 6, 5]
+        numbers_tex = VGroup(*[MathTex(str(n)) for n in numbers_list]).arrange(RIGHT, buff=0.8).scale(0.9)
+        self.play(Write(numbers_tex))
+        self.wait(2)
+
+        # --- FIX #1: Move numbers up to make space for the bins ---
+        self.play(numbers_tex.animate.to_edge(UP, buff=2.0))
+        self.wait(0.5)
+
+        bin_A = RoundedRectangle(width=3, height=2, corner_radius=0.2, color=BLUE).to_edge(LEFT, buff=1.5)
+        bin_B = RoundedRectangle(width=3, height=2, corner_radius=0.2, color=RED).to_edge(RIGHT, buff=1.5)
+        bin_A_label = Text("Group A").next_to(bin_A, UP)
+        bin_B_label = Text("Group B").next_to(bin_B, UP)
+
+        self.play(Create(bin_A), Create(bin_B), Write(bin_A_label), Write(bin_B_label))
+        self.wait(1)
+
+        sum_A = Integer(0, color=BLUE).scale(1.5).next_to(bin_A, DOWN, buff=0.3)
+        sum_B = Integer(0, color=RED).scale(1.5).next_to(bin_B, DOWN, buff=0.3)
+        self.play(Write(sum_A), Write(sum_B))
+
+        # Re-get the numbers from the VGroup for animation
+        num8, num7, num6, num5 = numbers_tex
+        self.play(
+            num8.animate.move_to(bin_A.get_center() + LEFT*0.5),
+            num5.animate.move_to(bin_A.get_center() + RIGHT*0.5),
+            num7.animate.move_to(bin_B.get_center() + LEFT*0.5),
+            num6.animate.move_to(bin_B.get_center() + RIGHT*0.5),
+        )
+        self.play(sum_A.animate.set_value(13), sum_B.animate.set_value(13))
+
+        equals_sign = MathTex("=", color=GREEN).scale(2).move_to(ORIGIN)
+        checkmark = MathTex(r"\checkmark", color=GREEN).scale(3).next_to(equals_sign, RIGHT, buff=0.5)
+        
+        self.play(Write(equals_sign), Write(checkmark))
+        self.wait(3)
+
+        # --- SEQUENCE 3: MAPPING TO SPINS ---
+
+        all_partition_elements = VGroup(
+            problem_title, numbers_tex, bin_A, bin_B, bin_A_label,
+            bin_B_label, sum_A, sum_B, equals_sign, checkmark
+        )
+        self.play(FadeOut(all_partition_elements))
+        self.wait(0.5)
+
+        numbers_tex_centered = VGroup(*[MathTex(str(n)) for n in numbers_list]).arrange(RIGHT, buff=1.5).scale(1.8)
+        self.play(Write(numbers_tex_centered))
+        
+        spins_tex = VGroup(
+            MathTex("+1", color=PLUS_ONE_COLOR), MathTex("-1", color=MINUS_ONE_COLOR),
+            MathTex("-1", color=MINUS_ONE_COLOR), MathTex("+1", color=PLUS_ONE_COLOR)
+        ).scale(1.5)
+
+        for i, spin in enumerate(spins_tex):
+            spin.next_to(numbers_tex_centered[i], DOWN, buff=0.5)
+
+        self.play(Write(spins_tex))
+        self.wait(3)
+
+        calc_sum = MathTex(
+            r"(+1)\times 8", r"+ (-1)\times 7", r"+ (-1)\times 6", r"+ (+1)\times 5", r" = 0"
+        ).scale(1.2).next_to(numbers_tex_centered, DOWN, buff=1.5)
+        
+        self.play(LaggedStart(*[Write(part) for part in calc_sum], lag_ratio=0.5, run_time=3))
+        self.wait(3)
+
+        goal_formula = MathTex(r"\text{Goal: Find } s_i \text{ such that } \sum_i s_i a_i = 0", font_size=48)
+        goal_formula.to_edge(DOWN)
+        
+        self.play(ReplacementTransform(calc_sum, goal_formula))
+        self.wait(3)
+
+        # --- SEQUENCE 4: THE CONNECTION TO HAMILTONIAN ---
+
+        all_prev_elements = VGroup(numbers_tex_centered, spins_tex)
+        self.play(FadeOut(all_prev_elements), goal_formula.animate.move_to(ORIGIN))
+        self.wait(1)
+
+        squared_sum = MathTex(r"\left( \sum_i s_i a_i \right)^2", font_size=60)
+        self.play(ReplacementTransform(goal_formula, squared_sum))
+        self.wait(2)
+
+        # --- FIX #2: Re-layout the long formula to prevent clipping ---
+        self.play(squared_sum.animate.to_edge(UP, buff=1.0))
+        
+        expanded_term1 = MathTex(r"= \sum_i (a_i)^2", font_size=60)
+        expanded_term2 = MathTex(r"+ \sum_{i \neq j}", r"a_i a_j", r"s_i s_j", font_size=60)
+        expanded_form = VGroup(expanded_term1, expanded_term2).arrange(RIGHT, buff=0.2)
+        expanded_form.next_to(squared_sum, DOWN, buff=0.5)
+
+        self.play(Write(expanded_form))
+        self.wait(2)
+
+        const_part = expanded_form[0]
+        const_label = Text("CONSTANT", color=YELLOW, font_size=32).next_to(const_part, DOWN)
+        self.play(Write(const_label))
+        self.wait(2)
+
+        variable_part = expanded_form[1]
+        self.play(
+            FadeOut(const_part, const_label, squared_sum),
+            variable_part.animate.move_to(ORIGIN).scale(0.9)
+        )
+        self.wait(2)
+        
+        hamiltonian = MathTex(r"H = \sum_{i<j}", r"J_{ij}", r"s_i s_j", font_size=60)
+        hamiltonian.set_color_by_tex_to_color_map({"H": H_COLOR, "J_{ij}": J_COLOR})
+        hamiltonian.next_to(variable_part, UP, buff=1.0)
+        self.play(Write(hamiltonian))
+        self.wait(2)
+
+        rect1 = SurroundingRectangle(variable_part[1], color=ORANGE)
+        rect2 = SurroundingRectangle(hamiltonian[1], color=ORANGE)
+        
+        equivalence_map = MathTex(r"J_{ij} = a_i a_j", color=YELLOW, font_size=60)
+        equivalence_map.next_to(variable_part, DOWN, buff=1.0)
+
+        self.play(Create(rect1), Create(rect2))
+        self.wait(1)
+        self.play(Write(equivalence_map))
+        self.wait(4)
+
+        self.play(
+            FadeOut(variable_part, hamiltonian, rect1, rect2, equivalence_map)
+        )
+        self.wait(0.5)
+        
+        # --- FIX #3: Adjust box width and text size to fit properly ---
+        box1 = RoundedRectangle(height=1.5, width=4.5, corner_radius=0.2, color=TEAL)
+        # Reduce font size to prevent overflow
+        text1 = Text("Number Partitioning", font_size=32).move_to(box1.get_center()) 
+        problem1 = VGroup(box1, text1)
+
+        box2 = RoundedRectangle(height=1.5, width=4.5, corner_radius=0.2, color=H_COLOR)
+        # Reduce font size to prevent overflow
+        text2 = Text("Ising Ground State", font_size=32).move_to(box2.get_center()) 
+        problem2 = VGroup(box2, text2)
+
+        problems = VGroup(problem1, problem2).arrange(RIGHT, buff=2.0)
+        
+        arrow = Arrow(problem1.get_right(), problem2.get_left(), buff=0.2, color=YELLOW)
+        arrow_text = Text("is equivalent to").next_to(arrow, 2.7*UP)
+
+        self.play(FadeIn(problem1))
+        self.wait(1)
+        self.play(GrowArrow(arrow), Write(arrow_text))
+        self.wait(1)
+        self.play(ReplacementTransform(problem1.copy(), problem2))
+        self.wait(5)
