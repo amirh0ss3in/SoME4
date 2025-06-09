@@ -1239,3 +1239,85 @@ class LinkToNPHardness(Scene):
         self.wait(1)
         self.play(ReplacementTransform(problem1.copy(), problem2))
         self.wait(5)
+
+        # --- NEW SEQUENCE: THE ROGUES' GALLERY (FINAL POLISHED VERSION) ---
+
+        # 1. Define a consistent helper function for creating problem boxes
+        def create_problem_box(text, color, height=1.3, width=4.0):
+            box = RoundedRectangle(height=height, width=width, corner_radius=0.2, color=color)
+            # This ensures the text always fits nicely inside the box
+            label = Text(text, font_size=36).scale_to_fit_width(width * 0.85)
+            label.move_to(box.get_center())
+            return VGroup(box, label)
+
+        # 2. Define the FINAL state of all objects for the smooth transition
+        
+        # A. The new, slightly larger central hub
+        central_hub_final = create_problem_box("Ising Ground State", H_COLOR, height=1.5, width=5.2)
+        central_hub_final.move_to(ORIGIN) # Place the final hub at the center
+
+        # B. The final position and look of the Number Partitioning box
+        np_box_final = create_problem_box("Number Partitioning", TEAL)
+        np_box_final.move_to(central_hub_final.get_center() + DOWN * 2.2 + LEFT * 3.5)
+
+        # C. The final arrow connecting them, based on their final positions
+        np_arrow_final = Arrow(
+            np_box_final.get_top(), central_hub_final.get_corner(DL),
+            buff=0.2, color=YELLOW
+        )
+
+        # 3. Perform the main transition in ONE smooth animation
+        # We transform the old objects (problem1, problem2, arrow) into their new final versions.
+        # This handles moving, resizing, and reshaping all at once.
+        self.play(
+            FadeOut(arrow_text),
+            Transform(problem1, np_box_final),       # The old NP box becomes the new one
+            Transform(problem2, central_hub_final),  # The old Ising box becomes the new hub
+            Transform(arrow, np_arrow_final),        # The old arrow becomes the new, correctly angled one
+            run_time=2.0
+        )
+        self.wait(1)
+
+        # 4. Sequentially introduce the other problems, now that the scene is set
+        
+        # Get the final objects from the Transform to use as references
+        central_hub = problem2
+        np_box = problem1
+        
+        # Max-Cut
+        max_cut_box = create_problem_box("Max-Cut", PURPLE)
+        max_cut_box.move_to(central_hub.get_center() + UP * 2.2 + LEFT * 3.5)
+        max_cut_arrow = Arrow(max_cut_box.get_bottom(), central_hub.get_corner(UL), buff=0.2, color=YELLOW)
+        self.play(FadeIn(max_cut_box))
+        self.play(GrowArrow(max_cut_arrow))
+        self.wait(2.5)
+
+        # Traveling Salesman
+        tsp_box = create_problem_box("Traveling Salesman", MAROON_B)
+        tsp_box.move_to(central_hub.get_center() + UP * 2.2 + RIGHT * 3.5)
+        tsp_arrow = Arrow(tsp_box.get_bottom(), central_hub.get_corner(UR), buff=0.2, color=YELLOW)
+        self.play(FadeIn(tsp_box))
+        self.play(GrowArrow(tsp_arrow))
+        self.wait(2.5)
+
+        # Protein Folding
+        protein_box = create_problem_box("Protein Folding", GOLD_D)
+        protein_box.move_to(central_hub.get_center() + DOWN * 2.2 + RIGHT * 3.5)
+        protein_arrow = Arrow(protein_box.get_top(), central_hub.get_corner(DR), buff=0.2, color=YELLOW)
+        self.play(FadeIn(protein_box))
+        self.play(GrowArrow(protein_arrow))
+        self.wait(2.5)
+        
+        # 5. Final shot - group everything for a clean end frame
+        
+        all_problems_group = VGroup(
+            central_hub,
+            np_box, arrow, # The NP box and its arrow are already grouped from the transform
+            max_cut_box, max_cut_arrow,
+            tsp_box, tsp_arrow,
+            protein_box, protein_arrow
+        )
+        
+        # A final small adjustment to ensure the whole composition is perfectly centered
+        self.play(all_problems_group.animate.move_to(ORIGIN))
+        self.wait(5)
