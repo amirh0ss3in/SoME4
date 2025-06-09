@@ -1402,3 +1402,110 @@ class LinkToNPHardness(Scene):
         
         self.play(Write(final_question))
         self.wait(5)
+    
+        # (This code follows immediately after the final question "how do we find it?")
+
+        # --- NEW SEQUENCE: THE EDGE OF SOLVABILITY ---
+
+        # 1. Answer the question with nuance (with text wrapping)
+        # Relies on Manim's default center alignment for MarkupText with newlines.
+        answer_text = MarkupText(
+            'The short answer: for a general, complex system...\n<span color="YELLOW">you don\'t.</span>',
+            font_size=42
+        )
+        self.play(ReplacementTransform(final_question, answer_text))
+        self.wait(3)
+
+        explanation_text = MarkupText(
+            'There is no known algorithm that can efficiently find the <span color="YELLOW">exact</span>\nground state for any arbitrary set of tensions.',
+            font_size=36
+        ).move_to(ORIGIN)
+        
+        self.play(ReplacementTransform(answer_text, explanation_text))
+        self.wait(4)
+        self.play(FadeOut(explanation_text))
+        self.wait(0.5)
+        
+        # 2. Show the "Rare Exact Solutions"
+        title = Text("Rare Exact Solutions", font_size=42).to_edge(UP)
+        self.play(Write(title))
+        self.wait(1)
+
+        # A) 2D Planar Graph (Onsager's Solution)
+        planar_label = Text("2D Planar Graphs", font_size=32).next_to(title, DOWN, buff=0.5)
+        
+        grid = VGroup(*[Dot() for i in range(25)]).arrange_in_grid(5, 5, buff=0.8)
+        lines = VGroup()
+        for i in range(5):
+            for j in range(4):
+                lines.add(Line(grid[i*5+j], grid[i*5+j+1], stroke_width=2, color=GRAY))
+        for i in range(4):
+            for j in range(5):
+                lines.add(Line(grid[i*5+j], grid[(i+1)*5+j], stroke_width=2, color=GRAY))
+
+        planar_system = VGroup(grid, lines).scale(0.8).next_to(planar_label, DOWN, buff=0.8)
+        
+        onsager_text = VGroup(
+            Text("Lars Onsager", font_size=36),
+            Text("1944", font_size=32, color=YELLOW)
+        ).arrange(DOWN).next_to(planar_system, RIGHT, buff=0.5)
+
+        planar_group = VGroup(planar_label, planar_system, onsager_text)
+        self.play(Write(planar_group))
+        self.wait(5)
+        
+        # B) Spin Glass / Parisi case
+        spinglass_label = Text("Spin Glasses (Random Tensions)", font_size=32).next_to(title, DOWN, buff=0.5)
+        
+        num_nodes = 15
+        nodes = VGroup(*[Dot() for _ in range(num_nodes)]).arrange_in_grid(3, 5, buff=1.5)
+        for node in nodes:
+            node.shift((random.random()-0.5)*0.5*RIGHT + (random.random()-0.5)*0.5*UP)
+        
+        lines = VGroup()
+        all_pairs = list(itertools.combinations(range(num_nodes), 2))
+        selected_pairs = random.sample(all_pairs, int(num_nodes * 1.8))
+        for pair in selected_pairs:
+            color = random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR])
+            lines.add(Line(nodes[pair[0]], nodes[pair[1]], color=color, stroke_width=2, z_index=-1))
+            
+        spinglass_system = VGroup(nodes, lines).scale(0.7).next_to(spinglass_label, DOWN, buff=0.5)
+        
+        parisi_text = VGroup(
+            Text("Giorgio Parisi", font_size=36),
+            MarkupText("Statistical Properties", font_size=28),
+            Text("Nobel Prize 2021", font_size=32, color=YELLOW)
+        ).arrange(DOWN, buff=0.2).next_to(spinglass_system, RIGHT, buff=0.5)
+
+        spinglass_group = VGroup(spinglass_label, spinglass_system, parisi_text)
+        self.play(ReplacementTransform(planar_group, spinglass_group))
+        self.wait(5)
+
+        # 3. Transition to Quantum Annealing
+        self.play(FadeOut(title), FadeOut(spinglass_group))
+        self.wait(0.5)
+
+        outro_text = MarkupText(
+            "For the messy, real-world problems,\nwe need a different approach...",
+            font_size=36
+        ).move_to(UP * 2.5)
+
+        self.play(Write(outro_text))
+        self.wait(3)
+
+        # 4. Show the D-Wave Computer
+        try:
+            dwave_image = ImageMobject("dwave_computer.jpeg")
+            dwave_image.set_height(4.5)
+            dwave_image.next_to(outro_text, DOWN, buff=0.5)
+            
+            self.play(FadeIn(dwave_image))
+            
+            dwave_label = Text("Quantum Annealer", font_size=42, color=TEAL)
+            dwave_label.next_to(dwave_image, DOWN)
+            self.play(Write(dwave_label))
+            self.wait(5)
+            
+        except FileNotFoundError:
+            self.play(Write(Text("Image 'dwave_computer.jpeg' not found.", color=RED)))
+            self.wait(3)
