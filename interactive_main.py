@@ -1300,12 +1300,12 @@ class LinkToNPHardness(Scene):
         self.play(GrowArrow(tsp_arrow))
         self.wait(2.5)
 
-        # Protein Folding
-        protein_box = create_problem_box("Protein Folding", GOLD_D)
-        protein_box.move_to(central_hub.get_center() + DOWN * 2.2 + RIGHT * 3.5)
-        protein_arrow = Arrow(protein_box.get_top(), central_hub.get_corner(DR), buff=0.2, color=YELLOW)
-        self.play(FadeIn(protein_box))
-        self.play(GrowArrow(protein_arrow))
+        # ksat
+        ksat_box = create_problem_box("k-SAT", GOLD_D)
+        ksat_box.move_to(central_hub.get_center() + DOWN * 2.2 + RIGHT * 3.5)
+        ksat_arrow = Arrow(ksat_box.get_top(), central_hub.get_corner(DR), buff=0.2, color=YELLOW)
+        self.play(FadeIn(ksat_box))
+        self.play(GrowArrow(ksat_arrow))
         self.wait(2.5)
         
         # 5. Final shot - group everything for a clean end frame
@@ -1315,9 +1315,90 @@ class LinkToNPHardness(Scene):
             np_box, arrow, # The NP box and its arrow are already grouped from the transform
             max_cut_box, max_cut_arrow,
             tsp_box, tsp_arrow,
-            protein_box, protein_arrow
+            ksat_box, ksat_arrow
         )
         
         # A final small adjustment to ensure the whole composition is perfectly centered
         self.play(all_problems_group.animate.move_to(ORIGIN))
+        self.wait(5)
+    
+        # (This code follows immediately after the final zoom-out of the problems group)
+
+        # --- NEW SEQUENCE: THE ESSENCE OF THE ISING PROBLEM ---
+
+        # 1. Clean up the screen
+        self.play(FadeOut(all_problems_group))
+        self.wait(0.5)
+
+        # 2. Define the positions for the formula and the graph
+        formula_pos = UP * 2.5
+        graph_pos = DOWN * 0.5
+
+        # 3. Create and place the Hamiltonian formula first
+        hamiltonian_essence = MathTex(r"H = \sum_{i<j} J_{ij} s_i s_j", font_size=72)
+        hamiltonian_essence.set_color_by_tex_to_color_map({"H": H_COLOR, "J_{ij}": J_COLOR})
+        hamiltonian_essence.move_to(formula_pos)
+        
+        self.play(Write(hamiltonian_essence))
+        self.wait(2)
+
+        # 4. Create a generic, complex-looking graph below the formula
+        num_nodes = 20
+        nodes = VGroup(*[
+            Dot(color=WHITE) for _ in range(num_nodes)
+        ])
+        # Arrange in a grid with some randomness
+        nodes.arrange_in_grid(4, 5, buff=1.2).scale(0.7)
+        nodes.rotate(PI/6)
+        for node in nodes:
+            node.shift(
+                (random.random() - 0.5) * 0.4 * RIGHT + 
+                (random.random() - 0.5) * 0.4 * UP
+            )
+
+        lines = VGroup()
+        # Use itertools.combinations to avoid duplicate edges and self-loops
+        all_possible_pairs = list(itertools.combinations(range(num_nodes), 2))
+        # Select a random subset of these pairs to form the edges
+        num_edges = int(num_nodes * 1.5) # A reasonable number of edges
+        selected_pairs = random.sample(all_possible_pairs, num_edges)
+        for pair in selected_pairs:
+            lines.add(Line(nodes[pair[0]].get_center(), nodes[pair[1]].get_center(), stroke_width=2, color=GRAY, z_index=-1))
+        
+        graph_system = VGroup(lines, nodes).move_to(graph_pos)
+
+        self.play(Create(graph_system))
+        self.wait(2)
+
+        # 5. Animate the "flickering" search for the ground state
+        flicker_duration = 0.15 # Slightly faster flicker
+        for _ in range(12): # Flicker a bit more
+            new_colors = [random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR]) for _ in range(num_nodes)]
+            self.play(
+                *[nodes[i].animate.set_color(new_colors[i]) for i in range(num_nodes)],
+                run_time=flicker_duration
+            )
+        
+        # Settle into a final state
+        final_colors = [random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR]) for _ in range(num_nodes)]
+        self.play(
+            *[nodes[i].animate.set_color(final_colors[i]) for i in range(num_nodes)],
+            run_time=0.5
+        )
+
+        # Highlight the minimized Hamiltonian
+        self.play(Indicate(hamiltonian_essence, color=H_COLOR, scale_factor=1.1))
+        self.wait(3)
+
+        # 6. Pose the final question as a hook
+        self.play(FadeOut(graph_system), FadeOut(hamiltonian_essence))
+        self.wait(0.5)
+
+        final_question = MarkupText(
+            'But if brute force is impossible... <span color="YELLOW">how do we find it?</span>',
+            font_size=42,
+            justify=True
+        ).move_to(ORIGIN) # Center the question
+        
+        self.play(Write(final_question))
         self.wait(5)
