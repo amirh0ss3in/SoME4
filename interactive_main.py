@@ -607,6 +607,8 @@ class Introduction(Scene):
     
         # (This code follows immediately after the previous sequence ends)
 
+        # (This code follows immediately after the previous sequence ends)
+
         # --- NEW SEQUENCE: BUILDING THE HAMILTONIAN (DEFINITIVE CORRECTED VERSION) ---
 
         # 1. Group the entire system and move it to the left
@@ -635,14 +637,14 @@ class Introduction(Scene):
         self.play(Write(h23_formula))
         self.wait(2)
 
-        # 4. Reveal the total Hamiltonian in a two-line format
+        # 4. Reveal the total Hamiltonian in a two-line format with a title
         
         # Create each part of the equation separately
         h_total_label = MathTex("H", "=").set_color_by_tex("H", H_COLOR)
-        term1 = MathTex("s_1 J_{12} s_2").set_color(J_COLOR)
-        plus_sign = MathTex("+").set_color(WHITE) # Use white for the plus sign
-        term2 = MathTex("s_1 J_{13} s_3").set_color(J_COLOR)
-        term3 = MathTex("+ s_2 J_{23} s_3").set_color(J_COLOR)
+        term1 = MathTex("s_1 J_{12} s_2").set_color_by_tex("J", J_COLOR)
+        plus_sign = MathTex("+").set_color(WHITE)
+        term2 = MathTex("s_1 J_{13} s_3").set_color_by_tex("J", J_COLOR)
+        term3 = MathTex("+ s_2 J_{23} s_3").set_color_by_tex("J", J_COLOR)
         
         # Arrange the first line
         line1 = VGroup(h_total_label, term1, plus_sign, term2).arrange(RIGHT, buff=0.2)
@@ -650,10 +652,100 @@ class Introduction(Scene):
         # Position the second line (term3) aligned under the start of term1
         term3.next_to(line1, DOWN, buff=0.2, aligned_edge=LEFT)
         term3.align_to(term1, LEFT)
-
-        # Group everything and move it into position
+        
+        # Group the formula parts
         full_formula = VGroup(line1, term3)
-        full_formula.move_to(formula_pos)
+        
+        # --- NEW --- Create the title and group it with the formula
+        total_conflict_title = Text("Total Conflict", font_size=36)
+        n3_hamiltonian_group = VGroup(total_conflict_title, full_formula).arrange(DOWN, buff=0.4)
+        n3_hamiltonian_group.move_to(formula_pos)
 
-        self.play(ReplacementTransform(h23_formula, full_formula))
+        self.play(ReplacementTransform(h23_formula, n3_hamiltonian_group))
         self.wait(4)
+        # (This code follows immediately after the previous sequence ends)
+
+        # --- NEW SEQUENCE: GENERALIZING TO N=4 AND THE SUMMATION (REVISED) ---
+
+        # 1. Modify the connection helper to prevent label overlap
+        def create_connection(node1, node2, label_text, label_pos_alpha=0.5):
+            circle1 = node1.submobjects[0]
+            circle2 = node2.submobjects[0]
+            p1, p2 = circle1.get_center(), circle2.get_center()
+            direction_vector = p2 - p1
+            unit_direction = direction_vector / np.linalg.norm(direction_vector)
+            
+            line = Line(
+                p1 + unit_direction * node_radius, 
+                p2 - unit_direction * node_radius, 
+                z_index=-1, color=TEAL, stroke_width=3
+            )
+            label = MathTex(label_text, color=J_COLOR).scale(1.2)
+            label.move_to(line.point_from_proportion(label_pos_alpha))
+            
+            line_angle = line.get_angle()
+            label.rotate(line_angle)
+            if (PI / 2) < abs(line_angle) < (3 * PI / 2):
+                label.rotate(PI)
+            label.add_background_rectangle(opacity=1, buff=0.1)
+            return VGroup(line, label)
+
+        # 2. Prepare the N=4 system and the new Hamiltonian layout
+        
+        # A. Create the N=4 graph nodes
+        alice_node_sq = create_person("Alice", UP * 2.0 + LEFT * 2.0)
+        bob_node_sq = create_person("Bob", UP * 2.0 + RIGHT * 2.0)
+        charlie_node_sq = create_person("Charlie", DOWN * 2.0 + LEFT * 2.0)
+        diana_node = create_person("Diana", DOWN * 2.0 + RIGHT * 2.0)
+        all_nodes_n4 = VGroup(alice_node_sq, bob_node_sq, charlie_node_sq, diana_node)
+
+        # B. Create N=4 connections, offsetting diagonal labels to avoid overlap
+        connections_n4 = VGroup(
+            create_connection(alice_node_sq, bob_node_sq, "J_{12}"),
+            create_connection(charlie_node_sq, diana_node, "J_{34}"),
+            create_connection(alice_node_sq, charlie_node_sq, "J_{13}"),
+            create_connection(bob_node_sq, diana_node, "J_{24}"),
+            create_connection(alice_node_sq, diana_node, "J_{14}", label_pos_alpha=0.6), # Offset
+            create_connection(bob_node_sq, charlie_node_sq, "J_{23}", label_pos_alpha=0.4)  # Offset
+        )
+        n4_system = VGroup(all_nodes_n4, connections_n4).scale(0.8).to_edge(LEFT, buff=1.0)
+        
+        # C. Define the target N=4 Hamiltonian formula with its title
+        total_conflict_title_n4 = Text("Total Conflict", font_size=36)
+        
+        h_total_label = MathTex("H", "=").set_color_by_tex("H", H_COLOR)
+        terms = [MathTex(t) for t in ["s_1 J_{12} s_2", "+ s_1 J_{13} s_3", "+ s_2 J_{23} s_3", "+ s_1 J_{14} s_4", "+ s_2 J_{24} s_4", "+ s_3 J_{34} s_4"]]
+        for term in terms:
+            term.set_color_by_tex("J", J_COLOR)
+            
+        line1_n4 = VGroup(*terms[:3]).arrange(RIGHT, buff=0.15)
+        line2_n4 = VGroup(*terms[3:]).arrange(RIGHT, buff=0.15)
+        
+        n4_formula_terms = VGroup(line1_n4, line2_n4).arrange(DOWN, buff=0.25, aligned_edge=LEFT)
+        n4_formula_body = VGroup(h_total_label, n4_formula_terms).arrange(RIGHT, buff=0.2)
+        
+        n4_hamiltonian_group = VGroup(total_conflict_title_n4, n4_formula_body).arrange(DOWN, buff=0.4)
+        n4_hamiltonian_group.scale(0.8).move_to(RIGHT * 3.0)
+
+        # 3. Animate the transformation from the N=3 system to the N=4 system
+        all_n3_objects = VGroup(triangle_system, n3_hamiltonian_group)
+        
+        self.play(
+            ReplacementTransform(all_n3_objects, VGroup(n4_system, n4_hamiltonian_group)),
+            run_time=2.5
+        )
+        self.wait(3)
+
+        # 4. Reveal the final, general formula
+        summation_formula = MathTex(r"H = \sum_{i<j} s_i J_{ij} s_j", font_size=60)
+        summation_formula.set_color_by_tex_to_color_map({
+            "H": H_COLOR,
+            "J_{ij}": J_COLOR
+        })
+        summation_formula.move_to(n4_hamiltonian_group.get_center())
+
+        self.play(
+            ReplacementTransform(n4_hamiltonian_group, summation_formula),
+            n4_system.animate.fade(0.7)
+        )
+        self.wait(5)
