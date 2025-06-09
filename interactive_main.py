@@ -1635,7 +1635,7 @@ class OrderedJ(Scene):
 
         # Create the dial for 'd' below the rows
         d_dial = NumberLine(
-            x_range=[-8, 8, 1], # Adjusted for better visual spacing of ticks
+            x_range=[-8, 8, 2], # Adjusted for better visual spacing of ticks
             length=10,
             include_numbers=True,
             label_direction=UP
@@ -1652,7 +1652,7 @@ class OrderedJ(Scene):
             return np.sum(s_g == 1)
 
         M_values = {}
-        d_points = [-1.0, 3.0, 6.0] # The points we will visit, d=1 is already shown
+        d_points = [-2.0, 4.0, 6.0] # The points we will visit, d=1 is already shown
         all_n_values = range(10, 16)
 
         for d_val in d_points:
