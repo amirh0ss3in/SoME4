@@ -1685,18 +1685,18 @@ class OrderedJ(Scene):
         )
         self.wait(1)
         
-        # Animate to d=3.0
+        # Animate to d=4.0
         self.play(
-            pointer.animate.move_to(d_dial.n2p(3) + UP*0.25),
-            LaggedStart(*get_update_animations(3.0), lag_ratio=0.01),
+            pointer.animate.move_to(d_dial.n2p(4) + UP*0.25),
+            LaggedStart(*get_update_animations(4.0), lag_ratio=0.01),
             run_time=3.0
         )
         self.wait(1)
 
-        # Animate to d=-1
+        # Animate to d=-2
         self.play(
-            pointer.animate.move_to(d_dial.n2p(-1) + UP*0.25),
-            LaggedStart(*get_update_animations(-1.0), lag_ratio=0.01),
+            pointer.animate.move_to(d_dial.n2p(-2) + UP*0.25),
+            LaggedStart(*get_update_animations(-2.0), lag_ratio=0.01),
             run_time=2.0
         )
         self.wait(2)
