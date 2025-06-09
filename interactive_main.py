@@ -1700,3 +1700,135 @@ class OrderedJ(Scene):
             run_time=2.0
         )
         self.wait(2)
+
+
+class ConvergingRatio(Scene):
+    def construct(self):
+        # --- CONFIGURATION ---
+        PLUS_ONE_COLOR = BLUE_D
+        MINUS_ONE_COLOR = RED_D
+        J_COLOR = YELLOW
+        D_COLOR = ORANGE
+        Q_COLOR = YELLOW
+
+        # Helper function for this scene
+        def calculate_min_J_o(J):
+            N = len(J)
+            H_l = []
+            for M in range(N + 1):
+                s = np.array([1]*M + [-1]*(N - M), dtype=float)
+                H = 0.5 * s @ J @ s
+                H_l.append(H)
+            
+            min_H_idx = np.argmin(H_l)
+            return min_H_idx
+
+        # --- SEQUENCE 1: DEFINING THE RATIO q ---
+
+        N_rep, d_rep = 12, 1
+        j_mat_rep = J_order(N_rep, d_rep)
+        M_rep = calculate_min_J_o(j_mat_rep)
+
+        s_vector = VGroup(*[
+            Dot(radius=0.15, color=PLUS_ONE_COLOR if i < M_rep else MINUS_ONE_COLOR)
+            for i in range(N_rep)
+        ]).arrange(RIGHT, buff=0.3)
+        
+        self.play(Write(s_vector))
+        self.wait(2)
+
+        brace = Brace(s_vector[:M_rep], direction=UP, color=WHITE)
+        m_label = brace.get_text("M")
+        m_label.set_color(Q_COLOR).scale(1.2)
+        
+        self.play(GrowFromCenter(brace), Write(m_label))
+        self.wait(2)
+
+        q_formula = MathTex("q", "=", "{M", r"\over", "N}").set_color_by_tex("q", Q_COLOR)
+        q_formula.next_to(s_vector, DOWN, buff=0.8)
+        q_formula.get_part_by_tex("M").set_color(Q_COLOR)
+        
+        self.play(Write(q_formula))
+        self.wait(3)
+
+        # --- SEQUENCE 2: THE CONVERGENCE GRAPH ---
+        
+        self.play(FadeOut(s_vector, brace, m_label, q_formula))
+        self.wait(0.5)
+
+        ax = Axes(
+            x_range=[0, 105, 10], y_range=[0, 1, 0.1],
+            x_length=10, y_length=5.5, # y_length is slightly smaller
+            axis_config={"color": BLUE},
+            y_axis_config={"decimal_number_config": {"num_decimal_places": 1}}
+        )
+        x_label = ax.get_x_axis_label("N \\text{ (Number of Spins)}")
+        y_label = ax.get_y_axis_label("q = M/N", direction=UP).shift(LEFT*0.5)
+        
+        # Corrected: Scale and shift the entire graph down
+        graph = VGroup(ax, x_label, y_label).scale(0.9).shift(DOWN * 0.5)
+
+        self.play(Create(graph))
+        self.wait(1)
+
+        max_N_brute = 30
+        max_N_total = 100
+        d_values = [1.0, -0.5, 4]
+        q_data = {d: [] for d in d_values}
+        
+        for d in d_values:
+            for n in range(2, max_N_total + 1):
+                j_mat = J_order(n, d)
+                M = calculate_min_J_o(j_mat)
+                q_data[d].append(M / n if n > 0 else 0)
+
+        d1_color = GREEN
+        d1_label = MathTex("d=1", color=d1_color).next_to(ax.c2p(max_N_total, q_data[1.0][-1]), RIGHT)
+        self.play(Write(d1_label))
+
+        d1_dots_brute = VGroup(*[
+            Dot(ax.c2p(n, q_data[1.0][n-2]), color=d1_color, radius=0.05)
+            for n in range(2, max_N_brute + 1)
+        ])
+        
+        self.play(LaggedStart(*[Create(d) for d in d1_dots_brute], lag_ratio=0.1, run_time=3))
+        self.wait(1)
+
+        wall = DashedLine(ax.c2p(max_N_brute, 0), ax.c2p(max_N_brute, 1), color=RED)
+        wall_label = Text("Brute-Force Wall", font_size=24, color=RED)
+        wall_label.next_to(wall.get_top(), UP, buff=0.1)
+        
+        self.play(Create(wall), Write(wall_label))
+        self.wait(2)
+        
+        # This text will now fit comfortably
+        leap_of_faith_text = Text(
+            "Assume the two-cluster pattern always holds.",
+            font_size=30, color=YELLOW
+        ).to_edge(UP)
+        self.play(Write(leap_of_faith_text))
+        self.wait(2)
+
+        complexity_before = MathTex("2^N", r"\gg", "N").scale(1.5).next_to(leap_of_faith_text, DOWN, buff=0.5).to_edge(RIGHT, buff=1.5)
+        complexity_after = MathTex("N").scale(1.5).move_to(complexity_before)
+        
+        self.play(Write(complexity_before))
+        self.wait(1)
+        self.play(Transform(complexity_before, complexity_after), FadeOut(leap_of_faith_text))
+        self.play(FadeOut(complexity_before))
+        self.wait(0.5)
+
+        d1_dots_assumed = VGroup(*[
+            Dot(ax.c2p(n, q_data[1.0][n-2]), color=d1_color, radius=0.05)
+            for n in range(max_N_brute + 1, max_N_total + 1)
+        ])
+        self.play(Create(d1_dots_assumed), run_time=1)
+        self.wait(1)
+
+        d_colors = {-0.5: PINK, 4: PURPLE}
+        for d in [-0.5, 4]:
+            label = MathTex(f"d={d}", color=d_colors[d]).next_to(ax.c2p(max_N_total, q_data[d][-1]), RIGHT)
+            dots = VGroup(*[Dot(ax.c2p(n, q_data[d][n-2]), color=d_colors[d], radius=0.05) for n in range(2, max_N_total + 1)])
+            self.play(Write(label), Create(dots), run_time=1.5)
+
+        self.wait(5)
