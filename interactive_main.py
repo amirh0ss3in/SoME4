@@ -1511,9 +1511,6 @@ class LinkToNPHardness(Scene):
             self.wait(3)
 
 
-# (This class can be added to the end of your interactive_main.py file)
-
-# Helper functions from the prompt, to be used inside the class or defined globally
 def calculate_min_H(J):
     N = len(J)
     # Generate all 2^(N-1) combinations for the first N-1 spins
@@ -1831,4 +1828,208 @@ class ConvergingRatio(Scene):
             dots = VGroup(*[Dot(ax.c2p(n, q_data[d][n-2]), color=d_colors[d], radius=0.05) for n in range(2, max_N_total + 1)])
             self.play(Write(label), Create(dots), run_time=1.5)
 
+        self.wait(5)
+
+
+class GroundStateCalculation(Scene):
+    def construct(self):
+        # --- CONFIGURATION ---
+        PLUS_ONE_COLOR = BLUE_D
+        MINUS_ONE_COLOR = RED_D
+        J_COLOR = YELLOW
+        D_COLOR = ORANGE
+        PINK_TERM_COLOR = PINK
+        H_COLOR = GREEN
+        # --- SEQUENCE 1: FORMALIZING THE INTERACTION MATRIX ---
+        
+        recap_text = Text(
+            "So, having seen the ratio 'q' converge for any given 'd'...",
+            font_size=36
+        ).to_edge(UP)
+        proportional_formula = MathTex(r"J_{ij} \propto i^d + j^d", font_size=60)
+        proportional_formula.set_color_by_tex("d", D_COLOR)
+        proportional_formula.next_to(recap_text, DOWN, buff=0.5)
+        self.play(Write(recap_text))
+        self.play(Write(proportional_formula))
+        self.wait(3)
+        formalization_text = MathTex(
+            r"\text{...he formalized this idea, naming the interaction matrix } J^{(N, d)},",
+            font_size=38
+        )
+        formalization_text.set_color_by_tex("J^{(N, d)}", J_COLOR)
+        formalization_text.next_to(proportional_formula, DOWN, buff=0.8)
+        formalization_text_2 = Text(
+            "adding some terms for convenience and rigor.",
+            font_size=32
+        ).next_to(formalization_text, DOWN)
+        self.play(Write(formalization_text), Write(formalization_text_2))
+        self.wait(3)
+
+        # --- THIS IS THE FIX ---
+        # Build the formula in parts to reference the Kronecker delta term reliably
+        part1 = MathTex(r"J_{ij}^{(N, d)}", r"=", r"\frac{1}{N^d}", r"(i^d + j^d)")
+        part2 = MathTex(r"(1 - \delta_{ij})") # This is the part we want to reference
+        
+        # Color the parts
+        part1.set_color_by_tex_to_color_map({
+            "J_{ij}^{(N, d)}": J_COLOR, "N": WHITE, "d": D_COLOR, "i": BLUE, "j": GREEN
+        })
+        part2.set_color_by_tex(r"\delta_{ij}", PINK_TERM_COLOR)
+
+        # Group and arrange them
+        formal_formula_group = VGroup(part1, part2).arrange(RIGHT, buff=0.2)
+        formal_formula_group.move_to(proportional_formula)
+
+        self.play(
+            FadeOut(recap_text, formalization_text, formalization_text_2),
+            Transform(proportional_formula, formal_formula_group)
+        )
+        formula = proportional_formula # Keep the handle
+        self.wait(2)
+        
+        # Now, we can reliably reference part2
+        kronecker_term_part = formula.submobjects[1] # part2 is the second element of the VGroup
+        kronecker_explanation = Text(
+            "(This just means the diagonals are zero)",
+            font_size=24, color=GRAY
+        ).next_to(kronecker_term_part, DOWN, buff=0.3)
+        
+        self.play(Indicate(kronecker_term_part, color=PINK_TERM_COLOR), Write(kronecker_explanation))
+        self.wait(3)
+        self.play(FadeOut(kronecker_explanation))
+
+        # 4. Show the concrete example for N=5, d=2
+        example_label = MathTex("N=5, d=2", font_size=42).set_color_by_tex("d", D_COLOR)
+        matrix_values = [
+            [0, 5, 10, 17, 26], [5, 0, 13, 20, 29], [10, 13, 0, 25, 34],
+            [17, 20, 25, 0, 41], [26, 29, 34, 41, 0]
+        ]
+        j52_lhs = MathTex(r"J^{(5, 2)}", "=", r"\frac{1}{5^2}").set_color_by_tex("J", J_COLOR)
+        j52_matrix = IntegerMatrix(matrix_values, h_buff=0.8)
+        
+        example_matrix_group = VGroup(j52_lhs, j52_matrix).arrange(RIGHT, buff=0.3)
+        full_example = VGroup(example_label, example_matrix_group).arrange(DOWN, buff=0.4)
+        full_example.next_to(formula, DOWN, buff=0.5).scale(0.8)
+
+        self.play(Write(example_label))
+        self.play(Write(j52_lhs), Create(j52_matrix))
+        self.wait(5)
+
+        # --- SEQUENCE 2: POSTULATING THE GROUND STATE ---
+
+        self.play(FadeOut(full_example), formula.animate.to_edge(UP, buff=1.0))
+        self.wait(0.5)
+
+        postulate_text = Text(
+            "...with the postulated ground state of the following form:",
+            font_size=36
+        ).next_to(formula, DOWN, buff=0.7)
+        self.play(Write(postulate_text))
+        self.wait(2)
+
+        # 3. Display the ground state vector s_g^T as specified
+        s_g_label = MathTex(r"\pmb{s}_g^T", r"=", font_size=60)
+        
+        up_spin = MathTex("+1", color=PLUS_ONE_COLOR)
+        down_spin = MathTex("-1", color=MINUS_ONE_COLOR)
+        dots = MathTex(r"\dots").scale(1.2)
+
+        # Using your specified layout for a clearer "block" visual
+        spin_vector_content = VGroup(
+            up_spin,
+            up_spin.copy(),
+            dots.copy(),
+            up_spin.copy(),
+            dots.copy(),
+            down_spin.copy(),
+            down_spin.copy(),
+            dots.copy(),
+            down_spin
+        ).arrange(RIGHT, buff=0.3) # Slightly reduced buff for a denser look
+
+        bracket_l = MathTex(r"\big[", font_size=120).next_to(spin_vector_content, LEFT, buff=0.2)
+        bracket_r = MathTex(r"\big]", font_size=120).next_to(spin_vector_content, RIGHT, buff=0.2)
+        
+        s_g_vector = VGroup(bracket_l, spin_vector_content, bracket_r)
+        
+        full_s_g_display = VGroup(s_g_label, s_g_vector).arrange(RIGHT, buff=0.4)
+        full_s_g_display.next_to(postulate_text, DOWN, buff=0.7)
+
+        self.play(Write(full_s_g_display))
+        self.wait(2)
+
+        # 4. Add the brace for M underneath the first cluster
+        # The first cluster consists of the first 4 elements in spin_vector_content
+        first_cluster = spin_vector_content[:4]
+        
+        m_brace = Brace(first_cluster, direction=DOWN, color=WHITE)
+        m_label = m_brace.get_text("M spins")
+        
+        self.play(
+            GrowFromCenter(m_brace),
+            Write(m_label)
+        )
+        self.wait(4)
+
+        # --- SEQUENCE 3: Z2 SYMMETRY AND CONVENTION (ROBUST VERSION) ---
+
+        # 1. Show the compact Hamiltonian
+        hamiltonian_compact = MathTex("H", "=", r"\frac{1}{2}", r"\pmb{s}^T", "J", r"\pmb{s}", font_size=48)
+        hamiltonian_compact.next_to(full_s_g_display, DOWN, buff=1.0)
+        hamiltonian_compact[0].set_color(H_COLOR)
+        hamiltonian_compact[4].set_color(J_COLOR)
+        self.play(Write(hamiltonian_compact))
+        self.wait(2)
+
+        # --- THE FOOLPROOF FIX ---
+        # Create BOTH the original and flipped targets right now.
+        
+        # Target 1: The original "+1 first" state
+        original_spins_target = spin_vector_content.copy()
+
+        # Target 2: The flipped "-1 first" state
+        flipped_spins_target = spin_vector_content.copy()
+        for elem in flipped_spins_target:
+            if isinstance(elem, MathTex) and elem.get_tex_string() != r"\dots":
+                if elem.get_tex_string() == "+1":
+                    elem.become(MathTex("-1", color=MINUS_ONE_COLOR).move_to(elem))
+                else:
+                    elem.become(MathTex("+1", color=PLUS_ONE_COLOR).move_to(elem))
+        
+        # Create the flipped formula target
+        hamiltonian_flipped = MathTex("H", "=", r"\frac{1}{2}", r"(-\pmb{s})^T", "J", r"(-\pmb{s})", font_size=48).move_to(hamiltonian_compact)
+        hamiltonian_flipped[0].set_color(H_COLOR)
+        hamiltonian_flipped[4].set_color(J_COLOR)
+
+        # 2. Animate the FIRST flip
+        # The on-screen 'spin_vector_content' becomes the flipped target.
+        self.play(
+            spin_vector_content.animate.become(flipped_spins_target),
+            hamiltonian_compact.animate.become(hamiltonian_flipped),
+            run_time=2.0
+        )
+        self.wait(3)
+
+        # 3. State the convention and flip BACK
+        self.play(FadeOut(hamiltonian_compact, m_brace, m_label))
+        convention_text = Text(
+            "In his notation, he chose the first cluster to be up (+1).",
+            font_size=32, color=YELLOW
+        ).next_to(full_s_g_display, DOWN, buff=0.8)
+        self.play(Write(convention_text))
+        self.wait(1)
+
+        # Animate the on-screen vector becoming the original target.
+        self.play(
+            spin_vector_content.animate.become(original_spins_target),
+            run_time=1.5
+        )
+        self.wait(5)
+
+        # 4. ONE. FINAL. FUCKING. FLIP.
+        # Animate the on-screen vector becoming the flipped target again.
+        self.play(
+            spin_vector_content.animate.become(flipped_spins_target),
+            run_time=2.0
+        )
         self.wait(5)
