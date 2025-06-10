@@ -2335,10 +2335,13 @@ class NewPerspective(Scene):
 
         # NOW, create the Brace objects targeting the colored parts
         blue_brace = Brace(s_g_vector_text[1], direction=DOWN, buff=0.1)
-        blue_label = blue_brace.get_tex(r"M \text{ spins}", font_size=22)
-        
+        blue_label = blue_brace.get_tex(r"M \text{ spins}")
+        blue_label.set_font_size(22)
+
         red_brace = Brace(s_g_vector_text[3], direction=DOWN, buff=0.1)
-        red_label = red_brace.get_tex(r"N-M \text{ spins}", font_size=22)
+        red_label = red_brace.get_tex(r"N-M \text{ spins}")
+        red_label.set_font_size(22)
+
         
         # Group everything for the animation
         s_g_reminder = VGroup(s_g_vector_text, blue_brace, blue_label, red_brace, red_label)
