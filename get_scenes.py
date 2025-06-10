@@ -19,6 +19,15 @@ def extract_class_names(filepath):
 if __name__ == "__main__":
     filepath = "interactive_main.py"  # Replace with your target file
     classes = extract_class_names(filepath)
-    print("Classes in order of appearance:")
-    for cls in classes:
-        print(cls)
+    # write it as "file name, class name" in a txt file in the media\videos\interactive_main\1080p60
+    path = r"media/videos/interactive_main/1080p60/inputs.txt"
+
+    # file 'class name'
+
+    with open(path, "w", encoding="utf-8") as file:
+        file.truncate(0)
+        for class_name in classes:
+            file.write(f"file '{class_name}.mp4'\n")
+            print(f"file '{class_name}.mp4'")
+
+    print(f"Class names extracted from {filepath} and written to {path}")
