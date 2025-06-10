@@ -2143,3 +2143,132 @@ class NewPerspective(Scene):
         # The object `final_element_identity` now looks like `final_eq`
         self.play(ReplacementTransform(final_element_identity, identity))
         self.wait(5)
+
+
+        # --- NEW SEQUENCE: VISUALLY PROVING THE IDENTITY FOR s_g ---
+        
+        # 1. Add the explanatory text (Corrected: with line break)
+        explanation_text = Text(
+            "For our postulated ground state, let's visualize each side:",
+            font_size=32, line_spacing=1.2
+        ).next_to(identity, DOWN, buff=0.4)
+        self.play(Write(explanation_text))
+        self.wait(2)
+
+        # 2. Define ALL components for the final layout first
+        s_g = np.array([1, 1, 1, -1, -1])
+        RED_COLOR = RED_D
+        # -- LHS Components --
+        s_row_vals = [f"{v:+.0f}" for v in s_g]
+        s_row_mobs = [MathTex(v, color=S_COLOR if v=="+1" else RED_COLOR) for v in s_row_vals]
+        s_row = MobjectMatrix([s_row_mobs], h_buff=0.8)
+        
+        s_col_vals = [[v] for v in s_row_vals]
+        s_col_mobs = [[MathTex(v[0], color=S_COLOR if v[0]=="+1" else RED_COLOR)] for v in s_col_vals]
+        s_col = MobjectMatrix(s_col_mobs, v_buff=0.6)
+
+        # Corrected: Using proper subscripts for J
+        J_matrix_vals = [[f"J_{{{i}{j}}}" for j in range(1,6)] for i in range(1,6)]
+        J_matrix = Matrix(J_matrix_vals, h_buff=1.0, v_buff=0.7)
+        J_matrix.elements.set_color(J_COLOR)
+
+        lhs_group = VGroup(s_row, J_matrix, s_col).arrange(RIGHT, buff=0.2)
+        
+        # -- RHS Components --
+        ssT_matrix_vals = np.outer(s_g, s_g)
+        ssT_mobs = [
+            [MathTex(f"{val:+.0f}", color=S_COLOR if val == 1 else RED_COLOR) for val in row]
+            for row in ssT_matrix_vals
+        ]
+        ssT_matrix = MobjectMatrix(ssT_mobs, h_buff=0.8, v_buff=0.7)
+
+        hadamard_symbol = MathTex(r"\odot", font_size=72)
+        hadamard_group = VGroup(J_matrix.copy(), hadamard_symbol, ssT_matrix).arrange(RIGHT, buff=0.2)
+        
+        sum_text = Text("Sum of all elements", font_size=36)
+        sum_brackets = SurroundingRectangle(hadamard_group, buff=0.2, color=WHITE)
+        sum_text.next_to(sum_brackets, UP, buff=0.1)
+        rhs_group = VGroup(hadamard_group, sum_brackets, sum_text)
+        
+        # -- Equation Assembly --
+        equals_sign = MathTex("=").scale(1.5)
+        
+        # This is the final layout group. We create it now to get the final positions.
+        full_equation = VGroup(lhs_group, equals_sign, rhs_group).arrange(RIGHT, buff=0.3)
+        full_equation.scale(0.55).move_to(ORIGIN).shift(DOWN*0.5)
+
+        # 3. Animate smoothly into the final layout
+        
+        # First, show only the LHS in the center
+        lhs_initial = lhs_group.copy().scale(1.8).next_to(explanation_text, DOWN, buff=0.3)
+        self.play(FadeOut(explanation_text), Write(lhs_initial))
+        self.wait(3)
+
+        # Now, animate all parts moving to their final, pre-calculated positions
+        self.play(
+            # The LHS moves from its initial spot to its final spot in the equation
+            Transform(lhs_initial, full_equation[0]),
+            # The equals sign and RHS fade in at their final spots
+            FadeIn(full_equation[1]),
+            FadeIn(full_equation[2])
+        )
+        self.wait(5)
+
+       # --- NEW SEQUENCE: EVALUATING THE HADAMARD PRODUCT (FRESH START) ---
+
+        # 1. Start by explicitly clearing the scene of old objects
+        # and adding back ONLY the ones we want to keep.
+        self.play(
+            FadeOut(lhs_group),
+            FadeOut(equals_sign),
+            FadeOut(lhs_initial),
+        )
+        # rhs_group is the only thing left.
+        
+        # 2. Animate the RHS to the center
+        self.play(
+            rhs_group.animate.move_to(ORIGIN).scale(1.2)
+        )
+        self.wait(1)
+
+        # 3. Define the final, resulting matrix with corrected logic
+        hadamard_group = rhs_group[0]
+        sum_brackets = rhs_group[1]
+        sum_text = rhs_group[2]
+
+        J_matrix_rhs = hadamard_group[0]
+        ssT_matrix = hadamard_group[2]
+        
+        j_mobs_list = J_matrix_rhs.mob_matrix
+        sst_mobs_list = ssT_matrix.mob_matrix
+
+        result_mobs = []
+        for i in range(5):
+            row_mobs = []
+            for j in range(5):
+                color = sst_mobs_list[i][j].get_color()
+                j_text = j_mobs_list[i][j].get_tex_string()
+                
+                if color == RED_COLOR:
+                    mob = MathTex(f"-{j_text}", color=color, font_size=30)
+                else:
+                    mob = MathTex(f"{j_text}", color=color, font_size=30)
+
+                row_mobs.append(mob)
+            result_mobs.append(row_mobs)
+            
+        final_matrix = MobjectMatrix(result_mobs, h_buff=1.0, v_buff=0.7)
+        final_matrix.move_to(hadamard_group)
+
+        # 4. Create a new, correctly sized bounding box for the final state
+        new_sum_brackets = SurroundingRectangle(final_matrix, buff=0.2, color=WHITE)
+        new_sum_text = Text("Sum of all elements", font_size=24).next_to(new_sum_brackets, DOWN, buff=0.1)
+
+        # 5. Animate the transformation
+        # Use ReplacementTransform for robustness
+        self.play(
+            ReplacementTransform(hadamard_group, final_matrix),
+            ReplacementTransform(sum_brackets, new_sum_brackets),
+            ReplacementTransform(sum_text, new_sum_text)
+        )
+        self.wait(4)
