@@ -2214,7 +2214,7 @@ class NewPerspective(Scene):
         )
         self.wait(5)
 
-       # --- NEW SEQUENCE: EVALUATING THE HADAMARD PRODUCT (FRESH START) ---
+        # --- NEW SEQUENCE: EVALUATING THE HADAMARD PRODUCT (FRESH START) ---
 
         # 1. Start by explicitly clearing the scene of old objects
         # and adding back ONLY the ones we want to keep.
@@ -2272,3 +2272,127 @@ class NewPerspective(Scene):
             ReplacementTransform(sum_text, new_sum_text)
         )
         self.wait(4)
+
+
+        # group them all
+        final_group = VGroup(final_matrix, new_sum_brackets, new_sum_text)
+        
+        # remove the identity formula and bring the matrix with the sum text and box into middle, then left of the panel:
+        self.play(
+            FadeOut(identity),
+            final_group.animate.move_to(ORIGIN).scale(1.2)
+        )
+
+        self.wait(3)
+
+        # move left
+        self.play(
+            final_group.animate.move_to(LEFT*2)
+        )
+
+        self.wait(1.5)
+
+        # add Mathtext : = \sum_{i,j \in \text{blue}} J_{ij} - \sum_{i,j \in \text{red}} J_{ij}
+
+        blue_sum_text = MathTex(r"= \sum_{i,j \in \text{blue}}J_{ij}", font_size=36, color=S_COLOR)
+        red_sum_text = MathTex(r"- \sum_{i,j \in \text{red}}J_{ij}", font_size=36, color=RED_COLOR)
+        color_based_text = VGroup(blue_sum_text, red_sum_text).arrange(RIGHT, buff=0.5)
+        
+        # add next to brackets
+        color_based_text.next_to(new_sum_brackets, RIGHT, buff=0.5)
+
+        self.play(
+            FadeIn(color_based_text)
+        )
+
+        self.wait(3)
+        
+
+        # --- INTERMEDIATE STEP: CONNECTING COLOR TO INDICES ---
+        D_COLOR = YELLOW_D
+        # 1. Fade out the matrix and identity, keep the color sum
+        self.play(
+            FadeOut(final_group),
+            # Center the color-based sum
+            color_based_text.animate.center()
+        )
+        self.wait(1)
+
+        s_g_vector_text = MathTex(
+            r"\pmb{s}_g^T = [",
+            r"+1 \dots, +1", # Blue part
+            r",",             # Comma
+            r"-1 \dots, -1", # Red part
+            r"]",
+            font_size=42
+        )
+        
+        # Color the specific parts by index
+        s_g_vector_text[1].set_color(S_COLOR)
+        s_g_vector_text[3].set_color(RED_COLOR)
+
+        s_g_vector_text.next_to(color_based_text, DOWN, buff=0.8)
+
+        # NOW, create the Brace objects targeting the colored parts
+        blue_brace = Brace(s_g_vector_text[1], direction=DOWN, buff=0.1)
+        blue_label = blue_brace.get_tex(r"M \text{ spins}", font_size=22)
+        
+        red_brace = Brace(s_g_vector_text[3], direction=DOWN, buff=0.1)
+        red_label = red_brace.get_tex(r"N-M \text{ spins}", font_size=22)
+        
+        # Group everything for the animation
+        s_g_reminder = VGroup(s_g_vector_text, blue_brace, blue_label, red_brace, red_label)
+        # --- END OF FIX ---
+
+        self.play(
+            Write(s_g_vector_text),
+            LaggedStart(
+                GrowFromCenter(blue_brace),
+                Write(blue_label),
+                lag_ratio=0.5
+            )
+        )
+        self.play(
+            LaggedStart(
+                GrowFromCenter(red_brace),
+                Write(red_label),
+                lag_ratio=0.5
+            )
+        )
+        self.wait(3)
+
+        # 3. Create and transform to the intermediate, index-based formula
+        # This formula is a bridge between the color names and the formal indices
+        intermediate_formula = MathTex(
+            r"H = \sum_{1 \le i,j \le M} J_{ij} + \sum_{M+1 \le i,j \le N} J_{ij} - 2\sum_{\substack{i \le M \\ j > M}} J_{ij}",
+            font_size=40
+        )
+        intermediate_formula.set_color_by_tex("M", S_COLOR) # Use the spin color for M
+
+        # Animate the transition from the simple color sum to the more formal index sum
+        self.play(
+            ReplacementTransform(VGroup(color_based_text, s_g_reminder), intermediate_formula)
+        )
+        self.wait(4)
+
+        # --- FINAL TRANSFORMATION TO THE PAPER'S FORMULA ---
+
+        # 4. Create the final, paper-accurate formula from your paper
+        final_hamiltonian_formula = MathTex(
+            r"""
+            H(M, N, d) = \frac{1}{2N^{d}} \Bigg\{ 
+            &\sum_{1 \le i \neq j \le M} (i^d+j^d) + \sum_{M+1 \le i \neq j \le N} (i^d+j^d) 
+            - &\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d) - \sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d) \Bigg\}
+            """,
+            font_size=26
+        )
+        # Color the key variables for clarity
+        final_hamiltonian_formula.set_color_by_tex_to_color_map({
+            "H": H_COLOR, "M": S_COLOR, "d": D_COLOR
+        })
+
+        # 5. Animate the final transformation from the intermediate to the final formula
+        self.play(
+            ReplacementTransform(intermediate_formula, final_hamiltonian_formula)
+        )
+        self.wait(5)
