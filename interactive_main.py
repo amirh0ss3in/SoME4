@@ -2033,3 +2033,113 @@ class GroundStateCalculation(Scene):
             run_time=2.0
         )
         self.wait(5)
+
+
+
+class NewPerspective(Scene):
+    def construct(self):
+        # --- CONFIGURATION ---
+        J_COLOR = YELLOW
+        S_COLOR = BLUE_D
+        H_COLOR = GREEN
+        
+        # --- SEQUENCE 1: THE IDENTITY ---
+
+        # 1. Start with the core identity to be proven, faded out
+        identity = MathTex(
+            r"\sum_{i,j} s_i J_{ij} s_j", "=", r"\sum_{i,j} \left[ J \odot (\pmb{s}\pmb{s}^T) \right]_{ij}",
+            font_size=60
+        )
+        identity.set_color_by_tex_to_color_map({
+            "J": J_COLOR,
+            "s": S_COLOR,
+            r"\odot": RED,
+            r"\pmb{s}": S_COLOR
+        })
+        identity.to_edge(1.1*UP)
+        
+        # 2. Step 1: Define the Outer Product
+        proof_step1_lhs = MathTex(r"(\pmb{s}\pmb{s}^T)_{ij}", font_size=48)
+        proof_step1_lhs.set_color_by_tex("s", S_COLOR)
+        
+        proof_step1_rhs = MathTex("=", "s_i s_j", font_size=48)
+        proof_step1_rhs.set_color_by_tex("s", S_COLOR)
+
+        step1_group = VGroup(proof_step1_lhs, proof_step1_rhs).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
+        
+        step1_title = Text("Step 1: The Outer Product", font_size=32).next_to(step1_group, 0.9*UP, buff=0.5)
+        self.play(Write(step1_title))
+        self.play(Write(step1_group))
+        self.wait(3)
+
+        # 3. Step 2: Define the Hadamard Product
+        self.play(step1_group.animate.shift(UP*2), FadeOut(step1_title))
+        
+        proof_step2_lhs = MathTex(r"\big[ J \odot (\pmb{s}\pmb{s}^T) \big]_{ij}", font_size=48)
+        proof_step2_lhs.set_color_by_tex_to_color_map({
+            "J": J_COLOR, "s": S_COLOR, r"\odot": RED
+        })
+
+        proof_step2_rhs = MathTex("=", "J_{ij}", r"(\pmb{s}\pmb{s}^T)_{ij}", font_size=48)
+        proof_step2_rhs.set_color_by_tex_to_color_map({
+            "J": J_COLOR, "s": S_COLOR
+        })
+
+        step2_group = VGroup(proof_step2_lhs, proof_step2_rhs).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
+        
+        step2_title = Text("Step 2: The Hadamard Product", font_size=32).next_to(step2_group, 0.9*UP, buff=0.5)
+        self.play(Write(step2_title))
+        self.play(Write(step2_group))
+        self.wait(3)
+
+        # 4. Substitute Step 1 into Step 2
+        # Highlight the term to be substituted
+        term_to_sub = proof_step2_rhs.get_part_by_tex(r"(\pmb{s}\pmb{s}^T)_{ij}")
+        self.play(Indicate(term_to_sub))
+        
+        # The result of the substitution
+        proof_step3_rhs = MathTex("=","J_{ij}", "s_i s_j", font_size=48)
+        proof_step3_rhs.set_color_by_tex_to_color_map({"J": J_COLOR, "s": S_COLOR})
+        proof_step3_rhs.next_to(proof_step2_lhs, RIGHT, buff=0.3)
+        
+        self.play(
+            FadeOut(step2_title),
+            Transform(proof_step2_rhs, proof_step3_rhs)
+        )
+        self.wait(3)
+        
+        # (The code for steps 1-4 remains the same)
+        # self.wait(3)
+
+        # 5. Final Step: Sum over all elements
+        
+        # Group the result of the substitution
+        final_element_identity = VGroup(proof_step2_lhs, proof_step2_rhs)
+        
+        # Create the final equation parts
+        sum_symbol_lhs = MathTex(r"\sum_{i,j}", font_size=64)
+        sum_symbol_rhs = MathTex(r"= \sum_{i,j}", font_size=64) # The equals sign is now part of the RHS
+        
+        # Build the final equation visually
+        # Target for the left part of the transform
+        final_lhs_target = VGroup(sum_symbol_lhs, proof_step2_lhs.copy()).arrange(RIGHT, buff=0.2)
+        
+        # Target for the right part of the transform
+        final_rhs_target = VGroup(sum_symbol_rhs, proof_step3_rhs[1:].copy()).arrange(RIGHT, buff=0.2)
+        
+        # Position the final equation in the center
+        final_eq = VGroup(final_lhs_target, final_rhs_target).arrange(RIGHT, buff=0.4).move_to(ORIGIN)
+        
+        # Animate the transformation precisely
+        self.play(
+            FadeOut(step1_group),
+            Transform(final_element_identity[0], final_lhs_target),
+            Transform(final_element_identity[1], final_rhs_target)
+        )
+        self.wait(2)
+
+        # 6. Show the final identity clearly at the top
+        identity.set_color(YELLOW_E)
+        # The object `final_element_identity` now looks like `final_eq`
+        self.play(ReplacementTransform(final_element_identity, identity))
+        self.wait(5)
