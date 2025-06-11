@@ -66,7 +66,7 @@ Now, what if their relationship is tense, with *J* equal to +1? The minimum conf
 
 You might wonder... what happens with three people?
 
-Let's introduce a third person, Charlie. Now there isn't just one relationship, but three: between Alice and Bob, Alice and Charlie, and Bob and Charlie. Each of these connections gets its own tension value: *J₁₂, J₁₃,* and *J₂₃*.
+Let's introduce a third person, Charlie. Now there isn't just one relationship, but three: between Alice and Bob, Alice and Charlie, and Bob and Charlie. Each of these connections gets its own tension value: *$J_{12}$, $J_{13}$,* and *$J_{23}$*.
 
 The Total Conflict of the system is now just the sum of the conflicts from each individual pair. It’s the conflict between Alice and Bob... plus the conflict between Alice and Charlie... plus the conflict between Bob and Charlie.
 
@@ -76,13 +76,13 @@ And this pattern continues. If we add a fourth person, Diana, we now have six co
 
 As you can imagine, writing this out gets very long, very quickly. But mathematicians have a beautiful shorthand for this kind of sum.
 
-We can say the Hamiltonian, *H*, is the sum over all pairs of people *i* and *j*, of *sᵢ* times *Jᵢⱼ* times *sⱼ*.
+We can say the Hamiltonian, *H*, is the sum over all pairs of people *i* and *j*, of *sᵢ* times *$J_{ji}$* times *sⱼ*.
 
 ### The Matrix Formulation
 
-This formula has two key components: the state of the spins, *sᵢ*, which for each person is either +1 or -1... and the tensions, *Jᵢⱼ*, which we can think of as the elements of an N-by-N matrix describing the entire network of relationships.
+This formula has two key components: the state of the spins, *sᵢ*, which for each person is either +1 or -1... and the tensions, *$J_{ji}$*, which we can think of as the elements of an N-by-N matrix describing the entire network of relationships.
 
-Now, it's fair to assume that in the real world, the tension is mutual. The way Alice feels about Bob is the same as how Bob feels about Alice. In other words, *Jᵢⱼ* is equal to *Jⱼᵢ*. The tension matrix is symmetric.
+Now, it's fair to assume that in the real world, the tension is mutual. The way Alice feels about Bob is the same as how Bob feels about Alice. In other words, *$J_{ji}$* is equal to *$J_{ji}$*. The tension matrix is symmetric.
 
 This symmetry allows us to rewrite the sum in a more general, and often more useful, way. Instead of summing over only the unique pairs where *i* is less than *j*, we can sum over all *i* and all *j*, as long as we multiply the whole thing by one-half to avoid double-counting each relationship.
 
@@ -140,9 +140,9 @@ If you work that out, you get 8 minus 7 minus 6 plus 5... which equals zero.
 
 This isn't a coincidence. Think about what this sum actually represents. It's the sum of the first group minus the sum of the second group. So, saying that the two groups have an equal sum is *exactly the same* as saying that this special spin-weighted sum is zero.
 
-Our goal has been transformed: can we find a set of spins `sᵢ` that makes the total sum `Σ sᵢaᵢ` equal to zero?
+Our goal has been transformed: can we find a set of spins $s_i$ that makes the total sum $\sum s_{i} a_{i}$ equal to zero?
 
-But hold on. You should be a little skeptical here. Our original Ising Hamiltonian had pairs of spins, `sᵢ` times `sⱼ`, and those `J` tension values. This new formula only has single spins. How can these possibly be the same problem?
+But hold on. You should be a little skeptical here. Our original Ising Hamiltonian had pairs of spins, $s_i$ times $s_j$, and those `J` tension values. This new formula only has single spins. How can these possibly be the same problem?
 
 Well, here's the final piece of the puzzle. Consider what happens if we take that entire sum... and square it.
 
@@ -152,9 +152,9 @@ Now, if we expand this squared term—and you can pause and try this yourself if
 
 The first part is just the sum of the squares of all our original numbers. But think about that for a moment. Our original numbers are fixed. They're given to us. So this part of the expression is just a constant value. It doesn't depend on our choices of spin at all. When we're looking for a minimum, we can completely ignore it.
 
-And the second part... look closely at what's left. It's a sum over all pairs of spins, `i` and `j`, of `sᵢ` times `sⱼ`... times some other values.
+And the second part... look closely at what's left. It's a sum over all pairs of spins, `i` and `j`, of $s_i$ times $s_j$... times some other values.
 
-This structure should look very familiar. It's exactly the form of our Ising Hamiltonian. If we simply define the "tension" `Jᵢⱼ` between any two spins to be the product of their corresponding numbers, `aᵢ` times `aⱼ`... then minimizing this expression is mathematically identical to finding the ground state of that specific Ising system.
+This structure should look very familiar. It's exactly the form of our Ising Hamiltonian. If we simply define the "tension" $J_{ji}$ between any two spins to be the product of their corresponding numbers, $a_i$ times $a_j$... then minimizing this expression is mathematically identical to finding the ground state of that specific Ising system.
 
 And this isn't just a special relationship. The Ising model is like a master key.
 
@@ -170,7 +170,7 @@ So this brings us back to our central question. If checking every state is impos
 
 The short, and perhaps surprising, answer is... for a general, complex system... you don't. At least, not perfectly.
 
-There is no known algorithm that can efficiently find the exact ground state for *any* arbitrary set of tensions `Jᵢⱼ`. It belongs to a class of problems believed to be fundamentally hard for classical computers.
+There is no known algorithm that can efficiently find the exact ground state for *any* arbitrary set of tensions $J_{ji}$. It belongs to a class of problems believed to be fundamentally hard for classical computers.
 
 However, for a few, very special cases where the network of connections is highly structured, mathematicians and physicists *have* found clever ways to solve it exactly. The most famous example is the **2D planar graph**—any graph that can be drawn flat without its edges crossing. In a landmark 1944 paper, Lars Onsager found a stunning analytical solution for these systems. But this is only possible because of the grid's rigid, two-dimensional structure. The moment you allow connections in 3D, an exact solution is once again out of reach.
 
@@ -189,13 +189,13 @@ It tackles the problem not by crunching numbers, but by using the laws of quantu
 
 So, how do you make progress on a problem that seems fundamentally impossible? Sometimes, the answer is to step back and change the question entirely.
 
-The Ising model is defined by its matrix of tensions, the `Jᵢⱼ` values. For decades, the most studied cases were those where these tensions were either uniform and repeating, or completely random.
+The Ising model is defined by its matrix of tensions, the $J_{ji}$ values. For decades, the most studied cases were those where these tensions were either uniform and repeating, or completely random.
 
 But a young physics student began to wonder about the nature of that `J` matrix itself. What other kinds of structures could it have?
 
 He imagined a system where the components weren't all identical, but had an intrinsic rank or identity. A hierarchy. And he posed a simple, creative question: "What if the interaction between any two spins was a direct function of their rank?"
 
-He started with the simplest rule he could think of: the tension between any two spins is just the sum of their ranks, `Jᵢⱼ` equals `i` plus `j`. He had defined a new mathematical world. But what were its laws? What did its most stable state—its ground state—look like?
+He started with the simplest rule he could think of: the tension between any two spins is just the sum of their ranks, $J_{ji}$ equals `i` plus `j`. He had defined a new mathematical world. But what were its laws? What did its most stable state—its ground state—look like?
 
 With a small computer, he could begin to explore. He set the number of spins to 10 and had the machine search through all 1,024 possible configurations to find the one with the lowest energy. The result was surprisingly simple. A clean split. Two blocks of spins, all aligned together.
 
@@ -226,7 +226,7 @@ But to answer the deeper question of "why," he first had to set that aside and r
 
 ### The Ground State Pattern
 
-So, having seen the ratio 'q' converge for any given 'd', the student formalized this idea, naming the interaction matrix `J^(N,d)`, adding some terms for convenience and rigor. This new rule, `Jᵢⱼ` equals one over `N` to the `d`, times `i` to the `d` plus `j` to the `d`, with a final term that just means the diagonals are zero, defines the entire system.
+So, having seen the ratio 'q' converge for any given 'd', the student formalized this idea, naming the interaction matrix `J^(N,d)`, adding some terms for convenience and rigor. This new rule, $J_{ji}$ equals one over `N` to the `d`, times `i` to the `d` plus `j` to the `d`, with a final term that just means the diagonals are zero, defines the entire system.
 
 For example, with 5 spins and d=2, the matrix of tensions has these specific, deterministic values.
 
@@ -234,7 +234,7 @@ With this formal structure in place, he could now state his central claim... a p
 
 The size of that first block, `M`, is the only thing we need to know to define the entire state.
 
-Of course, the system is free to choose any spin configuration it wants. But because of the underlying `Z₂` symmetry of the Hamiltonian—where flipping every single spin from `s` to `-s` leaves the total energy unchanged—there will always be at least two ground states that are mirror images of each other. In his notation, he made a simple choice: the first cluster would always be the "up" spins, the `+1`s.
+Of course, the system is free to choose any spin configuration it wants. But because of the underlying $Z_2$ symmetry of the Hamiltonian—where flipping every single spin from `s` to `-s` leaves the total energy unchanged—there will always be at least two ground states that are mirror images of each other. In his notation, he made a simple choice: the first cluster would always be the "up" spins, the `+1`s.
 
 ### A New Perspective on the Hamiltonian
 
@@ -242,17 +242,17 @@ This now begs the question: how do we actually calculate the energy for this sta
 
 We're used to thinking of it as this `s`-transposed times `J` times `s` calculation. But we can prove that this is identical to a different, more visual operation.
 
-The proof has a few parts. First, we can define the outer product of the spin vector with itself, which creates a matrix where every element is the product of two spins, `sᵢ` times `sⱼ`.
+The proof has a few parts. First, we can define the outer product of the spin vector with itself, which creates a matrix where every element is the product of two spins, $s_i$ times $s_j$.
 
-Second, we can define the Hadamard product, shown with this circle symbol, which is just a fancy term for element-by-element multiplication. The Hadamard product of the `J` matrix and the `s s` transpose matrix is just a new matrix where each element is `Jᵢⱼ` times `sᵢsⱼ`.
+Second, we can define the Hadamard product, shown with this circle symbol, which is just a fancy term for element-by-element multiplication. The Hadamard product of the `J` matrix and the `s s` transpose matrix is just a new matrix where each element is $J_{ji}$ times $s_i s_j$.
 
-And if you substitute our first definition into this second one, you see that each element of this new matrix is exactly `Jᵢⱼ` times `sᵢ` times `sⱼ`.
+And if you substitute our first definition into this second one, you see that each element of this new matrix is exactly $J_{ji}$ times $s_i$ times $s_j$.
 
 So, summing over all the elements of this new matrix is mathematically identical to our original definition of the Hamiltonian.
 
 Now, let's apply this to our postulated ground state. We start with the familiar `s`-transpose `J` `s` form on the left. On the right, we have the sum of all elements of the Hadamard product. For our specific `s` vector of three `+1`s and two `-1`s, the `s s`-transpose matrix has this checkerboard pattern of `+1`s and `-1`s.
 
-When we perform the element-wise product, the two matrices combine into a single matrix. The terms are colored blue where `sᵢsⱼ` was `+1`, and red where it was `-1`.
+When we perform the element-wise product, the two matrices combine into a single matrix. The terms are colored blue where $s_i s_j$ was `+1`, and red where it was `-1`.
 
 And so, calculating the total energy `H` is now simply the task of summing up all the elements of this final matrix. The blue terms are added, and the red terms are subtracted.
 
