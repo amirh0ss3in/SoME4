@@ -2753,3 +2753,122 @@ class GroundStateCalculationPart2(Scene):
             Write(final_title)
         )
         self.wait(8)
+
+
+from scipy.optimize import root
+
+class MasterEquationofGroundState(Scene):
+    # Constants
+    N = 1000
+    left = -2.4  # lower log exponent for symlog threshold
+
+    def _func_positive(self, p, d):
+        return 1 + (1 + d) * p**d - 2 * (2 + d) * p**(d + 1)
+
+    def _MasterGroundState(self, domain):
+        roots = []
+        for d in domain:
+            sol = root(
+                self._func_positive,
+                x0=1,
+                args=(d,),
+                tol=1e-30,
+                method='lm',
+                options={'maxiter': 1_000_000, 'ftol': 1e-30}
+            )
+            roots.append(sol.x[0])
+        return np.array(roots)
+
+    def construct(self):
+        # 1) Title + equation
+        eq = MathTex(r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0", font_size=48).set_color(YELLOW_D)
+        title = Text("The Master Equation of Ground State", font_size=36, color=GOLD)
+        title.to_edge(UP, buff=1.5)
+        self.add(eq, title)
+        self.play(eq.animate.next_to(title, DOWN, buff=0.2))
+        grouped_eq = VGroup(eq, title)
+        self.wait()
+        self.play(grouped_eq.animate.scale(0.8).to_corner(UP))
+        self.wait(0.5)
+
+        # 2) Rebuild domain here so we can change expo at will:
+        expo = 4.1   # ← change this to any exponent (e.g. 4.5) and the plot will follow
+        r1 = np.logspace(self.left, expo, 2000)
+        r2 = -np.logspace(-1e-6, self.left, 2000)
+        domain = np.sort(np.concatenate((r2, r1)))
+
+        # derive min/max from the actual domain
+        d_min, d_max = domain[0], domain[-1]
+
+        # symlog transform
+        C = 10**self.left
+        def symlog(x): return np.arcsinh(x / C)
+        x_min_t, x_max_t = symlog(d_min), symlog(d_max)
+
+        # 3) Build axes
+        axes = Axes(
+            x_range=[0, x_max_t - x_min_t, 1],
+            y_range=[0, 1.1, 0.2],
+            x_length=5 * 1.608,
+            y_length=5,
+            axis_config={"color": TEAL, 
+                         "include_tip": True, 
+                         "tip_width": 0.15,
+                         "tip_height": 0.15},
+
+            x_axis_config={"include_ticks": False, "include_numbers": False},
+            y_axis_config={
+                "decimal_number_config": {"num_decimal_places": 1},
+                "numbers_to_include": np.arange(0.2, 1.1, 0.2),
+                "font_size": 24
+            },
+        )
+
+        # manual ticks & labels (will now respect your dynamic d_max)
+        all_ticks = [-1e0, -1e-1, -1e-2, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
+        ticks = VGroup()
+        labels = []
+        for v in all_ticks:
+            xp = symlog(v) - x_min_t
+            ticks.add(Line(
+                axes.x_axis.n2p(xp),
+                axes.x_axis.n2p(xp) + DOWN*0.1,
+                color=TEAL, stroke_width=2
+            ))
+            exp = int(np.log10(abs(v)))
+            lab = MathTex(f'{"-" if v<0 else ""}10^{{{exp}}}', font_size=24)
+            lab.next_to(axes.x_axis.n2p(xp), DOWN, buff=0.2)
+            labels.append(lab)
+        # zero label
+        if d_min < 0 < d_max:
+            zp = symlog(0) - x_min_t
+            zero_lab = MathTex("0", font_size=24).next_to(axes.x_axis.n2p(zp), DOWN, buff=0.2)
+            ticks.add(Line(
+                axes.x_axis.n2p(zp),
+                axes.x_axis.n2p(zp) + DOWN*0.1,
+                color=TEAL, stroke_width=2))
+            labels.append(zero_lab)
+
+        axes.x_axis.add(*labels)
+        axis_labels = axes.get_axis_labels(
+            x_label=MathTex("d", font_size=42),
+            y_label=MathTex("q", font_size=42)
+        )
+
+        # Group and shift entire graph down
+        axes_group = VGroup(axes, axis_labels, ticks).shift(DOWN * 0.5)
+        self.play(Create(axes_group), run_time=2)
+
+        # 4) Compute and plot
+        q_vals = self._MasterGroundState(domain)
+        mask = (np.isfinite(q_vals))
+        x_plot = symlog(domain[mask]) - x_min_t
+
+        curve = axes.plot_line_graph(
+            x_values=x_plot,
+            y_values=q_vals[mask],
+            line_color=WHITE,
+            add_vertex_dots=False
+        )
+        self.play(Create(curve), run_time=3)
+        self.wait(2)
