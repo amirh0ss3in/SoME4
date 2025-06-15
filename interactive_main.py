@@ -3169,3 +3169,177 @@ class TheContinuousLeap(Scene):
             run_time=2.5
         )
         self.wait(5)
+from manim import *
+
+# Define colors for consistency
+H_COLOR = YELLOW
+J_COLOR = BLUE
+Q_COLOR = GREEN
+D_COLOR = RED
+PLUS_ONE_COLOR = GREEN_B
+MINUS_ONE_COLOR = RED_B
+LAMBDA_COLOR = PURPLE
+
+class ContinuousHDerivation(Scene):
+    def construct(self):
+        # --- PART 1: Recap The Analytical Hamiltonian ---
+        H_part_c = MathTex(r"H = \frac{N^2}{2} \int_0^1 \! \int_0^1").set_color_by_tex("H", H_COLOR)
+        J_part_c = MathTex("(x^d + y^d)").set_color_by_tex_to_color_map({"d": D_COLOR, "x": J_COLOR, "y": J_COLOR})
+        s_x_part_c = MathTex(r"S(x, \mathbf{q})").set_color(PLUS_ONE_COLOR)
+        s_y_part_c = MathTex(r"S(y, \mathbf{q})").set_color(MINUS_ONE_COLOR)
+        integrand_part_c = MathTex(r"\,dx\,dy").set_color(WHITE)
+        continuous_H_group = VGroup(H_part_c, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.15).scale(1.0)
+        self.play(Write(continuous_H_group))
+        self.wait(1)
+
+        part1 = MathTex(r"H_{\Lambda}", r"(d, \mathbf{q})", r"=", r"\frac{N^2}{1+d}").set_color_by_tex_to_color_map({"H": H_COLOR, r"\Lambda": LAMBDA_COLOR, "d": D_COLOR, r"\mathbf{q}": Q_COLOR})
+        part2 = MathTex(r"\Bigg( (-1)^{\Lambda} + 2\sum_{\alpha=1}^{\Lambda} (-1)^{\alpha+1}q_\alpha \Bigg)").set_color_by_tex_to_color_map({r"\Lambda": LAMBDA_COLOR, "q": Q_COLOR})
+        part3 = MathTex(r"\Bigg( (-1)^{\Lambda} + 2\sum_{\alpha=1}^{\Lambda} (-1)^{\alpha+1}q_\alpha^{d+1} \Bigg)").set_color_by_tex_to_color_map({r"\Lambda": LAMBDA_COLOR, "q": Q_COLOR, "d": D_COLOR})
+        analytical_H_formula = VGroup(part1, part2, part3).arrange(RIGHT, buff=0.2).scale(0.85).move_to(ORIGIN)
+        self.play(ReplacementTransform(continuous_H_group, analytical_H_formula), run_time=2.5)
+        self.wait(2)
+        self.play(analytical_H_formula.animate.to_edge(UP, buff=0.5).scale(0.8))
+        
+        # --- PART 2: The Λ=1 Case (Appendix C) ---
+        title_case1 = Tex(r"Case 1: Two Clusters ($\Lambda = 1$)", font_size=40).set_color(GREEN)
+        title_case1.next_to(analytical_H_formula, DOWN, buff=0.5)
+        self.play(Write(title_case1))
+
+        h1_formula = MathTex(r"H_1 = \frac{N^2}{1+d} (2q_1-1)(2q_1^{d+1}-1)").set_color_by_tex_to_color_map({"H": H_COLOR, "d": D_COLOR, "q_1": Q_COLOR})
+        appendix_c_result = MathTex(r"\text{Minimizing gives... } H_1(q_1) = -N^2(2q_1-1)^2 q_1^d").set_color_by_tex_to_color_map({"H": H_COLOR, "q_1": Q_COLOR, "d": D_COLOR})
+        case1_proof_group = VGroup(h1_formula, appendix_c_result).arrange(DOWN, buff=0.7)
+        case1_proof_group.next_to(title_case1, DOWN, buff=0.4)
+        self.play(FadeIn(case1_proof_group, shift=DOWN))
+        self.wait(2)
+
+        result_box = SurroundingRectangle(appendix_c_result, color=GREEN, buff=0.2)
+        result_text = Tex(r"$H_1 < 0$", r" (Always Negative!)", font_size=36).next_to(result_box, DOWN)
+        result_text[0].set_color(GREEN)
+        self.play(Create(result_box), Write(result_text))
+        self.wait(3)
+        self.play(FadeOut(VGroup(title_case1, case1_proof_group, result_box, result_text)))
+
+        # --- PART 3: The Λ >= 2 Case (Appendix D) with Full Detail ---
+        title_case2 = Tex(r"Case 2: More than Two Clusters ($\Lambda \geq 2$)", font_size=40).set_color(RED)
+        title_case2.next_to(analytical_H_formula, DOWN, buff=0.5)
+        self.play(Write(title_case2))
+
+        # --- Step 1: Present the core equation from Appendix D ---
+        insight_text = Tex(r"At a critical point, the sum of derivatives for adjacent boundaries is zero:").scale(0.8)
+        sum_deriv_full_eq = MathTex(
+            r"\frac{\partial H_{\Lambda}}{\partial q_j} + \frac{\partial H_{\Lambda}}{\partial q_{j+1}} =",
+            r"2(-1)^j(q_j^d - q_{j+1}^d)",
+            r"\times",
+            r"\left[(-1)^\Lambda + 2\sum_{n = 1}^\Lambda(-1)^{n+1}q_n\right]",
+            r"= 0"
+        ).scale(0.9)
+        step1_group = VGroup(insight_text, sum_deriv_full_eq).arrange(DOWN, buff=0.4)
+        step1_group.next_to(title_case2, DOWN, buff=0.4)
+        self.play(Write(step1_group))
+        self.wait(4)
+
+        # --- Step 2: Analyze the two factors ---
+        term_A = sum_deriv_full_eq[1]
+        term_B = sum_deriv_full_eq[3]
+        brace_A = Brace(term_A, DOWN, color=BLUE)
+        brace_B = Brace(term_B, DOWN, color=ORANGE)
+        label_A = brace_A.get_text("Term A").set_color(BLUE)
+        label_B = brace_B.get_text("Term B").set_color(ORANGE)
+        self.play(GrowFromCenter(brace_A), GrowFromCenter(brace_B), Write(label_A), Write(label_B))
+        self.wait(2)
+        
+        # --- Step 3: Rule out Term A ---
+        analysis_group = VGroup(
+            Tex("Since boundaries are ordered ($q_j < q_{j+1}$),", font_size=32),
+            Tex(r"Term A cannot be zero.", font_size=32)
+        ).arrange(DOWN).to_edge(DOWN, buff=0.5)
+        self.play(Write(analysis_group))
+        
+        cross = Cross(VGroup(term_A, brace_A, label_A), stroke_color=RED, stroke_width=6)
+        self.play(Create(cross))
+        self.wait(3)
+
+        # --- Step 4: Conclude Term B must be zero ---
+        conclusion_text = Tex("Therefore, Term B *must* be zero.", font_size=32).move_to(analysis_group)
+        self.play(FadeOut(analysis_group, cross), FadeIn(conclusion_text))
+        self.play(Indicate(VGroup(term_B, brace_B, label_B), color=ORANGE, scale_factor=1.2))
+        self.wait(3)
+        self.play(FadeOut(VGroup(insight_text, sum_deriv_full_eq, brace_A, brace_B, label_A, label_B, conclusion_text)))
+
+        # --- Step 5: The final punchline ---
+        final_condition = MathTex(
+            r"\text{So, at any critical point: }",
+            r"(-1)^{\Lambda} + 2\sum_{n=1}^{\Lambda} (-1)^{n+1}q_n = 0"
+        ).set_color_by_tex_to_color_map({r"\Lambda": LAMBDA_COLOR, "q": Q_COLOR})
+        final_condition.next_to(title_case2, DOWN, buff=0.7)
+        self.play(Write(final_condition))
+        self.wait(2)
+
+        q_factor_box_on_formula = SurroundingRectangle(analytical_H_formula[1], color=RED, buff=0.05)
+        zero_box_on_proof = SurroundingRectangle(final_condition[1], color=RED, buff=0.2)
+        arrow = Arrow(zero_box_on_proof.get_top(), q_factor_box_on_formula.get_bottom(), buff=0.1, color=RED)
+        
+        self.play(Create(zero_box_on_proof), Create(q_factor_box_on_formula), GrowArrow(arrow))
+        
+        final_result_case2 = MathTex(r"\Rightarrow H_{\Lambda} = 0").scale(1.2).set_color(RED)
+        final_result_case2.next_to(zero_box_on_proof, DOWN, buff=0.4)
+        self.play(Write(final_result_case2))
+        self.wait(4)
+        self.play(FadeOut(VGroup(title_case2, final_condition, zero_box_on_proof, q_factor_box_on_formula, arrow, final_result_case2)))
+        
+        # --- PART 4: Boundary Case (Interface Shedding) ---
+        boundary_title = Tex(r"Boundary Case: Domains Merge (e.g., $q_{\Lambda} \to 1$)", font_size=40).set_color(ORANGE)
+        boundary_title.next_to(analytical_H_formula, DOWN, buff=0.5)
+        reduction_eq = MathTex(r"H_{\Lambda}(q_{\Lambda} \to 1) \longrightarrow H_{\Lambda-1}").set_color_by_tex(r"\Lambda", LAMBDA_COLOR)
+        cascade = Tex(r"The system sheds interfaces to find lower energy:", font_size=32)
+        cascade_math = MathTex(r"\Lambda \to \Lambda-1 \to \dots \to 1").set_color(LAMBDA_COLOR)
+        boundary_group = VGroup(reduction_eq, cascade, cascade_math).arrange(DOWN, buff=0.6)
+        boundary_group.next_to(boundary_title, DOWN, buff=0.4)
+        self.play(Write(boundary_title), Write(boundary_group))
+        self.wait(4)
+        self.play(FadeOut(boundary_title), FadeOut(boundary_group))
+
+        # --- PART 5: Final Conclusion ---
+        
+        # Animate the formula to the top to serve as a header
+        self.play(analytical_H_formula.animate.scale(0.9).to_edge(UP, buff=0.7))
+
+        # Create the central dividing line
+        line = Line(UP * 2.5, DOWN * 3.5, color=GRAY)
+        self.play(Create(line))
+        
+        # --- Left Column: The Winning Case (Λ=1) ---
+        
+        # Define a stable anchor point for the left column
+        left_anchor = line.get_center() + LEFT * (self.camera.frame_width / 4)
+        
+        # Create the elements for the left column
+        title_L1 = Tex(r"Case $\Lambda=1$", font_size=42).set_color(GREEN)
+        result_L1 = MathTex(r"H_1 < 0", font_size=60).set_color(GREEN)
+        label_L1 = Tex("Stable, Energetically", "Favorable Ground State", font_size=32)
+        
+        # Group and position them relative to the anchor
+        group_L1 = VGroup(title_L1, result_L1, label_L1).arrange(DOWN, buff=0.7)
+        group_L1.move_to(left_anchor)
+
+        # --- Right Column: The Unstable Case (Λ>=2) ---
+        
+        # Define a stable anchor point for the right column
+        right_anchor = line.get_center() + RIGHT * (self.camera.frame_width / 4)
+
+        # Create the elements for the right column
+        title_L2 = Tex(r"Case $\Lambda \geq 2$", font_size=42).set_color(RED)
+        result_L2 = MathTex(r"H_{\Lambda} = 0", font_size=60).set_color(RED)
+        label_L2 = Tex("Unstable or Higher Energy", "(Decays to $\Lambda=1$)", font_size=32)
+        
+        # Group and position them relative to the anchor
+        group_L2 = VGroup(title_L2, result_L2, label_L2).arrange(DOWN, buff=0.7)
+        group_L2.move_to(right_anchor)
+
+        # --- Animate the final comparison ---
+        self.play(
+            Write(group_L1),
+            Write(group_L2),
+            run_time=2
+        )
+        self.wait(6)
