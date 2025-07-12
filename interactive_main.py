@@ -4,22 +4,32 @@ import itertools
 
 class Introduction(Scene):
     def construct(self):
-        # --- CONFIGURATION (unchanged) ---
         node_radius = 0.3
         PLUS_ONE_COLOR = BLUE_D
         MINUS_ONE_COLOR = RED_D
         TEXT_COLOR = YELLOW
         J_COLOR = YELLOW
         H_COLOR = GREEN
-        # --- TITLE TEXT (unchanged) ---
-        title = MarkupText(f'Each person decides <span color="{YELLOW}">yes or no</span> on some question.', font_size=36).to_edge(UP)
-        subtitle = MarkupText(f'We’ll call “yes” <span color="{PLUS_ONE_COLOR}">+1</span> and “no” <span color="{MINUS_ONE_COLOR}">–1</span>.', font_size=30).next_to(title, DOWN, buff=0.2)
+        LIGHT_YELLOW = YELLOW_D
+
+
+        title = MarkupText(
+            'Each person decides <span color="{0}">yes</span> or <span color="{0}">no</span> on some question.'.format(TEXT_COLOR),
+            font_size=36)
+        
+        subtitle = MarkupText(
+            'We’ll call “yes: <span color="{0}">+1</span>” and “no: <span color="{1}">–1</span>” .'.format(PLUS_ONE_COLOR, MINUS_ONE_COLOR),
+            font_size=30)
+
+        text_group = VGroup(title, subtitle).arrange(DOWN, buff=0.5)
+        text_group.to_edge(UP).shift(DOWN * 0.5) 
+
         self.play(Write(title))
-        self.wait(0.5)
+        self.wait()
         self.play(Write(subtitle))
         self.wait()
-        
-        # --- OBJECTS (unchanged) ---
+
+         # --- OBJECTS ---
         alice_circle = Circle(radius=node_radius, color=WHITE, fill_opacity=0.8).move_to(LEFT * 2.5)
         alice_name = Text("Alice", font_size=36).next_to(alice_circle, DOWN, buff=0.3)
         bob_circle = Circle(radius=node_radius, color=WHITE, fill_opacity=0.8).move_to(RIGHT * 2.5)
@@ -27,7 +37,7 @@ class Introduction(Scene):
         up_arrow = Arrow(DOWN*0.2, UP*0.2, stroke_width=3, max_tip_length_to_length_ratio=0.35)
         down_arrow = Arrow(UP*0.2, DOWN*0.2, stroke_width=3, max_tip_length_to_length_ratio=0.35)
         
-        # --- INITIAL ANIMATION (unchanged, just shortened for brevity in this view) ---
+        # --- INITIAL ANIMATION
         self.play(Create(alice_circle), Create(bob_circle), Write(alice_name), Write(bob_name))
         alice_up = up_arrow.copy().move_to(alice_circle.get_center())
         alice_plus_text = MathTex("+1", color=TEXT_COLOR).next_to(alice_circle, UP)
@@ -35,8 +45,8 @@ class Introduction(Scene):
         bob_plus_text = MathTex("+1", color=TEXT_COLOR).next_to(bob_circle, UP)
         self.play(
             alice_circle.animate.set_color(PLUS_ONE_COLOR), Create(alice_up), Write(alice_plus_text),
-            bob_circle.animate.set_color(PLUS_ONE_COLOR), Create(bob_up), Write(bob_plus_text)
-        )
+            bob_circle.animate.set_color(PLUS_ONE_COLOR), Create(bob_up), Write(bob_plus_text))
+        
         self.wait()
 
         # --- NEW CODE STARTS HERE ---
@@ -44,15 +54,16 @@ class Introduction(Scene):
         # 1. Clean up the scene and reposition
         alice_bob_group = VGroup(
             alice_circle, alice_name, alice_up, alice_plus_text,
-            bob_circle, bob_name, bob_up, bob_plus_text
-        )
+            bob_circle, bob_name, bob_up, bob_plus_text)
+        
         self.play(
             FadeOut(title, subtitle),
-            alice_bob_group.animate.scale(0.9).to_edge(LEFT, buff=1.0)
-        )
+            alice_bob_group.animate.scale(0.9).to_edge(LEFT, buff=0.7))
+        
         self.wait(0.5)
 
         # 2. Define Table and Status Labels
+        # Define the table data
         table_data = [
             [r"s_1", r"s_2", r"s_1 s_2"],
             [r"+1", r"+1", r"+1"],
@@ -60,6 +71,7 @@ class Introduction(Scene):
             [r"-1", r"+1", r"-1"],
             [r"-1", r"-1", r"+1"],
         ]
+
         table = MathTable(
             table_data,
             include_outer_lines=True,
@@ -68,18 +80,24 @@ class Introduction(Scene):
             v_buff=0.4
         ).scale(0.8).next_to(alice_bob_group, RIGHT, buff=1.0)
 
+        # Color the header row text (row 1, all columns)
+        num_cols = 3
+        for j in range(num_cols):
+            idx = j  # first row, zero-based index
+            table.get_entries()[idx].set_color(LIGHT_YELLOW)
+
         status_texts = VGroup(
-            MarkupText(f'<span color="{GREEN}">Agree</span>', font_size=28),
+            MarkupText(f'<span color="{WHITE}">Agree</span>', font_size=28),
             MarkupText(f'<span color="{ORANGE}">Disagree</span>', font_size=28),
             MarkupText(f'<span color="{ORANGE}">Disagree</span>', font_size=28),
-            MarkupText(f'<span color="{GREEN}">Agree</span>', font_size=28),
+            MarkupText(f'<span color="{WHITE}">Agree</span>', font_size=28),
         )
 
-        # 3. Animate the table appearing row-by-row
+        # Draw the table header and lines only once
         header = table.get_rows()[0]
         h_lines = table.get_horizontal_lines()
         v_lines = table.get_vertical_lines()
-        
+
         self.play(Write(header), Create(VGroup(*h_lines, *v_lines)))
         self.wait()
 
@@ -96,9 +114,9 @@ class Introduction(Scene):
             bob_target_arrow = (up_arrow if s2_val == 1 else down_arrow).copy().move_to(bob_circle.get_center())
             bob_target_text = MathTex(f"{s2_val:+}", color=TEXT_COLOR).next_to(bob_circle, UP)
             bob_target_color = PLUS_ONE_COLOR if s2_val == 1 else MINUS_ONE_COLOR
-            
+
             # Position the status text for this row
-            current_status = status_texts[i-1].next_to(table.get_rows()[i], RIGHT, buff=0.5)
+            current_status = status_texts[i-1].next_to(table.get_rows()[i], RIGHT, buff=0.7)
 
             # Animate everything together
             self.play(
@@ -113,33 +131,35 @@ class Introduction(Scene):
                 run_time=1.5
             )
             self.wait(0.5)
-        
+
         self.wait()
+
         
         # --- NEW SEQUENCE STARTS HERE ---
 
-        # 1. Clean up the previous scene
         all_table_elements = VGroup(table, status_texts)
         self.play(
             FadeOut(alice_bob_group),
-            FadeOut(all_table_elements)
-        )
+            FadeOut(all_table_elements))
+        
         self.wait(0.5)
 
-        # 2. Display the "tension" text
-        tension_text = MarkupText(
-            'But in the real world, people have a relationship.\n'
-            'A <span color="ORANGE">tension</span>, you might say.',
-            font_size=36,
-            justify=True
-        ).move_to(ORIGIN)
+        line1 = MarkupText(
+            'But in the real world, people have a relationship.',
+            font_size=40
+        )
+        line2 = MarkupText(
+            'A <span color="ORANGE">tension</span>, we might say.',
+            font_size=40
+        )
+
+        tension_text = VGroup(line1, line2).arrange(DOWN, buff=0.4).move_to(ORIGIN)
 
         self.play(Write(tension_text))
-        self.wait(3) # Pause for narration
+        self.wait(3)
         self.play(FadeOut(tension_text))
         self.wait(0.5)
 
-        # 3. Re-create Alice and Bob, more spread out
         alice_circle_new = Circle(radius=node_radius, color=WHITE, fill_opacity=0.8)
         alice_name_new = Text("Alice", font_size=36).next_to(alice_circle_new, DOWN, buff=0.3)
         alice_group_new = VGroup(alice_circle_new, alice_name_new).move_to(LEFT * 3)
@@ -150,48 +170,45 @@ class Introduction(Scene):
 
         self.play(
             Create(alice_group_new),
-            Create(bob_group_new)
-        )
+            Create(bob_group_new))
+        
         self.wait()
 
-        # 4. Add the J_12 label and the segmented connection line
+        #Add the J_12 label and the segmented connection line
         j_label = MathTex("J_{12}", color=YELLOW).scale(1.2)
         j_label.move_to((alice_circle_new.get_center() + bob_circle_new.get_center()) / 2)
 
-        # Create two separate lines that stop short of the label
         line1 = Line(
             alice_circle_new.get_right(),
             j_label.get_left(),
             buff=0.2,
             color=TEAL,
-            stroke_width=3
-        )
+            stroke_width=3)
         line2 = Line(
             j_label.get_right(),
             bob_circle_new.get_left(),
             buff=0.2,
             color=TEAL,
-            stroke_width=3
-        )
-        
-        # Animate the appearance of the connection
+            stroke_width=3)
+     
         self.play(
             Create(line1),
             Create(line2),
-            Write(j_label)
-        )
+            Write(j_label))
+        
         self.wait()
 
-        # --- NEW SEQUENCE STARTS HERE (CORRECTED LAYOUT) ---
+
+        # --- NEW SEQUENCE STARTS HERE ---
 
         # 1. Group the existing elements and move them to the left
         connection_group = VGroup(alice_group_new, bob_group_new, j_label, line1, line2)
         self.play(
-            connection_group.animate.scale(0.9).to_edge(LEFT, buff=1.0)
-        )
+            connection_group.animate.scale(0.9).to_edge(LEFT, buff=1.0))
+        
         self.wait(0.5)
 
-        # 2. Create the VERTICAL J-axis with more ticks
+        # Create the VERTICAL J-axis
         j_axis = NumberLine(
             x_range=[-1.5, 1.5, 0.5],
             length=5,
@@ -199,42 +216,38 @@ class Introduction(Scene):
             include_tip=True,
             tip_width=0.2,
             tip_height=0.2,
-            include_numbers=False 
-        )
+            include_numbers=False )
         
-        # Manually add numbers at the default position (below the line)
         j_axis.add_numbers(
             x_values=[-1, 0, 1],
-            font_size=32
-        )
+            font_size=32)
         
-        j_axis.rotate(PI / 2) # Rotate the line and the numbers together
+        j_axis.rotate(PI / 2)
         j_axis.move_to(RIGHT * 2.5)
-        
-        # --- THIS IS THE FIX ---
-        # Now that the axis is vertical, shift the numbers to the LEFT
+
         j_axis.numbers.shift(LEFT * 0.85)
 
         j_axis_title = MathTex("J_{12}", "\\text{ dial}", color=YELLOW).next_to(j_axis, UP)
-        j_axis_title[1].set_color(WHITE)
+        j_axis_title[1].set_color(YELLOW)
+        j_axis_title.shift(RIGHT * 0.3) 
 
         self.play(Create(j_axis), Write(j_axis_title))
         self.wait()
 
-        # 3. Create the simplified descriptive labels
+        # Create the simplified descriptive labels
         positive_label = MarkupText(
             f'<span color="{RED_E}">Tense</span>', font_size=34
         ).next_to(j_axis.n2p(1), RIGHT, buff=0.4)
 
         negative_label = MarkupText(
-            f'<span color="{BLUE_E}">Cozy</span>', font_size=34
+            f'<span color="{BLUE}">Cozy</span>', font_size=34
         ).next_to(j_axis.n2p(-1), RIGHT, buff=0.4)
 
         zero_label = MarkupText(
             'No influence', font_size=34
         ).next_to(j_axis.n2p(0), RIGHT, buff=0.4)
 
-        # 4. Animate the explanations sequentially with a pointer dot
+        # Animate the explanations sequentially with a pointer dot
         dot = Dot(color=YELLOW).scale(1.2)
 
         # J > 0 (Tense)
@@ -261,12 +274,11 @@ class Introduction(Scene):
         self.play(FadeOut(j_dial_group))
         
         self.add(connection_group) 
+
         self.wait()
 
-        # (This code follows immediately after the FadeOut of the first j_dial_group)
-        # The 'connection_group' Mobject is still present on the screen.
         
-        # --- NEW SEQUENCE STARTS HERE (CORRECTED WITH SMOOTH MOVEMENT) ---
+        # --- NEW SEQUENCE STARTS HERE ---
 
         # --- PART 1: DEFINE ALL OBJECTS AND CALCULATE FINAL LAYOUT ---
 
@@ -274,49 +286,72 @@ class Introduction(Scene):
         target_connection_group = connection_group.copy()
         target_connection_group.scale(0.9).to_edge(UP, buff=1.0)
 
-        # B) Left Panel: Formulas (we won't show them yet)
+        # B) Left Panel: Description + Formula
         desc_font_size = 28
-        desc_part1 = MarkupText(f'<span color="{H_COLOR}">Conflict</span> = <span color="{PLUS_ONE_COLOR}">Alice\'s choice</span> × <span color="{J_COLOR}">Tension</span> × ', font_size=desc_font_size)
-        desc_bob_choice = MarkupText(f'<span color="{PLUS_ONE_COLOR}">Bob\'s choice</span>', font_size=desc_font_size)
+        desc_part1 = MarkupText(
+            f'<span color="{H_COLOR}">Conflict</span> = '
+            f'<span color="{PLUS_ONE_COLOR}">Alice\'s choice</span> × '
+            f'<span color="{J_COLOR}">Tension</span> × ',
+            font_size=desc_font_size
+        )
+        desc_bob_choice = MarkupText(
+            f'<span color="{PLUS_ONE_COLOR}">Bob\'s choice</span>',
+            font_size=desc_font_size
+        )
         desc_formula = VGroup(desc_part1, desc_bob_choice).arrange(RIGHT, buff=0.1)
-        math_formula = MathTex("H", "=", "s_1", "J_{12}", "s_2", tex_to_color_map={"H": H_COLOR, "s_1": PLUS_ONE_COLOR, "J_{12}": J_COLOR, "s_2": PLUS_ONE_COLOR}).scale(1.2)
+
+        math_formula = MathTex(
+            "H", "=", "s_1", "J_{12}", "s_2",
+            tex_to_color_map={
+                "H": H_COLOR,
+                "s_1": PLUS_ONE_COLOR,
+                "J_{12}": J_COLOR,
+                "s_2": PLUS_ONE_COLOR
+            }
+        ).scale(1.2)
+
         formulas_group = VGroup(desc_formula, math_formula).arrange(DOWN, buff=0.4)
-        
-        # We use the INVISIBLE target_connection_group to define the layout
+
         left_panel = VGroup(target_connection_group, formulas_group).arrange(DOWN, buff=0.7)
 
-        # C) Right Panel: Dials
-        dial_config = {"x_range": [-1.5, 1.5, 0.5], "length": 3.5, "include_numbers": False, "rotation": PI/2}
+        # C) Right Panel: Vertical Dials
+        dial_config = {
+            "x_range": [-1.5, 1.5, 0.5],
+            "length": 3.5,
+            "include_numbers": False,
+            "rotation": PI / 2
+        }
+
+        # J Dial
         j_dial = NumberLine(**dial_config)
-        j_dial.add_numbers(x_values=[-1, 0, 1], font_size=24).numbers.shift(LEFT * 0.4)
-        j_dial_title = MathTex("J_{12}", color=J_COLOR).next_to(j_dial, UP)
+        j_dial.add_numbers(x_values=[-1, 0, 1], font_size=24).numbers.shift(LEFT * 0.4). shift(UP *0.3)
+        j_dial_title = MathTex("J_{12}", color=J_COLOR).next_to(j_dial, UP).shift(RIGHT*.3)
         j_dial_group = VGroup(j_dial, j_dial.numbers, j_dial_title)
         h_dial = NumberLine(**dial_config)
-        h_dial.add_numbers(x_values=[-1, 0, 1], font_size=24).numbers.shift(LEFT * 0.4)
-        h_dial_title = MathTex("H", color=H_COLOR).next_to(h_dial, UP)
+        h_dial.add_numbers(x_values=[-1, 0, 1], font_size=24).numbers.shift(LEFT * 0.4).shift(UP * 0.3)
+        h_dial_title = MathTex("H", color=H_COLOR).next_to(h_dial, UP).shift(RIGHT*.3)
         h_dial_group = VGroup(h_dial, h_dial.numbers, h_dial_title)
         right_panel = VGroup(j_dial_group, h_dial_group).arrange(0.9*RIGHT, buff=1)
-        
-        # D) Arrange the panels on screen to ensure they fit and are centered
-        main_layout = VGroup(left_panel, right_panel).arrange(RIGHT, buff=1.5).move_to(ORIGIN)
 
-        # --- PART 2: ANIMATE IN THE CORRECT ORDER ---
+        # D) Final layout
+        main_layout = VGroup(left_panel, right_panel).arrange(RIGHT, buff=1.5).move_to(ORIGIN)   
 
-        # 1. Move the original, visible diagram to its new position
-        self.play(
-            Transform(connection_group, target_connection_group)
-        )
+        # --- PART 2: Animation ---
+
+        # 1. Move the original connection group into new layout
+        self.play(Transform(connection_group, target_connection_group))
         self.wait(1)
-        
-        # 2. Bring in the dials
+
+        # 2. Animate in dials
         self.play(Create(right_panel))
         self.wait(1)
-        
-        # 3. Bring in the formulas
+
+        # 3. Animate in formulas
         self.play(Write(formulas_group))
         self.wait(1)
 
-        # --- PART 3: DEMONSTRATION WITH LIVE CALCULATION ---
+
+         # --- PART 3: DEMONSTRATION WITH LIVE CALCULATION ---
         
         s1_val, s2_val, j_val = 1, 1, -1
 
@@ -348,10 +383,10 @@ class Introduction(Scene):
             alice_circle.animate.set_color(PLUS_ONE_COLOR),
             bob_circle.animate.set_color(PLUS_ONE_COLOR),
             FadeIn(j_dot), FadeIn(h_dot),
-            Write(calculation_text)
-        )
+            Write(calculation_text))
+        
         self.wait(2)
-        # (The rest of the demonstration remains the same)
+        
         s2_val = -1
         new_calc = get_calc_text(s1_val, j_val, s2_val)
         new_bob_spin = down_arrow.copy().move_to(bob_circle.get_center())
@@ -361,8 +396,8 @@ class Introduction(Scene):
             h_dot.animate.move_to(h_dial.n2p(s1_val * j_val * s2_val)),
             FadeToColor(math_formula[4], MINUS_ONE_COLOR),
             desc_bob_choice.animate.set_color(MINUS_ONE_COLOR), 
-            Transform(calculation_text, new_calc), run_time=1.5
-        )
+            Transform(calculation_text, new_calc), run_time=1.5)
+        
         self.wait(2)
 
         j_val = 1
@@ -370,8 +405,8 @@ class Introduction(Scene):
         self.play(
             j_dot.animate.move_to(j_dial.n2p(j_val)),
             h_dot.animate.move_to(h_dial.n2p(s1_val * j_val * s2_val)),
-            Transform(calculation_text, new_calc), run_time=1.5
-        )
+            Transform(calculation_text, new_calc), run_time=1.5)
+        
         self.wait(2)
 
         s2_val = 1
@@ -383,37 +418,58 @@ class Introduction(Scene):
             h_dot.animate.move_to(h_dial.n2p(s1_val * j_val * s2_val)),
             FadeToColor(math_formula[4], PLUS_ONE_COLOR),
             desc_bob_choice.animate.set_color(PLUS_ONE_COLOR),
-            Transform(calculation_text, new_calc), run_time=1.5
-        )
+            Transform(calculation_text, new_calc), run_time=1.5)
+        
         self.wait(3)
 
-        # (This code follows immediately after the previous sequence ends)
 
-        # --- NEW SEQUENCE: FINDING THE GROUND STATE (CORRECTED DIAGRAM) ---
+        # --- NEW SEQUENCE: FINDING THE GROUND STATE ---
         
         # --- PART 1: CLEANUP AND RECAP ---
         
         all_previous_mobjects = VGroup(
             connection_group, right_panel, formulas_group,
-            calculation_text, alice_spin, bob_spin, j_dot, h_dot
-        )
+            calculation_text, alice_spin, bob_spin, j_dot, h_dot)
         self.play(FadeOut(all_previous_mobjects))
         self.wait(0.5)
 
         DEFAULT_FONT_SIZE = 32
         recap_text = MarkupText(
-            "The 'Conflict' depends on their choices and the 'Tension' between them.",
+            f"The <span color='{GREEN_D.to_hex()}'>Conflict</span> depends on their choices and the"
+            f" <span color='{YELLOW.to_hex()}'>Tension</span> between them.",
             font_size=DEFAULT_FONT_SIZE
-        )
+            )
         self.play(Write(recap_text))
+
         self.wait(2)
 
         # --- PART 2: POSE THE QUESTION ---
 
-        question_text_1 = Text("Now, let's assume the tension J is fixed.", font_size=DEFAULT_FONT_SIZE)
-        question_text_2 = MarkupText(f'The question is: what choices will they make to <span color="{H_COLOR}">minimize the conflict</span>?', font_size=DEFAULT_FONT_SIZE)
-        question_text_3 = MarkupText(f'This lowest-energy state is called the <span color="{YELLOW}">ground state</span>.', font_size=DEFAULT_FONT_SIZE)
-        question_group = VGroup(question_text_1, question_text_2, question_text_3).arrange(DOWN, buff=0.4)
+        text_before = MarkupText("Now, let's assume the tension", font_size=36)
+        j_math = MathTex(r"\mathbf{J}", font_size=47, color=YELLOW)
+        text_after = MarkupText("is fixed. The question is:", font_size=36)
+
+        question_text_1 = VGroup(text_before, j_math, text_after).arrange(RIGHT, buff=0.3)
+        
+        question_text_2 = MarkupText(
+                        f"What choices will they make to <span color='{H_COLOR}'>minimize</span> "
+                        f"the <span color='{H_COLOR}'>conflict</span>?",
+                        font_size=DEFAULT_FONT_SIZE, line_spacing=0.7)
+        question_text_2.move_to(ORIGIN)
+
+        question_text_3 = MarkupText(
+                        f"This lowest-energy state is called the <span color='{J_COLOR}'>ground state</span>.",
+                        font_size=DEFAULT_FONT_SIZE,line_spacing=0.7)
+        question_text_3.next_to(question_text_2, DOWN, buff=0.3)
+ 
+        centered_text_group = VGroup(question_text_2, question_text_3)
+        centered_text_group.move_to(ORIGIN)  
+
+        centered_text_group.next_to(question_text_1, DOWN, buff=1.0) 
+        
+        question_group = VGroup(question_text_1, centered_text_group)
+
+        question_group.shift(UP * 1.5) 
 
         self.play(ReplacementTransform(recap_text, question_group))
         self.wait(4)
@@ -422,27 +478,40 @@ class Introduction(Scene):
 
         # --- PART 3: THE INTERACTIVE TABLE (REWRITTEN WITH CORRECT BUFFERS AND SPACING) ---
 
-        # A) Setup the main components
-        case_label = MathTex("J_{12}", "=", "?").scale(1.5).to_edge(UP, buff=1.0)
+        # A) Setup the main components  
+        case_label = MathTex("J_{12}", "=", "?").scale(1.5).to_edge(UP, buff=0.8)
+        case_label.set_color_by_tex("=", YELLOW)  ###
+
 
         table = MathTable(
-            [["+1","+1",""],["+1","-1",""],["-1","+1",""],["-1","-1",""]],
-            col_labels=[MathTex("s_1"), MathTex("s_2"), MathTex("H", color=H_COLOR)],
-            include_outer_lines=True
-        ).scale(0.9).next_to(case_label, DOWN, buff=0.7)
+                [["+1", "+1", ""], ["+1", "-1", ""], ["-1", "+1", ""], ["-1", "-1", ""]],
+               col_labels=[MathTex("s_1", color = LIGHT_YELLOW), MathTex("s_2",  color = LIGHT_YELLOW), MathTex("H", color=H_COLOR)],
+                include_outer_lines=True).scale(0.9).next_to(case_label, DOWN, buff=0.7)
 
-        # Helper function to create the s_gs vector display
+        # Helper function to create the s_gs vector display 
         def create_gs_vector(s1, s2):
-            s_gs_label = MathTex("s_{gs}", "=").set_color(YELLOW)
-            s1_val_text = MathTex(f"{s1:+}").set_color(WHITE)
-            s2_val_text = MathTex(f"{s2:+}").set_color(WHITE)
-            
-            vector_body = VGroup(
-                MathTex("["), s1_val_text, s2_val_text, MathTex("]")
-            ).arrange(RIGHT, buff=0.25)
-            
-            full_vector = VGroup(s_gs_label, vector_body).arrange(RIGHT, buff=0.3)
+            s_gs = MathTex("s_{gs}").set_color(YELLOW)
+            eq = MathTex("=").set_color(YELLOW)
+
+            s1_val = MathTex(f"{s1:+}").set_color(WHITE)
+            s2_val = MathTex(f"{s2:+}").set_color(WHITE)
+
+            # Make components a bit thicker via stroke
+            s1_val.set_stroke(width=2.5)
+            s2_val.set_stroke(width=2.5)
+
+            vector_components = VGroup(s1_val, s2_val).arrange(RIGHT, buff=0.4)
+            l_bracket = MathTex("[").set_color(WHITE).set_stroke(width=2)
+            r_bracket = MathTex("]").set_color(WHITE).set_stroke(width=2)
+            vector_body = VGroup(l_bracket, vector_components, r_bracket).arrange(RIGHT, buff=0.15)
+
+            s_gs.align_to(vector_body, DOWN)
+            eq.align_to(vector_body, DOWN)
+            vector_body.align_to(vector_components, DOWN)
+
+            full_vector = VGroup(s_gs, eq, vector_body).arrange(RIGHT, buff=0.3)
             return full_vector
+
 
         # B) Animate the appearance of the tools
         self.play(Write(case_label))
@@ -454,25 +523,29 @@ class Introduction(Scene):
         new_case_label_cozy = MathTex("J_{12}", "=", f"{j_val_cozy}").scale(1.5).move_to(case_label)
         new_case_label_cozy[0].set_color(J_COLOR)
         new_case_label_cozy[2].set_color(PLUS_ONE_COLOR)
-        
+
         s1_vals = [int(c.get_tex_string()) for c in table.get_columns()[0][1:]]
         s2_vals = [int(c.get_tex_string()) for c in table.get_columns()[1][1:]]
-        h_col_data_cozy = VGroup(*[MathTex(f"{j_val_cozy * s1 * s2}", color=H_COLOR) for s1, s2 in zip(s1_vals, s2_vals)]).scale(0.9)
+
+        h_col_data_cozy = VGroup(*[
+            MathTex(f"{{{j_val_cozy * s1 * s2:+}}}", color=H_COLOR).scale(0.9)
+            for s1, s2 in zip(s1_vals, s2_vals)])
+
         for i, item in enumerate(h_col_data_cozy):
-            item.move_to(table.get_cell((i+2, 3)))
+            cell_center = table.get_cell((i + 2, 3)).get_center()
+            item.move_to(cell_center)
 
         self.play(Transform(case_label, new_case_label_cozy))
         self.play(Write(h_col_data_cozy))
         self.wait(1)
-        
-        # Point to the first ground state with correct spacing
+
+        # Point to the first ground state
         gs1_row = table.get_rows()[1]
         gs_vector_display = create_gs_vector(1, 1).next_to(gs1_row, LEFT, buff=1.5)
         pointer = Arrow(
-            start=gs_vector_display.get_right() + RIGHT * 0.4, # Add gap on the left
-            end=gs1_row.get_left() + LEFT * 0.1,             # Add gap on the right
-            color=YELLOW
-        )
+            start=gs_vector_display.get_right() + RIGHT * 0.4,
+            end=gs1_row.get_left() + LEFT * 0.1,
+            color=YELLOW)
 
         self.play(Write(gs_vector_display), GrowArrow(pointer))
         self.wait(2)
@@ -481,15 +554,13 @@ class Introduction(Scene):
         gs2_row = table.get_rows()[4]
         target_vector = create_gs_vector(-1, -1).next_to(gs2_row, LEFT, buff=1.5)
         target_pointer = Arrow(
-            start=target_vector.get_right() + RIGHT * 0.4, # Add gap on the left
-            end=gs2_row.get_left() + LEFT * 0.1,             # Add gap on the right
-            color=YELLOW
-        )
+            start=target_vector.get_right() + RIGHT * 0.4,
+            end=gs2_row.get_left() + LEFT * 0.1,
+            color=YELLOW)
 
         self.play(
             Transform(pointer, target_pointer),
-            Transform(gs_vector_display, target_vector)
-        )
+            Transform(gs_vector_display, target_vector))
         self.wait(2)
 
         # D) Case 2: J = +1 ("Tense")
@@ -498,71 +569,75 @@ class Introduction(Scene):
         new_case_label_tense = MathTex("J_{12}", "=", f"+{j_val_tense}").scale(1.5).move_to(case_label)
         new_case_label_tense[0].set_color(J_COLOR)
         new_case_label_tense[2].set_color(MINUS_ONE_COLOR)
-        
-        h_col_data_tense = VGroup(*[MathTex(f"{j_val_tense * s1 * s2}", color=H_COLOR) for s1, s2 in zip(s1_vals, s2_vals)]).scale(0.9)
+
+        h_col_data_tense = VGroup(*[
+            MathTex(f"{{{j_val_tense * s1 * s2:+}}}", color=H_COLOR).scale(0.9)
+            for s1, s2 in zip(s1_vals, s2_vals)])
+
         for i, item in enumerate(h_col_data_tense):
-            item.move_to(table.get_cell((i+2, 3)))
+            cell_center = table.get_cell((i + 2, 3)).get_center()
+            item.move_to(cell_center)
 
         self.play(
             Transform(case_label, new_case_label_tense),
             Transform(h_col_data_cozy, h_col_data_tense),
-            run_time=1.5
-        )
+            run_time=1.5)
         self.wait(1)
 
-        # Point to the new ground states with correct spacing
+        # Point to the new ground states
         gs1_row_new = table.get_rows()[2]
         gs_vector_display = create_gs_vector(1, -1).next_to(gs1_row_new, LEFT, buff=1.5)
         pointer = Arrow(
-            start=gs_vector_display.get_right() + RIGHT * 0.4, # Add gap on the left
-            end=gs1_row_new.get_left() + LEFT * 0.1,             # Add gap on the right
-            color=YELLOW
-        )
-        
+            start=gs_vector_display.get_right() + RIGHT * 0.4,
+            end=gs1_row_new.get_left() + LEFT * 0.1,
+            color=YELLOW)
+
         self.play(Write(gs_vector_display), GrowArrow(pointer))
         self.wait(2)
-        
+
         gs2_row_new = table.get_rows()[3]
         target_vector = create_gs_vector(-1, 1).next_to(gs2_row_new, LEFT, buff=1.5)
         target_pointer = Arrow(
-            start=target_vector.get_right() + RIGHT * 0.4, # Add gap on the left
-            end=gs2_row_new.get_left() + LEFT * 0.1,             # Add gap on the right
-            color=YELLOW
-        )
+            start=target_vector.get_right() + RIGHT * 0.4,
+            end=gs2_row_new.get_left() + LEFT * 0.1,
+            color=YELLOW)
 
         self.play(
             Transform(pointer, target_pointer),
-            Transform(gs_vector_display, target_vector)
-        )
+            Transform(gs_vector_display, target_vector))
         self.wait(3)
 
         # (This code follows immediately after the previous sequence ends)
 
         # --- NEW SEQUENCE: THREE PEOPLE (FINAL POLISHED VERSION) ---
-        
-        # 1. Clean up all elements from the previous scene
+
         all_table_elements = VGroup(case_label, table, h_col_data_cozy, pointer, gs_vector_display)
         self.play(FadeOut(all_table_elements))
         self.wait(0.5)
 
-        # 2. Pose the question
-        question_text = Text("You might wonder... what happens with three people?", font_size=36)
+        question_text = MarkupText(
+            'You might wonder... what happens with <span fgcolor="YELLOW">three</span> people?',
+            font_size=36)
+        
         self.play(Write(question_text))
         self.wait(2)
         self.play(FadeOut(question_text))
         self.wait(0.5)
 
-        # 3. Define helper functions with corrected, robust logic
         node_radius = 0.3
 
-        def create_person(name, position):
+        def create_person(name, position, name_above=False):
             circle = Circle(radius=node_radius, color=WHITE, fill_opacity=0.8)
-            text_name = Text(name, font_size=36).next_to(circle, DOWN, buff=0.2)
-            # Ensure names are drawn on top of lines
+
+            # Choose direction for name placement
+            direction = UP if name_above else DOWN
+            text_name = Text(name, font_size=36).next_to(circle, direction, buff=0.2)
+
             text_name.set_z_index(2)
-            # Add a background to prevent lines from cutting through the text
             text_name.add_background_rectangle(opacity=1, buff=0.05)
+
             return VGroup(circle, text_name).move_to(position)
+
 
         def create_connection(node1, node2, label_text):
             circle1 = node1.submobjects[0]
@@ -580,8 +655,8 @@ class Introduction(Scene):
             label.add_background_rectangle(opacity=1, buff=0.1)
             return VGroup(line, label)
 
-        # 4. Define the nodes in a triangle layout
-        alice_node = create_person("Alice", UP * 2.2)
+        # Define the nodes in a triangle layout
+        alice_node = create_person("Alice", UP * 2.2, name_above=True)
         bob_node = create_person("Bob", DOWN * 1.5 + LEFT * 2.5)
         charlie_node = create_person("Charlie", DOWN * 1.5 + RIGHT * 2.5)
         
@@ -589,7 +664,6 @@ class Introduction(Scene):
         self.play(Create(all_nodes))
         self.wait(1)
 
-        # 5. Define and animate the connections using the new, smooth technique
         connection_12 = create_connection(alice_node, bob_node, "J_{12}")
         connection_13 = create_connection(alice_node, charlie_node, "J_{13}")
         connection_23 = create_connection(bob_node, charlie_node, "J_{23}")
@@ -599,73 +673,73 @@ class Introduction(Scene):
                 Create(connection_12),
                 Create(connection_13),
                 Create(connection_23),
-                lag_ratio=0.6, # Start the next animation when the previous is 60% done
-                run_time=3     # The entire process takes 3 seconds
-            )
-        )
+                lag_ratio=0.6,
+                run_time=3 ))  
+         
         self.wait(3)
     
-        # (This code follows immediately after the previous sequence ends)
 
-        # (This code follows immediately after the previous sequence ends)
 
-        # --- NEW SEQUENCE: BUILDING THE HAMILTONIAN (DEFINITIVE CORRECTED VERSION) ---
+        # --- NEW SEQUENCE: BUILDING THE HAMILTONIAN  ---
 
         # 1. Group the entire system and move it to the left
         triangle_system = VGroup(all_nodes, connection_12, connection_13, connection_23)
         self.play(
-            triangle_system.animate.scale(0.8).to_edge(LEFT, buff=1.0)
-        )
+            triangle_system.animate.scale(0.8).to_edge(LEFT, buff=1.0))
         self.wait(0.5)
 
         # 2. Define the position for the formulas to appear on the right
         formula_pos = RIGHT * 3.0
 
         # 3. Create and animate the individual conflict formulas
-        
-        h12_formula = MathTex("H_{12}", "=", "s_1", "J_{12}", "s_2", tex_to_color_map={"H_{12}": H_COLOR, "J_{12}": J_COLOR}).scale(1.2).move_to(formula_pos)
+
+        h12_formula = MathTex("H_{12}", "=", "s_1", "J_{12}", "s_2", tex_to_color_map={"H_{12}": H_COLOR, "J_{12}": J_COLOR})
+        h13_formula = MathTex("H_{13}", "=", "s_1", "J_{13}", "s_3", tex_to_color_map={"H_{13}": H_COLOR, "J_{13}": J_COLOR})
+        h23_formula = MathTex("H_{23}", "=", "s_2", "J_{23}", "s_3", tex_to_color_map={"H_{23}": H_COLOR, "J_{23}": J_COLOR})
+
+        for f in [h12_formula, h13_formula, h23_formula]:
+            f.set_color_by_tex("=", WHITE)
+            f.scale(1.2)
+
+        h12_formula.move_to(formula_pos + UP * 1.0)
+        h13_formula.next_to(h12_formula, DOWN, buff=0.4)
+        h23_formula.next_to(h13_formula, DOWN, buff=0.4)
+
         self.play(Write(h12_formula))
-        self.wait(1.5)
-        self.play(FadeOut(h12_formula))
-
-        h13_formula = MathTex("H_{13}", "=", "s_1", "J_{13}", "s_3", tex_to_color_map={"H_{13}": H_COLOR, "J_{13}": J_COLOR}).scale(1.2).move_to(formula_pos)
+        self.wait(1)
         self.play(Write(h13_formula))
-        self.wait(1.5)
-        self.play(FadeOut(h13_formula))
-
-        h23_formula = MathTex("H_{23}", "=", "s_2", "J_{23}", "s_3", tex_to_color_map={"H_{23}": H_COLOR, "J_{23}": J_COLOR}).scale(1.2).move_to(formula_pos)
+        self.wait(1)
         self.play(Write(h23_formula))
         self.wait(2)
 
-        # 4. Reveal the total Hamiltonian in a two-line format with a title
+        # 4. Reveal the total Hamiltonian
         
-        # Create each part of the equation separately
-        h_total_label = MathTex("H", "=").set_color_by_tex("H", H_COLOR)
-        term1 = MathTex("s_1 J_{12} s_2").set_color_by_tex("J", J_COLOR)
-        plus_sign = MathTex("+").set_color(WHITE)
-        term2 = MathTex("s_1 J_{13} s_3").set_color_by_tex("J", J_COLOR)
-        term3 = MathTex("+ s_2 J_{23} s_3").set_color_by_tex("J", J_COLOR)
-        
-        # Arrange the first line
-        line1 = VGroup(h_total_label, term1, plus_sign, term2).arrange(RIGHT, buff=0.2)
-        
-        # Position the second line (term3) aligned under the start of term1
-        term3.next_to(line1, DOWN, buff=0.2, aligned_edge=LEFT)
-        term3.align_to(term1, LEFT)
-        
-        # Group the formula parts
-        full_formula = VGroup(line1, term3)
-        
-        # --- NEW --- Create the title and group it with the formula
+        h_total_label = MathTex("H").set_color(H_COLOR)
+        equal_sign = MathTex("=").set_color(WHITE)
+        term1 = MathTex("s_1", "J_{12}", "s_2")
+        term1.set_color_by_tex("J", J_COLOR)
+        term1.set_color_by_tex("s", WHITE) 
+        plus1 = MathTex("+").set_color(WHITE)
+        term2 = MathTex("s_1", "J_{13}", "s_3")
+        term2.set_color_by_tex("J", J_COLOR)
+        term2.set_color_by_tex("s", WHITE)
+        plus2 = MathTex("+").set_color(WHITE)
+        term3 = MathTex("s_2", "J_{23}", "s_3")
+        term3.set_color_by_tex("J", J_COLOR)
+        term3.set_color_by_tex("s", WHITE)
+
+        full_formula = VGroup(h_total_label, equal_sign, term1, plus1, term2, plus2, term3).arrange(RIGHT, buff=0.2)
+
         total_conflict_title = Text("Total Conflict", font_size=36)
-        n3_hamiltonian_group = VGroup(total_conflict_title, full_formula).arrange(DOWN, buff=0.4)
+        n3_hamiltonian_group = VGroup(total_conflict_title, full_formula).arrange(DOWN, buff=1.2)
         n3_hamiltonian_group.move_to(formula_pos)
 
-        self.play(ReplacementTransform(h23_formula, n3_hamiltonian_group))
-        self.wait(4)
-        # (This code follows immediately after the previous sequence ends)
+        all_h_formulas = VGroup(h12_formula, h13_formula, h23_formula)
+        self.play(ReplacementTransform(all_h_formulas, n3_hamiltonian_group))
 
-        # --- NEW SEQUENCE: GENERALIZING TO N=4 AND THE SUMMATION (REVISED) ---
+        self.wait(4)
+
+        # --- NEW SEQUENCE: GENERALIZING TO N=4 AND THE SUMMATION  ---
 
         # 1. Modify the connection helper to prevent label overlap
         def create_connection(node1, node2, label_text, label_pos_alpha=0.5):
@@ -678,23 +752,25 @@ class Introduction(Scene):
             line = Line(
                 p1 + unit_direction * node_radius, 
                 p2 - unit_direction * node_radius, 
-                z_index=-1, color=TEAL, stroke_width=3
-            )
+                z_index=-1, color=TEAL, stroke_width=3)
+            
             label = MathTex(label_text, color=J_COLOR).scale(1.2)
             label.move_to(line.point_from_proportion(label_pos_alpha))
             
             line_angle = line.get_angle()
             label.rotate(line_angle)
+
             if (PI / 2) < abs(line_angle) < (3 * PI / 2):
                 label.rotate(PI)
             label.add_background_rectangle(opacity=1, buff=0.1)
+
             return VGroup(line, label)
 
         # 2. Prepare the N=4 system and the new Hamiltonian layout
         
         # A. Create the N=4 graph nodes
-        alice_node_sq = create_person("Alice", UP * 2.0 + LEFT * 2.0)
-        bob_node_sq = create_person("Bob", UP * 2.0 + RIGHT * 2.0)
+        alice_node_sq = create_person("Alice", UP * 2.0 + LEFT * 2.0, name_above=True)
+        bob_node_sq = create_person("Bob", UP * 2.0 + RIGHT * 2.0, name_above=True)
         charlie_node_sq = create_person("Charlie", DOWN * 2.0 + LEFT * 2.0)
         diana_node = create_person("Diana", DOWN * 2.0 + RIGHT * 2.0)
         all_nodes_n4 = VGroup(alice_node_sq, bob_node_sq, charlie_node_sq, diana_node)
@@ -705,211 +781,259 @@ class Introduction(Scene):
             create_connection(charlie_node_sq, diana_node, "J_{34}"),
             create_connection(alice_node_sq, charlie_node_sq, "J_{13}"),
             create_connection(bob_node_sq, diana_node, "J_{24}"),
-            create_connection(alice_node_sq, diana_node, "J_{14}", label_pos_alpha=0.6), # Offset
-            create_connection(bob_node_sq, charlie_node_sq, "J_{23}", label_pos_alpha=0.4)  # Offset
+            create_connection(alice_node_sq, diana_node, "J_{14}", label_pos_alpha=0.7),
+            create_connection(bob_node_sq, charlie_node_sq, "J_{23}", label_pos_alpha=0.3)
         )
         n4_system = VGroup(all_nodes_n4, connections_n4).scale(0.8).to_edge(LEFT, buff=1.0)
         
         # C. Define the target N=4 Hamiltonian formula with its title
         total_conflict_title_n4 = Text("Total Conflict", font_size=36)
+        h_total_label = MathTex("H", "=").set_color_by_tex_to_color_map({
+            "H": H_COLOR,
+            "=": WHITE})
         
-        h_total_label = MathTex("H", "=").set_color_by_tex("H", H_COLOR)
-        terms = [MathTex(t) for t in ["s_1 J_{12} s_2", "+ s_1 J_{13} s_3", "+ s_2 J_{23} s_3", "+ s_1 J_{14} s_4", "+ s_2 J_{24} s_4", "+ s_3 J_{34} s_4"]]
-        for term in terms:
-            term.set_color_by_tex("J", J_COLOR)
+        raw_terms = [
+            "s_1 J_{12} s_2",
+            "s_1 J_{13} s_3",
+            "s_2 J_{23} s_3",
+            "s_1 J_{14} s_4",
+            "s_2 J_{24} s_4",
+            "s_3 J_{34} s_4"]
+        
+        terms = []
+
+        for i, t in enumerate(raw_terms):
+            if i > 0:
+                terms.append(MathTex("+").set_color(WHITE))
+
+            term = MathTex(
+                "s_1", "J_{12}", "s_2")
             
-        line1_n4 = VGroup(*terms[:3]).arrange(RIGHT, buff=0.15)
-        line2_n4 = VGroup(*terms[3:]).arrange(RIGHT, buff=0.15)
-        
+            parts = t.split()  
+            term = MathTex(*parts)  
+            term.set_color_by_tex("J", J_COLOR) 
+            term.set_color_by_tex("s", WHITE) 
+            terms.append(term)
+
+
+        line1_n4 = VGroup(*terms[:5]).arrange(RIGHT, buff=0.15)
+        line2_n4 = VGroup(*terms[5:]).arrange(RIGHT, buff=0.15)
+
         n4_formula_terms = VGroup(line1_n4, line2_n4).arrange(DOWN, buff=0.25, aligned_edge=LEFT)
-        n4_formula_body = VGroup(h_total_label, n4_formula_terms).arrange(RIGHT, buff=0.2)
-        
-        n4_hamiltonian_group = VGroup(total_conflict_title_n4, n4_formula_body).arrange(DOWN, buff=0.4)
+        n4_formula_body = VGroup(h_total_label, n4_formula_terms).arrange(RIGHT, buff=0.5)
+
+        n4_hamiltonian_group = VGroup(total_conflict_title_n4, n4_formula_body).arrange(DOWN, buff=1.2)
         n4_hamiltonian_group.scale(0.8).move_to(RIGHT * 3.0)
 
-        # 3. Animate the transformation from the N=3 system to the N=4 system
+
         all_n3_objects = VGroup(triangle_system, n3_hamiltonian_group)
         
         self.play(
             ReplacementTransform(all_n3_objects, VGroup(n4_system, n4_hamiltonian_group)),
-            run_time=2.5
-        )
+            run_time=2.5)
+        
         self.wait(3)
 
         # 4. Reveal the final, general formula
-        summation_formula = MathTex(r"H = \sum_{i<j} s_i J_{ij} s_j", font_size=60)
-        summation_formula.set_color_by_tex_to_color_map({
-            "H": H_COLOR,
-            "J_{ij}": J_COLOR
-        })
+        summation_formula = MathTex(
+                r"H = \sum_{i<j} s_i J_{ij} s_j",
+                font_size=60,
+                tex_to_color_map={
+                "H": H_COLOR,
+                "J_{ij}": J_COLOR,
+                "=": WHITE})
         summation_formula.move_to(n4_hamiltonian_group.get_center())
 
         self.play(
-            ReplacementTransform(n4_hamiltonian_group, summation_formula),
-            n4_system.animate.fade(0.7)
-        )
+            ReplacementTransform(n4_hamiltonian_group, summation_formula))
+        
         self.wait(5)
 
-        # (This code follows immediately after the previous sequence ends)
 
         # --- NEW SEQUENCE: THE MATRIX FORMULATION ---
 
-        # 1. Clean up the scene, leaving only the summation formula
         self.play(
             FadeOut(n4_system),
-            summation_formula.animate.move_to(ORIGIN).scale(1.2)
-        )
+            summation_formula.animate.move_to(ORIGIN).scale(1.1))
+        
         self.wait(1)
 
-        # 2. Define the components: s_i and J
         s_i_def = MathTex(r"s_i \in \{+1, -1\}", font_size=36)
-        j_matrix_def = MarkupText(
-            f'J is an <span color="{J_COLOR}">N × N</span> matrix of tensions', 
-            font_size=36
-        )
+        j_matrix_def = MathTex(
+            r"\mathbf{J}", 
+            r"\text{ is an }", 
+            r"\mathbf{N} \times \mathbf{N}", 
+            r"\text{ matrix of tensions}",
+            font_size=36)
+
+        j_matrix_def.set_color_by_tex(r"\mathbf{J}", J_COLOR)
+        j_matrix_def.set_color_by_tex(r"\mathbf{N} \times \mathbf{N}", J_COLOR)
         
-        definitions_group = VGroup(s_i_def, j_matrix_def).arrange(DOWN, buff=0.5)
-        definitions_group.next_to(summation_formula, DOWN, buff=1.0)
+        definitions_group = VGroup(s_i_def, j_matrix_def).arrange(DOWN, buff=0.4)
+        definitions_group.next_to(summation_formula, DOWN, buff=0.5)
         
         self.play(Write(definitions_group))
         self.wait(3)
 
         # 3. Introduce the symmetry argument
-        symmetry_text = MarkupText(
-            f'In the real world, the tension is mutual: <span color="{YELLOW}">J<sub>ij</sub> = J<sub>ji</sub></span>',
-            font_size=42
-        )
+        symmetry_text = MathTex(
+            r"\text{In the real world, the tension is mutual: }",  
+            r"J_{ij} = J_{ji}", 
+            font_size=42)
+
+        symmetry_text.set_color_by_tex(r"J_{ij}", YELLOW)
+        symmetry_text.set_color_by_tex(r"J_{ji}", YELLOW)
+
         symmetry_text.move_to(definitions_group)
 
         self.play(ReplacementTransform(definitions_group, symmetry_text))
         self.wait(3)
 
-        # 4. Rewrite the formula into its final matrix-ready form
-        final_formula = MathTex(r"H = \frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} s_i J_{ij} s_j", font_size=60)
-        final_formula.set_color_by_tex_to_color_map({
-            "H": H_COLOR,
-            "J_{ij}": J_COLOR
-        })
-        final_formula.move_to(summation_formula)
+        # 4. Rewrite the formula into its final matrix-ready form  ###
+        part_H = MathTex("H", font_size=60).set_color(H_COLOR)
+        part_eq = MathTex("=", font_size=60).set_color(WHITE)
+        part_frac = MathTex(r"\frac{1}{2}", font_size=60).set_color(WHITE)
+        part_sum = MathTex(r"\sum_{i=1}^{N}", font_size=60).set_color(WHITE)
+        part_sum2 = MathTex(r"\sum_{j=1}^{N}", font_size=60).set_color(WHITE)
+        part_si = MathTex("s_i", font_size=60).set_color(WHITE)
+        part_J = MathTex("J_{ij}", font_size=60).set_color(J_COLOR)
+        part_sj = MathTex("s_j", font_size=60).set_color(WHITE)
 
-        n_explanation = MarkupText(
-            "where N is the number of people (spins)", 
-            font_size=32
-        ).next_to(final_formula, DOWN, buff=0.7)
+        final_formula = VGroup(
+            part_H, part_eq, part_frac, part_sum, part_sum2, part_si, part_J, part_sj
+        ).arrange(RIGHT, buff=0.15)
+
+        n_explanation = MathTex(
+            r"\text{where }",
+            r"N",
+            r"\text{ is the number of people }",
+            r"(\text{spins})",
+            font_size=32)
+
+        n_explanation.set_color_by_tex("N", J_COLOR)
+        n_explanation.set_color_by_tex(r"(\text{spins})", H_COLOR)
+
+        n_explanation.next_to(final_formula, DOWN, buff=0.7)
 
         self.play(
             ReplacementTransform(summation_formula, final_formula),
             ReplacementTransform(symmetry_text, n_explanation),
-            run_time=2
-        )
+            run_time=2)
         self.wait(5)
 
-        # (This code follows immediately after the previous sequence ends)
-
-        # --- NEW SEQUENCE: THE MATRIX-VECTOR FORM (REVISED LAYOUT) ---
-
-        # 1. Clean up the explanation text
+        # --- NEW SEQUENCE: THE MATRIX-VECTOR FORM  ---
         self.play(FadeOut(n_explanation))
         self.wait(0.5)
 
-        # 2. Transform the summation formula into the compact matrix form
-        sTJs_formula = MathTex(r"H = \frac{1}{2} \mathbf{s}^T \mathbf{J} \mathbf{s}", font_size=60)
-        sTJs_formula.set_color_by_tex_to_color_map({
-            "H": H_COLOR,
-            r"\mathbf{J}": J_COLOR,
-            r"\mathbf{s}": PLUS_ONE_COLOR
-        })
-        sTJs_formula.move_to(final_formula)
+        # Transform the summation formula into the compact matrix form
+        sTJs_formula = MathTex(r"H = \frac{1}{2} \mathbf{s}^T \mathbf{J} \, \mathbf{s}", font_size = 60,
+            tex_to_color_map={
+                r"H": H_COLOR,
+                "=": WHITE,
+                r"\frac{1}{2}" : WHITE,
+                r"\mathbf{s}^T" : PLUS_ONE_COLOR,
+                r"\mathbf{J}" : J_COLOR,
+                r"\mathbf{s}" :  PLUS_ONE_COLOR})
+
 
         self.play(ReplacementTransform(final_formula, sTJs_formula))
         self.wait(2)
 
-        # 3. Animate the main formula moving up to become a "title" for the explanation
         self.play(
-            sTJs_formula.animate.scale(0.8).to_edge(UP, buff=1.0)
-        )
+            sTJs_formula.animate.scale(0.8).to_edge(UP, buff=1.0) )
         self.wait(0.5)
 
-        # 4. Show what s^T J s means visually in the newly cleared space
-        
-        # --- THIS IS THE FIX ---
         # A. Create the components for s^T, J, and s more robustly
+        # --- Matrix components ---
+
         s1_tex = MathTex("s_1")
         s2_tex = MathTex("s_2")
         dots_tex = MathTex(r"\dots")
         sN_tex = MathTex("s_N")
         s_T_vec = VGroup(
             MathTex("["), s1_tex, s2_tex, dots_tex, sN_tex, MathTex("]")
-        ).arrange(RIGHT, buff=0.2).set_color(PLUS_ONE_COLOR)
-        
+            ).arrange(RIGHT, buff=0.2).set_color(PLUS_ONE_COLOR)
+
         j_matrix = Matrix(
             [[r"J_{11}", r"J_{12}", r"\dots", r"J_{1N}"],
-             [r"J_{21}", r"J_{22}", r"\dots", r"J_{2N}"],
-             [r"\vdots", r"\vdots", r"\ddots", r"\vdots"],
-             [r"J_{N1}", r"J_{N2}", r"\dots", r"J_{NN}"]],
+            [r"J_{21}", r"J_{22}", r"\dots", r"J_{2N}"],
+            [r"\vdots", r"\vdots", r"\ddots", r"\vdots"],
+            [r"J_{N1}", r"J_{N2}", r"\dots", r"J_{NN}"]],
             h_buff=1.2, v_buff=0.7, bracket_h_buff=0.2
-        ).set_color(J_COLOR)
-        
+            ).set_color(J_COLOR)
+
         s_vec = Matrix(
             [[r"s_1"], [r"s_2"], [r"\vdots"], [r"s_N"]]
-        ).set_color(PLUS_ONE_COLOR)
-        
+            ).set_color(PLUS_ONE_COLOR)
+
         one_half = MathTex(r"\frac{1}{2}")
 
-        # B. Group and arrange them in the center of the screen
         expanded_form = VGroup(one_half, s_T_vec, j_matrix, s_vec).arrange(RIGHT, buff=0.25)
         expanded_form.scale(0.8).move_to(ORIGIN)
 
-        # C. Animate their appearance
         self.play(
             LaggedStart(
                 Write(one_half),
                 Write(s_T_vec),
                 Create(j_matrix),
                 Write(s_vec),
-                lag_ratio=0.5
-            )
-        )
+                lag_ratio=0.5))
+        
         self.wait(5)
 
-        # (This code follows immediately after the previous sequence ends)
+        # --- PART 1: Posing the Ground State Problem ---
 
-        # --- NEW SEQUENCE: THE COMPLEXITY OF FINDING THE GROUND STATE (POLISHED VERSION) ---
-
-        # --- PART 1: Posing the Problem (The "Brute-Force" Approach) ---
-
-        # 1. Cleanup and focus on the spin vector
         self.play(
-            FadeOut(one_half, j_matrix, s_vec), # Fade out everything except s^T vector and title
-            sTJs_formula.animate.fade(0.5)      # Dim the title
+            FadeOut(one_half),
+            FadeOut(j_matrix),
+            FadeOut(s_vec),
+            FadeOut(s_T_vec)
         )
-        # s_T_vec is the horizontal vector from the previous scene
-        
-        # FIX: Add the "s^T =" label to the vector
-        s_T_label = MathTex(r"\mathbf{s}^T =").scale(1.5).set_color(PLUS_ONE_COLOR)
-        labeled_s_vector = VGroup(s_T_label, s_T_vec).arrange(RIGHT, buff=0.25)
 
-        self.play(labeled_s_vector.animate.move_to(ORIGIN))
+        # Re-create a fresh s_T_vec for the spin vector and label it
+        labeled_s_vector = MathTex(
+            r"s^T", "=", "[\:", "s_1\:", "s_2\:", r"\cdots", "s_N", "\:]",
+            font_size=48)
+        labeled_s_vector.set_color_by_tex("s^T", BLUE)
+        labeled_s_vector.set_color_by_tex("=", WHITE)
+        labeled_s_vector.set_color_by_tex("s_1", BLUE)
+        labeled_s_vector.set_color_by_tex("s_2", BLUE)
+        labeled_s_vector.set_color_by_tex("s_N", BLUE)
+        labeled_s_vector.set_color_by_tex(r"\cdots", BLUE)
+
+
+        labeled_s_vector.move_to(ORIGIN)
+
+        self.play(FadeIn(labeled_s_vector))
         self.wait(1)
 
-        # 2. Pose the question
-        # FIX: Reduce font size and justify text to prevent overflow
-        question = MarkupText(
-            "To find the ground state, which configuration of spins minimizes H?",
+        question_text = MarkupText(
+            'To find the ground state, which configuration of spins '
+            '<span foreground="YELLOW">minimizes</span>',
             font_size=32,
-            justify=True
-        ).next_to(labeled_s_vector, UP, buff=1.0)
+            justify=True)
+
+        latex_H = MathTex("H", font_size=40, color="#90ee90")
+        question = VGroup(question_text, latex_H).arrange(RIGHT, buff=0.2)
+        question.next_to(labeled_s_vector, UP, buff=1.0)
+
+
         self.play(Write(question))
         self.wait(2)
 
-        # 3. Count the choices for each spin
-        s1 = s_T_vec.submobjects[1]
-        s2 = s_T_vec.submobjects[2]
-        sN = s_T_vec.submobjects[4]
+        s1 = labeled_s_vector.submobjects[3]
+        s2 = labeled_s_vector.submobjects[4]
+        sN = labeled_s_vector.submobjects[6]
 
-        # FIX: Increase buff for a slightly larger highlight box
-        highlight_box = SurroundingRectangle(s1, color=YELLOW, buff=0.15)
-        choices_text = MarkupText("2 choices (+1 or –1)", font_size=28).next_to(labeled_s_vector, DOWN, buff=0.7)
+        highlight_box = SurroundingRectangle(s1, color=YELLOW, buff=0.1, stroke_width=1.5)
+        choices_text = MathTex(
+            r"\text{2 choices } (+1 \text{ or } -1)",
+            font_size=34)
+        
+        choices_text.next_to(labeled_s_vector, DOWN, buff=0.7)
+        choices_text.shift(RIGHT * 0.75)
+
+
         self.play(Create(highlight_box), Write(choices_text))
         self.wait(1)
 
@@ -918,142 +1042,151 @@ class Introduction(Scene):
         self.play(highlight_box.animate.move_to(sN))
         self.wait(1)
 
-        # 4. Build the 2^N formula from the choices
-        multiplication_text = MathTex("2 \\times 2 \\times \\dots \\times 2", font_size=48)
-        n_times_label = MathTex("(N \\text{ times})", font_size=36).next_to(multiplication_text, DOWN)
+        # Build the 2^N formula from the choices
+        multiplication_text = MathTex(r"2 \times 2 \times \dots \times 2", font_size=38)
+        n_times_label = MathTex(r"(N\ \text{times})", font_size=36).next_to(multiplication_text, DOWN)
         multiplication_group = VGroup(multiplication_text, n_times_label).move_to(choices_text.get_center())
+
         
         self.play(ReplacementTransform(choices_text, multiplication_group))
         self.wait(2)
 
-        # FIX: Use MathTex with \text{} to ensure proper spacing
-        final_configs_formula = MathTex(r"\text{Total Configurations} = 2^N", font_size=48)
+        final_configs_formula = MathTex(
+            r'\text{Total Configurations}', "=", r"2^N",
+            font_size=48)
+
+        final_configs_formula.set_color(YELLOW)
+        final_configs_formula.set_color_by_tex("=", WHITE)
         final_configs_formula.move_to(multiplication_group.get_center())
-        
+
         self.play(
             ReplacementTransform(multiplication_group, final_configs_formula),
-            FadeOut(question, labeled_s_vector, highlight_box, sTJs_formula)
-        )
+            FadeOut(question, labeled_s_vector, highlight_box,sTJs_formula))
+        
         self.wait(1)
 
+        
         # --- PART 2: Visualizing Exponential Growth (Linear Scale) ---
 
         # 1. Set the stage for the graph
         self.play(final_configs_formula.animate.scale(0.7).to_edge(UP, buff=0.5))
         
-        # FIX: Use a linear scale, we will move the graph to keep the dot in view.
+        # linear scale, we will move the graph to keep the dot in view.
         ax = Axes(
-            x_range=[0, 32, 5],
-            y_range=[0, 40, 10], # Start with a small, manageable y-range
-            x_length=10,
-            y_length=5.5, # Make y-axis a bit shorter to give more vertical room
+            x_range=[0, 50, 5],
+            y_range=[0, 40, 10],
+            x_length=11.5,
+            y_length=5.5,
             axis_config={"color": BLUE},
-            x_axis_config={"numbers_to_include": np.arange(0, 31, 5)},
-        )
+            x_axis_config={"numbers_to_include": np.arange(0, 51, 5)},)
 
-        x_label = ax.get_x_axis_label("N \\text{ (Number of People)}")
+        x_label = ax.get_x_axis_label(r"N \text{ (Number of People)}", edge=DOWN, direction=DOWN)
+        x_label.next_to(ax.x_axis, DOWN, buff=0.4)
+
         y_label = ax.get_y_axis_label("\\text{Configurations}", edge=LEFT, direction=UP)
         y_label.next_to(ax.y_axis, UP, buff=0.2)
-        
-        # FIX: Group everything and scale it down slightly to fit well
+
         graph_group = VGroup(ax, x_label, y_label).scale(0.95).move_to(ORIGIN)
+
         self.play(Create(graph_group))
         self.wait(1)
 
         # 2. Plot the curve and animate its explosive growth
         tracker = ValueTracker(2)
-        
+
         # Create a graph that will be updated
         graph = ax.plot(lambda x: 2**x, color=WHITE, x_range=[0,2])
 
         # Create a dot that tracks the end of the graph
         dot = Dot(color=YELLOW).move_to(graph.get_end())
-        
+
         # Create a label for the dot
         label = always_redraw(lambda: 
             MathTex(f"2^{{{int(tracker.get_value())}}} = {int(2**tracker.get_value()):,}")
-            .scale(0.7).next_to(dot, UR, buff=0.1)
-        )
+            .scale(0.7).next_to(dot, UR, buff=0.1))
 
         self.play(Create(graph), FadeIn(dot), FadeIn(label))
         self.wait(1)
 
-        # Animate to N=5
-        self.play(
-            tracker.animate.set_value(5),
-            UpdateFromFunc(graph, lambda m: m.become(ax.plot(lambda x: 2**x, color=WHITE, x_range=[0, 5]))),
-            UpdateFromFunc(dot, lambda m: m.move_to(ax.c2p(5, 2**5))),
-            run_time=2
-        )
-        self.wait(1)
-        
-        # Animate to N=10, moving the graph down to keep the dot in frame
+        # Animate step-by-step growth from N=2 to N=5 (smooth increment)
+        for n in range(3, 6): 
+            self.play(
+                tracker.animate.set_value(n),
+                UpdateFromFunc(graph, lambda m: m.become(
+                    ax.plot(lambda x: 2**x, color=WHITE, x_range=[0, n]))
+                ),
+                UpdateFromFunc(dot, lambda m: m.move_to(ax.c2p(tracker.get_value(), 2**tracker.get_value()))),
+                run_time=0.8
+            )
+            self.wait(0.2)
+
+        # Continue original animations to N=10, moving the graph down to keep dot in frame
         self.play(
             tracker.animate.set_value(10),
             UpdateFromFunc(graph, lambda m: m.become(ax.plot(lambda x: 2**x, color=WHITE, x_range=[0, 10]))),
-            # Animate the dot and the entire graph group simultaneously
             dot.animate.move_to(ax.c2p(10, 2**10)),
             graph_group.animate.shift(DOWN * 3),
             run_time=3
         )
         self.wait(1)
-        
+
         # Animate to N=30, showing the massive jump
         self.play(
             tracker.animate.set_value(30),
-            # We don't need to draw the full graph, just move the dot to its final position
-            # while the graph scrolls away, creating a sense of immense scale.
-            dot.animate.move_to(ax.c2p(30, 2**30)), 
-            graph_group.animate.shift(DOWN * 20), # Move graph way off-screen
+            dot.animate.move_to(ax.c2p(30, 2**30)),
+            graph_group.animate.shift(DOWN * 20),
             run_time=4
         )
         self.wait(2)
 
-
         # --- PART 3: The "Impossible" Punchline ---
-        
-        # 1. Clean up the graph elements
+
         self.play(
-            FadeOut(graph_group, dot, label, graph, final_configs_formula)
-        )
+            FadeOut(graph_group, dot, label, graph, final_configs_formula))
         self.wait(0.5)
 
-        # 2. Show the N=300 case
-        n300_text = MathTex("N = 300", font_size=72)
+
+        # Show the N=300 case
+        n300_text = MathTex("N = 300", font_size=68)
         self.play(Write(n300_text))
         self.wait(1)
 
-        # 3. Create the punchline text
-        line1 = MarkupText(
-            "For just 300 people, the number of configurations (2<sup>300</sup>)...", 
-            font_size=36
-        )
+        # Create the punchline text
+        line1 = MathTex(
+            r"\text{For just }",
+            r"300", 
+            r"\text{ people, the number of configurations }", 
+            r"2^{300}", 
+            r"\text{,}",
+            font_size=45)
         
-        # --- THIS IS THE FIX ---
-        # Create each line of the final sentence as a separate object
-        line2a = MarkupText(
-            "is greater than the number of atoms", 
-            font_size=42, color=YELLOW
-        )
-        line2b = MarkupText(
-            "in the known universe.",
-            font_size=42, color=YELLOW
-        )
-        # Arrange them in a VGroup, which will center them by default
+        line1.set_color_by_tex("300", GREEN)
+
+        line2a = MathTex(
+            r"\text{is }",
+            r"\textbf{greater}",
+            r"\text{ than }",
+            r"\text{the number of atoms}",
+            font_size=45)
+        
+        line2a.set_color_by_tex("the number of atoms", YELLOW)
+        line2a.set_color_by_tex(r"\textbf{greater}", WHITE)
+        
+        line2b = MathTex(
+            r"\text{in the known universe!}",
+            font_size=38,
+            color=WHITE)
+
         line2_group = VGroup(line2a, line2b).arrange(DOWN, buff=0.2)
-        
-        # Group the entire punchline for positioning
         punchline = VGroup(line1, line2_group).arrange(DOWN, buff=0.5)
         
-        # 4. Animate the final text
         self.play(
-            n300_text.animate.next_to(punchline, UP, buff=0.7)
-        )
+            n300_text.animate.next_to(punchline, UP, buff=0.7))
         self.play(Write(line1))
         self.wait(1.5)
-        # Write the two-line group together
         self.play(Write(line2_group))
         self.wait(5)
+
 
 
 class LinkToNPHardness(Scene):
