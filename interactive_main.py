@@ -3741,22 +3741,18 @@ class ContinuousHDerivation(Scene):
         self.wait(6)
 # now in the next scene, we want to focus on this ordered J again. We want to show what this truly represents. We can show a table that has the name of richest people, and some other people that are poor. a ranked table. this rank is the index i, and we can show that again what interaction means. as an example, we can show number 1 and 2 have the interaction 1^d+2^d (with other constants) and the 1^d+1000^d, and so on (we'll show all of the possibilities for total of 4 people, two rich and two poor). and discuss how this can be extended to the other ranked systems. and show the obvious conclusion that such system turns into two opposing poles (such as class gap). we say each pole agrees with itself but disagrees with the other one. 
 
-# Add these imports at the top of your file
 from scipy.optimize import root
 import numpy as np
 
-# Add this class to your interactive_main.py file
 
-# --- CONFIGURATION (Consistent Colors) ---
 PLUS_ONE_COLOR = BLUE_D
 MINUS_ONE_COLOR = RED_D
 J_COLOR = YELLOW
 H_COLOR = GREEN
-Q_COLOR = YELLOW # For the 'q' ratio and domain walls
-D_COLOR = ORANGE # For the 'd' parameter
+Q_COLOR = YELLOW 
+D_COLOR = ORANGE 
 
 class TheGreatSchism(Scene):
-    # Helper function to solve the Master Equation for q given d
     def _get_q_for_d(self, d):
         def equation(q):
             # Clamp q to avoid math errors for d<0
@@ -3770,9 +3766,7 @@ class TheGreatSchism(Scene):
         return 0.5 # Default to 0.5 on failure
     def construct(self):
         # --- SEQUENCE 1: The J_ij Rule and the Ranked Society Analogy ---
-        
-        # (The code from the previous step goes here, I've kept it for context)
-        # 1. Start with the glowing formula
+
         interaction_formula = MathTex(r"J_{ij} \propto i^d + j^d", font_size=60)
         interaction_formula.set_color_by_tex_to_color_map({"J": J_COLOR, "d": D_COLOR})
         self.play(FadeIn(interaction_formula, scale=0.8))
@@ -3780,16 +3774,14 @@ class TheGreatSchism(Scene):
         self.wait(3)
         self.play(FadeOut(interaction_formula))
         self.wait(0.5)
-
-        # 2. Introduce the ranked table
+        
         table_data = [
             [r"\text{Rank (i)}", r"\text{Name}", r"\text{Status/Wealth}"],
             ["1", r"\text{Titan Corp.}", r"\$1.2 \text{ Trillion}"],
             ["2", r"\text{Innovate Inc.}", r"\$980 \text{ Billion}"],
             [r"\vdots", r"\vdots", r"\vdots"],
             ["999", r"\text{Alice}", r"\$52,000"],
-            ["1000", r"\text{Bob}", r"\$48,000"],
-        ]
+            ["1000", r"\text{Bob}", r"\$48,000"],]
         table = Table(
             table_data, include_outer_lines=True, line_config={"stroke_width": 2, "color": TEAL},
             h_buff=0.5, element_to_mobject=MathTex
@@ -3799,68 +3791,84 @@ class TheGreatSchism(Scene):
         self.wait(4)
         self.play(FadeOut(table))
         self.wait(0.5)
-
-        # 3. Helper function
+        
         def create_interaction_viz(rank1_str, rank2_str, is_high_tension=False):
-            node1 = VGroup(Circle(radius=0.4, color=WHITE), Text(rank1_str, font_size=24)).move_to(LEFT * 2)
-            node2 = VGroup(Circle(radius=0.4, color=WHITE), Text(rank2_str, font_size=24)).move_to(RIGHT * 2)
+            node1 = VGroup(
+                Circle(radius=0.4, color=WHITE), 
+                MathTex(rank1_str, font_size=28) 
+            ).move_to(LEFT * 2)
+            
+            node2 = VGroup(
+                Circle(radius=0.4, color=WHITE), 
+                MathTex(rank2_str, font_size=28) 
+            ).move_to(RIGHT * 2)
+            
             line_color = ORANGE if is_high_tension else TEAL
             line_stroke = 6 if is_high_tension else 3
             line = Line(node1.get_right(), node2.get_left(), color=line_color, stroke_width=line_stroke)
+            
             if is_high_tension:
                 line.add_updater(lambda m: m.set_color(random.choice([ORANGE, RED_A, YELLOW_B])))
+            
             j_label = MathTex(f"J_{{{rank1_str}, {rank2_str}}}", color=J_COLOR).next_to(line, UP, buff=0.2)
-            calc_label = MathTex(r"\propto", f"{rank1_str}^d + {rank2_str}^d").next_to(line, DOWN, buff=0.2)
+            
+            calc_label = MathTex(
+                r"\propto", 
+                f"{rank1_str}^d + {rank2_str}^d", 
+                font_size=35
+            ).next_to(line, DOWN, buff=0.2)
             calc_label.set_color_by_tex("d", D_COLOR)
+            
             return VGroup(node1, node2, line, j_label, calc_label)
 
-        # 4. Animate interactions
-        top_top_viz = create_interaction_viz("1", "2").shift(UP*2)
-        self.play(FadeIn(top_top_viz, shift=DOWN)); self.wait(3)
-        bottom_bottom_viz = create_interaction_viz("999", "1000")
-        self.play(FadeIn(bottom_bottom_viz, shift=DOWN)); self.wait(3)
-        top_bottom_viz = create_interaction_viz("1", "1000", is_high_tension=True).shift(DOWN*2)
-        self.play(FadeIn(top_bottom_viz, shift=DOWN)); self.wait(4)
+        top_top_viz = create_interaction_viz(r"1", r"2").shift(UP * 2)
+        self.play(FadeIn(top_top_viz, shift=DOWN))
+        self.wait(3)
 
-        # Cleanup for the next sequence
+        bottom_bottom_viz = create_interaction_viz(r"999", r"1000")
+        self.play(FadeIn(bottom_bottom_viz, shift=DOWN))
+        self.wait(3)
+
+        top_bottom_viz = create_interaction_viz(r"1", r"1000", is_high_tension=True).shift(DOWN * 2)
+        self.play(FadeIn(top_bottom_viz, shift=DOWN))
+        self.wait(4)
+
         self.play(FadeOut(top_top_viz, bottom_bottom_viz, top_bottom_viz))
         self.wait(1)
 
 
-        # --- SEQUENCE 2: Inevitable Polarization (REVISED & DYNAMIC) ---
+        # --- SEQUENCE 2: Inevitable Polarization ---
 
-        # 1. Bring back the Hamiltonian
-        hamiltonian = MathTex(r"H = \sum s_i J_{ij} s_j", font_size=60)
-        hamiltonian.set_color_by_tex_to_color_map({"H": H_COLOR, "J_{ij}": J_COLOR, "s_i": PLUS_ONE_COLOR, "s_j": MINUS_ONE_COLOR})
+        chunk1 = MathTex("H", font_size=60).set_color(H_COLOR)
+        chunk2 = MathTex("=", font_size=60).set_color(WHITE)
+        chunk3 = MathTex(r"\sum", font_size=60).set_color(WHITE)
+        chunk4 = MathTex(r"s_i", font_size=60).set_color(PLUS_ONE_COLOR)
+        chunk5 = MathTex(r"J_{ij}", font_size=60).set_color(J_COLOR)
+        chunk6 = MathTex(r"s_j", font_size=60).set_color(MINUS_ONE_COLOR)
+
+        hamiltonian = VGroup(chunk1, chunk2, chunk3, chunk4, chunk5, chunk6).arrange(RIGHT, buff=0.1)
+
         self.play(Write(hamiltonian))
-        self.wait(3) # "Now, remember the system's one and only goal..."
+        self.wait(3)
         self.play(FadeOut(hamiltonian))
-        
-        # 2. Set up the dynamic visualization elements
+
         total_width = 10
         viz_height = 4
         
-        d_tracker = ValueTracker(1.0) # Start with d=1
-
-        # This object is redrawn every frame based on d_tracker's value
+        d_tracker = ValueTracker(1.0) 
+        
         polarization_viz = always_redraw(lambda: 
             VGroup(
-                # Blue rectangle (width based on q)
                 Rectangle(
                     width=self._get_q_for_d(d_tracker.get_value()) * total_width,
                     height=viz_height,
-                    fill_color=PLUS_ONE_COLOR, fill_opacity=0.9, stroke_width=0
-                ),
-                # Red rectangle (width is the remainder)
+                    fill_color=PLUS_ONE_COLOR, fill_opacity=0.9, stroke_width=0),
                 Rectangle(
                     width=(1 - self._get_q_for_d(d_tracker.get_value())) * total_width,
                     height=viz_height,
-                    fill_color=MINUS_ONE_COLOR, fill_opacity=0.9, stroke_width=0
-                )
-            ).arrange(RIGHT, buff=0)
-        )
+                    fill_color=MINUS_ONE_COLOR, fill_opacity=0.9, stroke_width=0)
+            ).arrange(RIGHT, buff=0))
         
-        # 3. Set up the controller for 'd'
         d_dial = NumberLine(
             x_range=[-2, 6, 1],
             length=8,
@@ -3868,7 +3876,7 @@ class TheGreatSchism(Scene):
             label_direction=DOWN,
             include_numbers=True
         ).to_edge(DOWN, buff=1.5)
-        d_label = MathTex("d", color=D_COLOR).next_to(d_dial, LEFT)
+        d_label = MathTex("d", color=D_COLOR).next_to(d_dial, DOWN, buff= 0.3)
         
         pointer = Arrow(start=UP, end=DOWN, color=D_COLOR, max_tip_length_to_length_ratio=0.25).scale(0.5)
         pointer.add_updater(lambda m: m.next_to(d_dial.n2p(d_tracker.get_value()), UP))
@@ -3877,76 +3885,58 @@ class TheGreatSchism(Scene):
             MathTex(
                 f"q = {self._get_q_for_d(d_tracker.get_value()):.2f}",
                 font_size=42, color=Q_COLOR
-            ).next_to(polarization_viz, UP, buff=0.4)
-        )
-        
-        # 4. Animate the appearance of the visualization
+            ).next_to(polarization_viz, UP, buff=0.4))
+
         self.play(
             Create(polarization_viz),
             Create(d_dial),
             Write(d_label),
             GrowArrow(pointer),
-            Write(q_value_text)
-        )
+            Write(q_value_text))
         self.wait(2)
-
-        # 5. Animate the change in polarization as 'd' changes
+        
         self.play(
             d_tracker.animate.set_value(4.0),
-            run_time=3, rate_func=rate_functions.ease_in_out_sine
-        )
+            run_time=3, rate_func=rate_functions.ease_in_out_sine)
         self.wait(1)
         
         self.play(
             d_tracker.animate.set_value(-0.5),
-            run_time=3, rate_func=rate_functions.ease_in_out_sine
-        )
+            run_time=3, rate_func=rate_functions.ease_in_out_sine)
         self.wait(1)
         
         self.play(
             d_tracker.animate.set_value(1.0),
-            run_time=2, rate_func=rate_functions.ease_in_out_sine
-        )
+            run_time=2, rate_func=rate_functions.ease_in_out_sine)
         self.wait(2)
 
-        
-        # (This code replaces everything from the final d-tracker animation onwards)
-
-        # Animate the d-tracker to its final position
         self.play(
             d_tracker.animate.set_value(1.0),
-            run_time=2, rate_func=rate_functions.ease_in_out_sine
-        )
+            run_time=2, rate_func=rate_functions.ease_in_out_sine)
         self.wait(2)
 
-        # "Bake" the final state of the dynamic Mobjects by removing their updaters.
-        # Now they are just static objects and can be transformed safely.
         polarization_viz.clear_updaters()
         pointer.clear_updaters()
         q_value_text.clear_updaters()
         
-        # 6. Group the (now static) visualization, scale it, and move it up
         pol_group = VGroup(polarization_viz, d_dial, d_label, pointer, q_value_text)
         
         self.play(
-            pol_group.animate.scale(0.8).to_edge(UP, buff=1.0)
+            pol_group.animate.scale(0.7).to_edge(UP, buff=1.0)
         )
         self.wait(1)
 
-        # 7. Final text and conclusion
         schism_text = Text("The Great Schism", font_size=48, color=YELLOW)
         conclusion_text = Text("A direct consequence of the ranked interaction", font_size=32)
         
-        # Arrange the final text below the moved group
         final_text_group = VGroup(schism_text, conclusion_text).arrange(DOWN, buff=0.4)
-        final_text_group.next_to(pol_group, DOWN, buff=0.8)
+        final_text_group.next_to(pol_group, DOWN, buff=0.6)
 
         self.play(Write(schism_text))
         self.wait(1)
         self.play(Write(conclusion_text))
         self.wait(5)
-        
-        # Cleanup for the very final scene
+    
         self.play(FadeOut(pol_group, final_text_group))
         self.wait(1)
 
