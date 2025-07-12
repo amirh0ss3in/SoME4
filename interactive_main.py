@@ -1191,22 +1191,22 @@ class Introduction(Scene):
 
 class LinkToNPHardness(Scene):
     def construct(self):
-        # --- CONFIGURATION (from previous scene) ---
         PLUS_ONE_COLOR = BLUE_D
         MINUS_ONE_COLOR = RED_D
         TEXT_COLOR = YELLOW
         J_COLOR = YELLOW
         H_COLOR = GREEN
-        
+        SIGN_COLOR = WHITE
+        LIGHT_YELLOW = YELLOW_D
+
         # --- SEQUENCE 1: INTRO AND WHY WE CARE ---
         
         title_text = MarkupText(
             'Why is this <span color="YELLOW">Ising Problem</span> important?',
-            font_size=42
-        )
+            font_size=38)
         subtitle_text = MarkupText(
             "It's a <span color='TEAL'>universal puzzle</span> that describes many other hard problems.",
-            font_size=36
+            font_size=34
         ).next_to(title_text, DOWN, buff=0.4)
 
         self.play(Write(title_text))
@@ -1218,7 +1218,7 @@ class LinkToNPHardness(Scene):
 
         # --- SEQUENCE 2: THE NUMBER PARTITIONING PROBLEM ---
         
-        problem_title = Text("The Number Partitioning Problem", font_size=38).to_edge(UP)
+        problem_title = Text('The Number Partitioning Problem', font_size=38, color=PURPLE_A).to_edge(UP)
         self.play(Write(problem_title))
         self.wait(1)
 
@@ -1227,7 +1227,6 @@ class LinkToNPHardness(Scene):
         self.play(Write(numbers_tex))
         self.wait(2)
 
-        # --- FIX #1: Move numbers up to make space for the bins ---
         self.play(numbers_tex.animate.to_edge(UP, buff=2.0))
         self.wait(0.5)
 
@@ -1263,18 +1262,17 @@ class LinkToNPHardness(Scene):
 
         all_partition_elements = VGroup(
             problem_title, numbers_tex, bin_A, bin_B, bin_A_label,
-            bin_B_label, sum_A, sum_B, equals_sign, checkmark
-        )
+            bin_B_label, sum_A, sum_B, equals_sign, checkmark)
         self.play(FadeOut(all_partition_elements))
         self.wait(0.5)
 
-        numbers_tex_centered = VGroup(*[MathTex(str(n)) for n in numbers_list]).arrange(RIGHT, buff=1.5).scale(1.8)
+        numbers_tex_centered = VGroup(*[MathTex(str(n)) for n in numbers_list]).arrange(RIGHT, buff=1.5).scale(1.4)
         self.play(Write(numbers_tex_centered))
         
         spins_tex = VGroup(
             MathTex("+1", color=PLUS_ONE_COLOR), MathTex("-1", color=MINUS_ONE_COLOR),
             MathTex("-1", color=MINUS_ONE_COLOR), MathTex("+1", color=PLUS_ONE_COLOR)
-        ).scale(1.5)
+        ).scale(1.25)
 
         for i, spin in enumerate(spins_tex):
             spin.next_to(numbers_tex_centered[i], DOWN, buff=0.5)
@@ -1283,15 +1281,35 @@ class LinkToNPHardness(Scene):
         self.wait(3)
 
         calc_sum = MathTex(
-            r"(+1)\times 8", r"+ (-1)\times 7", r"+ (-1)\times 6", r"+ (+1)\times 5", r" = 0"
-        ).scale(1.2).next_to(numbers_tex_centered, DOWN, buff=1.5)
-        
+        r"(+1)\times 8", r"+", r"(-1)\times 7", r"+", r"(-1)\times 6", r"+", r"(+1)\times 5", r"=", r"0").scale(1.05).next_to(numbers_tex_centered, DOWN, buff=1.8)
+
+        calc_sum[1].set_color(YELLOW)  # first +
+        calc_sum[3].set_color(YELLOW)  # second +
+        calc_sum[5].set_color(YELLOW)  # third +
+        calc_sum[7].set_color(GREEN)   # equal sign
+
+
         self.play(LaggedStart(*[Write(part) for part in calc_sum], lag_ratio=0.5, run_time=3))
         self.wait(3)
 
-        goal_formula = MathTex(r"\text{Goal: Find } s_i \text{ such that } \sum_i s_i a_i = 0", font_size=48)
+        goal_formula = MathTex(
+            r"\text{Goal :}",
+            r"\text{ Find }",
+            r"s_i",
+            r"\text{ such that }",
+            r"\sum_i s_i a_i = 0",
+            font_size=48
+        )
+
+        goal_formula[0].set_color(YELLOW)  
+        goal_formula[1].set_color(WHITE) 
+        goal_formula[2].set_color(LIGHT_YELLOW)   
+        goal_formula[3].set_color(WHITE)
+        goal_formula[4].set_color(LIGHT_YELLOW)    
+   
+
         goal_formula.to_edge(DOWN)
-        
+
         self.play(ReplacementTransform(calc_sum, goal_formula))
         self.wait(3)
 
@@ -1301,44 +1319,79 @@ class LinkToNPHardness(Scene):
         self.play(FadeOut(all_prev_elements), goal_formula.animate.move_to(ORIGIN))
         self.wait(1)
 
-        squared_sum = MathTex(r"\left( \sum_i s_i a_i \right)^2", font_size=60)
+        squared_sum = MathTex(r"\left( \sum_i s_i a_i \right)^2", font_size=47, color= LIGHT_YELLOW)
         self.play(ReplacementTransform(goal_formula, squared_sum))
         self.wait(2)
 
-        # --- FIX #2: Re-layout the long formula to prevent clipping ---
         self.play(squared_sum.animate.to_edge(UP, buff=1.0))
         
-        expanded_term1 = MathTex(r"= \sum_i (a_i)^2", font_size=60)
-        expanded_term2 = MathTex(r"+ \sum_{i \neq j}", r"a_i a_j", r"s_i s_j", font_size=60)
-        expanded_form = VGroup(expanded_term1, expanded_term2).arrange(RIGHT, buff=0.2)
+        expanded_term0 = MathTex(r"=", font_size=47, color= H_COLOR)
+        expanded_term1 = MathTex(r"\sum_i (a_i)^2 ", font_size=47)
+        expanded_term1_plus = MathTex(r"+", font_size=47, color= H_COLOR)
+        expanded_term2 = MathTex(r"\sum_{i \neq j}", r"a_i a_j", r"s_i s_j", font_size =47)
+        expanded_form = VGroup(expanded_term0, expanded_term1, expanded_term1_plus, expanded_term2).arrange(RIGHT, buff=0.2)
         expanded_form.next_to(squared_sum, DOWN, buff=0.5)
 
         self.play(Write(expanded_form))
         self.wait(2)
 
-        const_part = expanded_form[0]
-        const_label = Text("CONSTANT", color=YELLOW, font_size=32).next_to(const_part, DOWN)
+        const_part = expanded_form[1]
+        const_label = Text("CONSTANT", color=YELLOW, font_size=28).next_to(const_part, DOWN)
         self.play(Write(const_label))
         self.wait(2)
 
-        variable_part = expanded_form[1]
+        variable_part = expanded_form[3]
         self.play(
-            FadeOut(const_part, const_label, squared_sum),
+            FadeOut(const_part, const_label, squared_sum, expanded_term1_plus, expanded_term0),
             variable_part.animate.move_to(ORIGIN).scale(0.9)
         )
-        self.wait(2)
-        
-        hamiltonian = MathTex(r"H = \sum_{i<j}", r"J_{ij}", r"s_i s_j", font_size=60)
-        hamiltonian.set_color_by_tex_to_color_map({"H": H_COLOR, "J_{ij}": J_COLOR})
+        self.wait(2)  
+
+        hamiltonian = MathTex(
+            r"H",
+            r"= \sum_{i<j}",
+            r"J_{ij}",
+            r"s_i s_j",
+            font_size=60
+        )
+
+        hamiltonian[0].set_color(H_COLOR)    
+        hamiltonian[1].set_color(WHITE)  
+        hamiltonian[2].set_color(J_COLOR)    
+        hamiltonian[3].set_color(WHITE) 
+
+
         hamiltonian.next_to(variable_part, UP, buff=1.0)
         self.play(Write(hamiltonian))
         self.wait(2)
 
-        rect1 = SurroundingRectangle(variable_part[1], color=ORANGE)
-        rect2 = SurroundingRectangle(hamiltonian[1], color=ORANGE)
+        rect1 = SurroundingRectangle(variable_part[1], color=ORANGE, buff=0.05)
+        rect1.set_stroke(width=1)
+        rect2 = SurroundingRectangle(hamiltonian[2], color=ORANGE, buff=0.05)
+        rect2.set_stroke(width=1)
+
         
-        equivalence_map = MathTex(r"J_{ij} = a_i a_j", color=YELLOW, font_size=60)
+        arrow = MathTex(r"\to", color=WHITE, font_size=60)
+
+        equivalence_map = MathTex(
+            r"J_{ij}", "=", r"a_i", r"a_j",
+            font_size=60,
+            tex_to_color_map={
+                "J_{ij}": J_COLOR,
+                "a_i": J_COLOR,
+                "a_j": J_COLOR,
+                "=": WHITE})
+
+        equivalence_map = VGroup(arrow, equivalence_map).arrange(RIGHT, buff=0.3)
         equivalence_map.next_to(variable_part, DOWN, buff=1.0)
+
+        equiv_box = SurroundingRectangle(equivalence_map, color=PURPLE_A, buff=0.3)
+
+        self.play(FadeIn(equivalence_map), Create(equiv_box))
+
+        equivalence_map = VGroup(arrow, equivalence_map).arrange(RIGHT, buff=0.3)
+        equivalence_map.next_to(variable_part, DOWN, buff=1.0)
+
 
         self.play(Create(rect1), Create(rect2))
         self.wait(1)
@@ -1346,25 +1399,23 @@ class LinkToNPHardness(Scene):
         self.wait(4)
 
         self.play(
-            FadeOut(variable_part, hamiltonian, rect1, rect2, equivalence_map)
-        )
+            FadeOut(variable_part, hamiltonian, rect1, rect2, equivalence_map, equiv_box))
         self.wait(0.5)
-        
-        # --- FIX #3: Adjust box width and text size to fit properly ---
+
         box1 = RoundedRectangle(height=1.5, width=4.5, corner_radius=0.2, color=TEAL)
-        # Reduce font size to prevent overflow
+   
         text1 = Text("Number Partitioning", font_size=32).move_to(box1.get_center()) 
         problem1 = VGroup(box1, text1)
 
         box2 = RoundedRectangle(height=1.5, width=4.5, corner_radius=0.2, color=H_COLOR)
-        # Reduce font size to prevent overflow
+
         text2 = Text("Ising Ground State", font_size=32).move_to(box2.get_center()) 
         problem2 = VGroup(box2, text2)
 
         problems = VGroup(problem1, problem2).arrange(RIGHT, buff=2.0)
         
         arrow = Arrow(problem1.get_right(), problem2.get_left(), buff=0.2, color=YELLOW)
-        arrow_text = Text("is equivalent to").next_to(arrow, 2.7*UP)
+        arrow_text = Text("is equivalent to").next_to(arrow, 3.8*UP)
 
         self.play(FadeIn(problem1))
         self.wait(1)
@@ -1373,47 +1424,35 @@ class LinkToNPHardness(Scene):
         self.play(ReplacementTransform(problem1.copy(), problem2))
         self.wait(5)
 
-        # --- NEW SEQUENCE: THE ROGUES' GALLERY (FINAL POLISHED VERSION) ---
 
-        # 1. Define a consistent helper function for creating problem boxes
+        # --- NEW SEQUENCE: THE ROGUES' GALLERY  ---
+
+        # Define a consistent helper function for creating problem boxes
         def create_problem_box(text, color, height=1.3, width=4.0):
             box = RoundedRectangle(height=height, width=width, corner_radius=0.2, color=color)
-            # This ensures the text always fits nicely inside the box
-            label = Text(text, font_size=36).scale_to_fit_width(width * 0.85)
+            label = Text(text, font_size=33).scale_to_fit_width(width * 0.85)
             label.move_to(box.get_center())
             return VGroup(box, label)
-
-        # 2. Define the FINAL state of all objects for the smooth transition
         
-        # A. The new, slightly larger central hub
         central_hub_final = create_problem_box("Ising Ground State", H_COLOR, height=1.5, width=5.2)
-        central_hub_final.move_to(ORIGIN) # Place the final hub at the center
+        central_hub_final.move_to(ORIGIN) 
 
-        # B. The final position and look of the Number Partitioning box
         np_box_final = create_problem_box("Number Partitioning", TEAL)
         np_box_final.move_to(central_hub_final.get_center() + DOWN * 2.2 + LEFT * 3.5)
 
-        # C. The final arrow connecting them, based on their final positions
         np_arrow_final = Arrow(
             np_box_final.get_top(), central_hub_final.get_corner(DL),
-            buff=0.2, color=YELLOW
-        )
+            buff=0.2, color=YELLOW)
 
-        # 3. Perform the main transition in ONE smooth animation
-        # We transform the old objects (problem1, problem2, arrow) into their new final versions.
-        # This handles moving, resizing, and reshaping all at once.
         self.play(
             FadeOut(arrow_text),
-            Transform(problem1, np_box_final),       # The old NP box becomes the new one
-            Transform(problem2, central_hub_final),  # The old Ising box becomes the new hub
-            Transform(arrow, np_arrow_final),        # The old arrow becomes the new, correctly angled one
-            run_time=2.0
-        )
+            Transform(problem1, np_box_final),     
+            Transform(problem2, central_hub_final),  
+            Transform(arrow, np_arrow_final),        
+            run_time=2.0)
+        
         self.wait(1)
 
-        # 4. Sequentially introduce the other problems, now that the scene is set
-        
-        # Get the final objects from the Transform to use as references
         central_hub = problem2
         np_box = problem1
         
@@ -1445,56 +1484,61 @@ class LinkToNPHardness(Scene):
         
         all_problems_group = VGroup(
             central_hub,
-            np_box, arrow, # The NP box and its arrow are already grouped from the transform
+            np_box, arrow, 
             max_cut_box, max_cut_arrow,
             tsp_box, tsp_arrow,
-            ksat_box, ksat_arrow
-        )
+            ksat_box, ksat_arrow)
         
-        # A final small adjustment to ensure the whole composition is perfectly centered
+
         self.play(all_problems_group.animate.move_to(ORIGIN))
         self.wait(5)
     
-        # (This code follows immediately after the final zoom-out of the problems group)
 
         # --- NEW SEQUENCE: THE ESSENCE OF THE ISING PROBLEM ---
 
-        # 1. Clean up the screen
         self.play(FadeOut(all_problems_group))
         self.wait(0.5)
 
-        # 2. Define the positions for the formula and the graph
         formula_pos = UP * 2.5
         graph_pos = DOWN * 0.5
 
-        # 3. Create and place the Hamiltonian formula first
-        hamiltonian_essence = MathTex(r"H = \sum_{i<j} J_{ij} s_i s_j", font_size=72)
-        hamiltonian_essence.set_color_by_tex_to_color_map({"H": H_COLOR, "J_{ij}": J_COLOR})
+        hamiltonian_essence = MathTex(
+            "H", "=", r"\sum_{i<j}", "J_{ij}", "s_i", "s_j",
+            font_size=72)
+
+        hamiltonian_essence.set_color_by_tex("H", H_COLOR)
+        hamiltonian_essence.set_color_by_tex("=", WHITE)
+        hamiltonian_essence.set_color_by_tex(r"\sum_{i<j}", WHITE)
+        hamiltonian_essence.set_color_by_tex("J_{ij}", J_COLOR)
+        hamiltonian_essence.set_color_by_tex("s_i", BLUE_D)
+        hamiltonian_essence.set_color_by_tex("s_j", RED)
+
+
         hamiltonian_essence.move_to(formula_pos)
+
         
         self.play(Write(hamiltonian_essence))
         self.wait(2)
 
-        # 4. Create a generic, complex-looking graph below the formula
         num_nodes = 20
         nodes = VGroup(*[
-            Dot(color=WHITE) for _ in range(num_nodes)
-        ])
-        # Arrange in a grid with some randomness
+            Dot(color=WHITE) for _ in range(num_nodes)])
+
         nodes.arrange_in_grid(4, 5, buff=1.2).scale(0.7)
         nodes.rotate(PI/6)
+        
         for node in nodes:
             node.shift(
                 (random.random() - 0.5) * 0.4 * RIGHT + 
-                (random.random() - 0.5) * 0.4 * UP
-            )
+                (random.random() - 0.5) * 0.4 * UP)
 
         lines = VGroup()
-        # Use itertools.combinations to avoid duplicate edges and self-loops
+
         all_possible_pairs = list(itertools.combinations(range(num_nodes), 2))
-        # Select a random subset of these pairs to form the edges
-        num_edges = int(num_nodes * 1.5) # A reasonable number of edges
+ 
+        num_edges = int(num_nodes * 1.5) 
         selected_pairs = random.sample(all_possible_pairs, num_edges)
+        
         for pair in selected_pairs:
             lines.add(Line(nodes[pair[0]].get_center(), nodes[pair[1]].get_center(), stroke_width=2, color=GRAY, z_index=-1))
         
@@ -1503,49 +1547,42 @@ class LinkToNPHardness(Scene):
         self.play(Create(graph_system))
         self.wait(2)
 
-        # 5. Animate the "flickering" search for the ground state
         flicker_duration = 0.15 # Slightly faster flicker
-        for _ in range(12): # Flicker a bit more
+        for _ in range(12): 
             new_colors = [random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR]) for _ in range(num_nodes)]
             self.play(
                 *[nodes[i].animate.set_color(new_colors[i]) for i in range(num_nodes)],
-                run_time=flicker_duration
-            )
+                run_time=flicker_duration)
         
         # Settle into a final state
         final_colors = [random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR]) for _ in range(num_nodes)]
         self.play(
             *[nodes[i].animate.set_color(final_colors[i]) for i in range(num_nodes)],
-            run_time=0.5
-        )
+            run_time=0.5 )
 
         # Highlight the minimized Hamiltonian
         self.play(Indicate(hamiltonian_essence, color=H_COLOR, scale_factor=1.1))
         self.wait(3)
 
-        # 6. Pose the final question as a hook
         self.play(FadeOut(graph_system), FadeOut(hamiltonian_essence))
         self.wait(0.5)
 
         final_question = MarkupText(
             'But if brute force is impossible... <span color="YELLOW">how do we find it?</span>',
-            font_size=42,
+            font_size=38,
             justify=True
-        ).move_to(ORIGIN) # Center the question
+        ).move_to(ORIGIN) 
         
         self.play(Write(final_question))
         self.wait(5)
     
-        # (This code follows immediately after the final question "how do we find it?")
 
         # --- NEW SEQUENCE: THE EDGE OF SOLVABILITY ---
 
         # 1. Answer the question with nuance (with text wrapping)
-        # Relies on Manim's default center alignment for MarkupText with newlines.
         answer_text = MarkupText(
             'The short answer: for a general, complex system...\n<span color="YELLOW">you don\'t.</span>',
-            font_size=42
-        )
+            font_size=38)
         self.play(ReplacementTransform(final_question, answer_text))
         self.wait(3)
 
@@ -1560,9 +1597,10 @@ class LinkToNPHardness(Scene):
         self.wait(0.5)
         
         # 2. Show the "Rare Exact Solutions"
-        title = Text("Rare Exact Solutions", font_size=42).to_edge(UP)
+        title = Text('Rare Exact Solutions', font_size=42, color=PURPLE_A).to_edge(UP)
         self.play(Write(title))
         self.wait(1)
+
 
         # A) 2D Planar Graph (Onsager's Solution)
         planar_label = Text("2D Planar Graphs", font_size=32).next_to(title, DOWN, buff=0.5)
