@@ -1682,11 +1682,17 @@ class LinkToNPHardness(Scene):
             self.wait(3)
 
 
+def J_order(N, d):
+    def f(i, j):
+        return ((i+1)/N)**d + ((j+1)/N)**d
+    mat = np.fromfunction(f, (N, N), dtype=float)
+    np.fill_diagonal(mat, 0)
+    return mat
+
 def calculate_min_H(J):
     N = len(J)
     # Generate all 2^(N-1) combinations for the first N-1 spins
     # The last spin is fixed to -1 to break the s -> -s symmetry
-    # This is okay because we only care about the structure of one of the two ground states.
     num_combos = 2**(N - 1)
     # Using a direct array approach to build combinations
     # This is more memory-intensive but conceptually clear for smaller N
@@ -1701,17 +1707,10 @@ def calculate_min_H(J):
     H = 0.5 * np.einsum('ij,jk,ik->i', combos, J, combos)
     min_H_index = np.argmin(H)
     return np.min(H), combos[min_H_index]
-def J_order(N, d):
-    def f(i, j):
-        return ((i+1)/N)**d + ((j+1)/N)**d
-    mat = np.fromfunction(f, (N, N), dtype=float)
-    np.fill_diagonal(mat, 0)
-    return mat
 
 
 class OrderedJ(Scene):
     def construct(self):
-        # --- CONFIGURATION ---
         PLUS_ONE_COLOR = BLUE_D
         MINUS_ONE_COLOR = RED_D
         J_COLOR = YELLOW
@@ -1720,9 +1719,19 @@ class OrderedJ(Scene):
         # --- SEQUENCE 1: THE SPARK OF AN IDEA ---
 
         # 1. Opening text about J_ij
-        title_text = Text("The Ising model is defined by its matrix of tensions,", font_size=36)
-        hamiltonian_formula = MathTex(r"H = \sum_{i<j} J_{ij} s_i s_j", font_size=48).next_to(title_text, DOWN, buff=0.4)
-        hamiltonian_formula.set_color_by_tex("J_{ij}", J_COLOR)
+        title_text = MarkupText("The Ising model is defined by its <span color='YELLOW'>Matrix Of Tensions</span>,",font_size=36)
+        hamiltonian_formula = MathTex(
+            "H", "=", r"\sum_{i<j}", "J_{ij}", "s_i", "s_j",
+            font_size=48
+        ).next_to(title_text, DOWN, buff=0.4)
+
+        hamiltonian_formula[0].set_color(H_COLOR)       # H
+        hamiltonian_formula[1].set_color(WHITE)         # =
+        hamiltonian_formula[2].set_color(WHITE)         # \sum_{i<j}
+        hamiltonian_formula[3].set_color(J_COLOR)       # J_{ij}
+        hamiltonian_formula[4].set_color(WHITE)         # s_i
+        hamiltonian_formula[5].set_color(WHITE)         # s_j
+
         
         opening_group = VGroup(title_text, hamiltonian_formula).move_to(ORIGIN)
         
@@ -1733,11 +1742,20 @@ class OrderedJ(Scene):
         self.wait(0.5)
 
         # 2. Pose the student's question
-        question = Text("A young physics student wondered...", font_size=36).to_edge(2*UP)
-        sub_question = Text(
-            "What if the interaction was not random,\nbut based on a simple, underlying rule?",
-            font_size=32, line_spacing=1.2
+        question = Text("A young physics student wondered...", font_size=36).to_edge(2 * UP)
+
+        sub_question = MarkupText(
+            "What if the interaction was <span color='YELLOW'>not</span> random,\n"
+            "but based on a simple, underlying rule?",
+            font_size=32,
+            line_spacing=1.2
         ).move_to(ORIGIN)
+        text_group = VGroup(question, sub_question)
+
+        text_group.arrange(DOWN, buff=1) 
+
+        text_group.shift(DOWN * 0.5) 
+
 
         self.play(Write(question))
         self.play(Write(sub_question))
@@ -1748,8 +1766,11 @@ class OrderedJ(Scene):
         # --- SEQUENCE 2: THE WALL OF EVIDENCE (d=1) ---
 
         # 1. Show the simple rule
-        rule_formula = MathTex("J_{ij} = i + j", font_size=48)
+        rule_formula = MathTex("J_{ij}", "=", "i", "+", "j",font_size=48)
+        rule_formula.set_color(J_COLOR) 
+        rule_formula[1].set_color(WHITE)
         rule_formula.to_edge(UP, buff=1.0)
+
         self.play(Write(rule_formula))
         self.wait(2)
 
@@ -1763,7 +1784,7 @@ class OrderedJ(Scene):
         # 3. Animate the "Wall of Evidence"
         dot_rows = VGroup()
         for n in range(10, 16):
-            # Create the label and the row of dots
+
             n_label = MathTex(f"N={n}", font_size=32)
             dot_row = VGroup(*[Dot(radius=0.1, color=WHITE) for _ in range(n)]).arrange(RIGHT, buff=0.25)
             
@@ -1790,25 +1811,29 @@ class OrderedJ(Scene):
 
 
         # --- SEQUENCE 3: GENERALIZING TO 'd' ---
+        general_rule = MathTex(r"J_{ij}", r"\propto", r"i^d", r"+", r"j^d",font_size=48).move_to(rule_formula)
 
-        # 1. Morph the formula to the general case
-        general_rule = MathTex(r"J_{ij} \propto i^d + j^d", font_size=48).move_to(rule_formula)
-        general_rule.set_color_by_tex("d", ORANGE)
+        general_rule.set_color(ORANGE)
+
+        general_rule[1].set_color(YELLOW)
+
         self.play(Transform(rule_formula, general_rule))
         self.wait(2)
 
         # 2. Set up the interactive demonstration
-        # Make the "wall of evidence" fully opaque again for the main demonstration
         self.play(dot_rows.animate.fade(0))
 
         # Create the dial for 'd' below the rows
         d_dial = NumberLine(
-            x_range=[-8, 8, 2], # Adjusted for better visual spacing of ticks
+            x_range=[-8, 8, 2],
             length=10,
             include_numbers=True,
-            label_direction=UP
+            label_direction=DOWN
         ).next_to(dot_rows, DOWN, buff=0.8)
-        d_label = MathTex("d", color=ORANGE).next_to(d_dial, DOWN)
+        d_label = MathTex("d", color=ORANGE)
+        d_label.next_to(d_dial, RIGHT, buff=0.4)
+        d_label.align_to(d_dial, UP)
+
         
         self.play(Create(d_dial), Write(d_label))
         self.wait(1)
@@ -1870,14 +1895,15 @@ class OrderedJ(Scene):
         self.wait(2)
 
 
+
 class ConvergingRatio(Scene):
     def construct(self):
-        # --- CONFIGURATION ---
         PLUS_ONE_COLOR = BLUE_D
         MINUS_ONE_COLOR = RED_D
         J_COLOR = YELLOW
         D_COLOR = ORANGE
         Q_COLOR = YELLOW
+        SIGN_COLOR = WHITE
 
         # Helper function for this scene
         def calculate_min_J_o(J):
@@ -1906,13 +1932,19 @@ class ConvergingRatio(Scene):
         self.wait(2)
 
         brace = Brace(s_vector[:M_rep], direction=UP, color=WHITE)
-        m_label = brace.get_text("M")
+        m_label = brace.get_tex(r"M")
         m_label.set_color(Q_COLOR).scale(1.2)
         
         self.play(GrowFromCenter(brace), Write(m_label))
         self.wait(2)
 
-        q_formula = MathTex("q", "=", "{M", r"\over", "N}").set_color_by_tex("q", Q_COLOR)
+        q_formula = MathTex("q", "=", "{M", r"\over", "N}")
+        q_formula.set_color_by_tex("q", Q_COLOR)
+        q_formula.set_color_by_tex("M", Q_COLOR)
+        q_formula.set_color_by_tex("=", SIGN_COLOR)
+        q_formula.set_color_by_tex(r"\over", SIGN_COLOR)
+        q_formula.set_color_by_tex("N", D_COLOR)
+
         q_formula.next_to(s_vector, DOWN, buff=0.8)
         q_formula.get_part_by_tex("M").set_color(Q_COLOR)
         
@@ -1925,16 +1957,19 @@ class ConvergingRatio(Scene):
         self.wait(0.5)
 
         ax = Axes(
-            x_range=[0, 105, 10], y_range=[0, 1, 0.1],
-            x_length=10, y_length=5.5, # y_length is slightly smaller
+            x_range=[0, 125, 10], y_range=[0, 1, 0.1],
+            x_length=12, y_length=6.5, # y_length is slightly smaller
             axis_config={"color": BLUE},
-            y_axis_config={"decimal_number_config": {"num_decimal_places": 1}}
-        )
-        x_label = ax.get_x_axis_label("N \\text{ (Number of Spins)}")
-        y_label = ax.get_y_axis_label("q = M/N", direction=UP).shift(LEFT*0.5)
+            y_axis_config={"decimal_number_config": {"num_decimal_places": 1}})
+        x_label = ax.get_x_axis_label("N \\text{ (Number of Spins)}").scale(0.8)
+        x_label.next_to(ax.x_axis, DOWN, buff=0.15)
+    
+
+        y_label = ax.get_y_axis_label(MathTex("q = {M \\over N}"), direction=UP).scale(0.9)
+        y_label.next_to(ax.y_axis, LEFT, buff=0.4).shift(UP * 0.1) 
         
         # Corrected: Scale and shift the entire graph down
-        graph = VGroup(ax, x_label, y_label).scale(0.9).shift(DOWN * 0.5)
+        graph = VGroup(ax, x_label, y_label).scale(0.8).shift(DOWN * 0.1)
 
         self.play(Create(graph))
         self.wait(1)
@@ -1951,7 +1986,12 @@ class ConvergingRatio(Scene):
                 q_data[d].append(M / n if n > 0 else 0)
 
         d1_color = GREEN
-        d1_label = MathTex("d=1", color=d1_color).next_to(ax.c2p(max_N_total, q_data[1.0][-1]), RIGHT)
+        d1_label = MathTex("d", "=", "1")
+        d1_label.set_color_by_tex("d", d1_color)
+        d1_label.set_color_by_tex("1", d1_color)
+        d1_label.set_color_by_tex("=", SIGN_COLOR)
+
+        d1_label.next_to(ax.c2p(max_N_total, q_data[1.0][-1]), RIGHT)
         self.play(Write(d1_label))
 
         d1_dots_brute = VGroup(*[
@@ -1963,21 +2003,22 @@ class ConvergingRatio(Scene):
         self.wait(1)
 
         wall = DashedLine(ax.c2p(max_N_brute, 0), ax.c2p(max_N_brute, 1), color=RED)
-        wall_label = Text("Brute-Force Wall", font_size=24, color=RED)
+        wall_label = Text('Brute-Force Wall', font_size=24, color=RED)
         wall_label.next_to(wall.get_top(), UP, buff=0.1)
         
         self.play(Create(wall), Write(wall_label))
         self.wait(2)
         
-        # This text will now fit comfortably
-        leap_of_faith_text = Text(
-            "Assume the two-cluster pattern always holds.",
-            font_size=30, color=YELLOW
-        ).to_edge(UP)
+        leap_of_faith_text = VGroup(
+            Text("Assume the", font_size=30, color=WHITE),
+            Text("two-cluster  pattern", font_size=30, color=LIGHT_YELLOW),
+            Text("always holds.", font_size=30, color=WHITE)
+        ).arrange(RIGHT, buff=0.3).to_edge(UP)
+
         self.play(Write(leap_of_faith_text))
         self.wait(2)
 
-        complexity_before = MathTex("2^N", r"\gg", "N").scale(1.5).next_to(leap_of_faith_text, DOWN, buff=0.5).to_edge(RIGHT, buff=1.5)
+        complexity_before = MathTex("2^N", r"\gg", "N").scale(1.3).next_to(leap_of_faith_text, DOWN, buff=0.5).to_edge(RIGHT, buff=1.5)
         complexity_after = MathTex("N").scale(1.5).move_to(complexity_before)
         
         self.play(Write(complexity_before))
@@ -1995,96 +2036,147 @@ class ConvergingRatio(Scene):
 
         d_colors = {-0.5: PINK, 4: PURPLE}
         for d in [-0.5, 4]:
-            label = MathTex(f"d={d}", color=d_colors[d]).next_to(ax.c2p(max_N_total, q_data[d][-1]), RIGHT)
-            dots = VGroup(*[Dot(ax.c2p(n, q_data[d][n-2]), color=d_colors[d], radius=0.05) for n in range(2, max_N_total + 1)])
+            label = MathTex("d", "=", str(d))
+            label.set_color_by_tex("d", d_colors[d])
+            label.set_color_by_tex(str(d), d_colors[d])
+            label.set_color_by_tex("=", SIGN_COLOR)
+
+            label.next_to(ax.c2p(max_N_total, q_data[d][-1]), RIGHT)
+
+            dots = VGroup(*[Dot(ax.c2p(n, q_data[d][n-2]), color=d_colors[d], radius=0.05)
+                for n in range(2, max_N_total + 1)])
             self.play(Write(label), Create(dots), run_time=1.5)
 
         self.wait(5)
 
 
+
 class GroundStateCalculation(Scene):
     def construct(self):
-        # --- CONFIGURATION ---
         PLUS_ONE_COLOR = BLUE_D
         MINUS_ONE_COLOR = RED_D
         J_COLOR = YELLOW
         D_COLOR = ORANGE
         PINK_TERM_COLOR = PINK
         H_COLOR = GREEN
+        Q_COLOR = YELLOW
+        SIGN_COLOR = WHITE
         # --- SEQUENCE 1: FORMALIZING THE INTERACTION MATRIX ---
         
-        recap_text = Text(
-            "So, having seen the ratio 'q' converge for any given 'd'...",
-            font_size=36
-        ).to_edge(UP)
-        proportional_formula = MathTex(r"J_{ij} \propto i^d + j^d", font_size=60)
-        proportional_formula.set_color_by_tex("d", D_COLOR)
-        proportional_formula.next_to(recap_text, DOWN, buff=0.5)
+        text1 = MarkupText("So, having seen the ratio ", font_size=32, color=WHITE)
+        q_latex = MathTex("\:q\:", font_size=46).set_color(YELLOW)
+        text2 = MarkupText(" converge for any given ", font_size=32, color=WHITE)
+        d_latex = MathTex("\:d:", font_size=46).set_color(YELLOW)
+
+        recap_text = VGroup(text1, q_latex, text2, d_latex).arrange(RIGHT, buff=0.15)
+
+        proportional_formula = MathTex("J_{ij}", r"\propto", "i^d", "+", "j^d", font_size=60)
+        proportional_formula[0].set_color(D_COLOR)
+        proportional_formula[1].set_color(J_COLOR)
+        proportional_formula[2].set_color(D_COLOR)
+        proportional_formula[3].set_color(D_COLOR)
+        proportional_formula[4].set_color(D_COLOR)
+
+        text_part = MarkupText(
+            "He formalized this idea, naming the interaction matrix ",
+            font_size=32,
+            color=WHITE)
+        latex_part = MathTex(r"J^{(N, d)}", font_size=46, color=J_COLOR)
+
+        formalization_text = VGroup(text_part, latex_part).arrange(RIGHT, buff=0.1)
+
+        formalization_text_2 = Text(
+            "adding some terms for convenience and rigor.", font_size=32)
+
+        text_block = VGroup(
+            recap_text, proportional_formula, formalization_text, formalization_text_2
+        ).arrange(DOWN, buff=0.5).move_to(ORIGIN)
+
         self.play(Write(recap_text))
         self.play(Write(proportional_formula))
-        self.wait(3)
-        formalization_text = MathTex(
-            r"\text{...he formalized this idea, naming the interaction matrix } J^{(N, d)},",
-            font_size=38
-        )
-        formalization_text.set_color_by_tex("J^{(N, d)}", J_COLOR)
-        formalization_text.next_to(proportional_formula, DOWN, buff=0.8)
-        formalization_text_2 = Text(
-            "adding some terms for convenience and rigor.",
-            font_size=32
-        ).next_to(formalization_text, DOWN)
-        self.play(Write(formalization_text), Write(formalization_text_2))
+        self.wait(0.5)
+        self.play(Write(formalization_text))
+        self.play(Write(formalization_text_2))
         self.wait(3)
 
-        # --- THIS IS THE FIX ---
-        # Build the formula in parts to reference the Kronecker delta term reliably
-        part1 = MathTex(r"J_{ij}^{(N, d)}", r"=", r"\frac{1}{N^d}", r"(i^d + j^d)")
-        part2 = MathTex(r"(1 - \delta_{ij})") # This is the part we want to reference
-        
-        # Color the parts
-        part1.set_color_by_tex_to_color_map({
-            "J_{ij}^{(N, d)}": J_COLOR, "N": WHITE, "d": D_COLOR, "i": BLUE, "j": GREEN
-        })
+        part1 = VGroup(
+            MathTex(r"J_{ij}^{(N, d)}", font_size=60, color=J_COLOR),
+            MathTex(r"=", font_size=60, color=WHITE),
+            MathTex(r"\frac{1}{N^d}", font_size=60, color=D_COLOR),
+            MathTex(r"(i^d + j^d)", font_size=60, color=H_COLOR)
+        ).arrange(RIGHT, buff=0.15)
+
+        part2 = MathTex(r"(1 - \delta_{ij})", font_size=60)
         part2.set_color_by_tex(r"\delta_{ij}", PINK_TERM_COLOR)
+        part2.set_color_by_tex("1", PINK_TERM_COLOR)
+        part2.set_color_by_tex("-", PINK_TERM_COLOR)
 
-        # Group and arrange them
-        formal_formula_group = VGroup(part1, part2).arrange(RIGHT, buff=0.2)
+        formal_formula_group = VGroup(part1, part2).arrange(RIGHT, buff=0.3)
+
         formal_formula_group.move_to(proportional_formula)
 
         self.play(
             FadeOut(recap_text, formalization_text, formalization_text_2),
-            Transform(proportional_formula, formal_formula_group)
-        )
+            Transform(proportional_formula, formal_formula_group))
         formula = proportional_formula # Keep the handle
         self.wait(2)
         
-        # Now, we can reliably reference part2
-        kronecker_term_part = formula.submobjects[1] # part2 is the second element of the VGroup
+        # Now, we can reliably reference part2, Getting the Kronecker delta term
+        kronecker_term_part = part2
+
+        kronecker_box = SurroundingRectangle(kronecker_term_part, color=SIGN_COLOR, buff=0.15)
         kronecker_explanation = Text(
-            "(This just means the diagonals are zero)",
+            "This just means the diagonals are zero",
             font_size=24, color=GRAY
-        ).next_to(kronecker_term_part, DOWN, buff=0.3)
-        
-        self.play(Indicate(kronecker_term_part, color=PINK_TERM_COLOR), Write(kronecker_explanation))
+        ).next_to(kronecker_box, DOWN, buff=0.4)
+
+        self.play(Create(kronecker_box), Write(kronecker_explanation))
         self.wait(3)
-        self.play(FadeOut(kronecker_explanation))
+
+        self.play(FadeOut(kronecker_box), FadeOut(kronecker_explanation))
+        self.play(proportional_formula.animate.to_edge(UP))
+
 
         # 4. Show the concrete example for N=5, d=2
-        example_label = MathTex("N=5, d=2", font_size=42).set_color_by_tex("d", D_COLOR)
+        example_label = MathTex("N", "=", "5", ",", "d", "=", "2", font_size=42)
+
+        example_label[0].set_color(D_COLOR)  
+        example_label[1].set_color(SIGN_COLOR)  
+        example_label[2].set_color(D_COLOR) 
+        example_label[3].set_color(SIGN_COLOR) 
+        example_label[4].set_color(D_COLOR) 
+        example_label[5].set_color(SIGN_COLOR) 
+        example_label[6].set_color(D_COLOR) 
+
+        # Matrix values
         matrix_values = [
-            [0, 5, 10, 17, 26], [5, 0, 13, 20, 29], [10, 13, 0, 25, 34],
-            [17, 20, 25, 0, 41], [26, 29, 34, 41, 0]
-        ]
-        j52_lhs = MathTex(r"J^{(5, 2)}", "=", r"\frac{1}{5^2}").set_color_by_tex("J", J_COLOR)
+            [0, 5, 10, 17, 26],
+            [5, 0, 13, 20, 29],
+            [10, 13, 0, 25, 34],
+            [17, 20, 25, 0, 41],
+            [26, 29, 34, 41, 0]]
+
+        # LHS expression
+        j52_lhs = MathTex(r"J^{(5, 2)}", "=", r"\frac{1}{5^2}")
+        j52_lhs.set_color_by_tex("J", J_COLOR)
+        j52_lhs.set_color_by_tex("=", SIGN_COLOR)
+
+        # Integer matrix
         j52_matrix = IntegerMatrix(matrix_values, h_buff=0.8)
-        
+
         example_matrix_group = VGroup(j52_lhs, j52_matrix).arrange(RIGHT, buff=0.3)
-        full_example = VGroup(example_label, example_matrix_group).arrange(DOWN, buff=0.4)
+        full_example = VGroup(example_matrix_group)
+
+        example_label.next_to(j52_matrix, UP, buff=0.4)
+
+        full_example.add(example_label)
+
         full_example.next_to(formula, DOWN, buff=0.5).scale(0.8)
 
         self.play(Write(example_label))
         self.play(Write(j52_lhs), Create(j52_matrix))
         self.wait(5)
+
 
         # --- SEQUENCE 2: POSTULATING THE GROUND STATE ---
 
@@ -2093,19 +2185,17 @@ class GroundStateCalculation(Scene):
 
         postulate_text = Text(
             "...with the postulated ground state of the following form:",
-            font_size=36
+            font_size=30
         ).next_to(formula, DOWN, buff=0.7)
         self.play(Write(postulate_text))
         self.wait(2)
 
-        # 3. Display the ground state vector s_g^T as specified
         s_g_label = MathTex(r"\pmb{s}_g^T", r"=", font_size=60)
         
         up_spin = MathTex("+1", color=PLUS_ONE_COLOR)
         down_spin = MathTex("-1", color=MINUS_ONE_COLOR)
         dots = MathTex(r"\dots").scale(1.2)
 
-        # Using your specified layout for a clearer "block" visual
         spin_vector_content = VGroup(
             up_spin,
             up_spin.copy(),
@@ -2116,7 +2206,7 @@ class GroundStateCalculation(Scene):
             down_spin.copy(),
             dots.copy(),
             down_spin
-        ).arrange(RIGHT, buff=0.3) # Slightly reduced buff for a denser look
+        ).arrange(RIGHT, buff=0.3)
 
         bracket_l = MathTex(r"\big[", font_size=120).next_to(spin_vector_content, LEFT, buff=0.2)
         bracket_r = MathTex(r"\big]", font_size=120).next_to(spin_vector_content, RIGHT, buff=0.2)
@@ -2129,22 +2219,19 @@ class GroundStateCalculation(Scene):
         self.play(Write(full_s_g_display))
         self.wait(2)
 
-        # 4. Add the brace for M underneath the first cluster
-        # The first cluster consists of the first 4 elements in spin_vector_content
         first_cluster = spin_vector_content[:4]
         
         m_brace = Brace(first_cluster, direction=DOWN, color=WHITE)
-        m_label = m_brace.get_text("M spins")
+        m_label = m_brace.get_tex(r"M\ \text{spins}")
+
         
         self.play(
             GrowFromCenter(m_brace),
-            Write(m_label)
-        )
+            Write(m_label))
         self.wait(4)
 
-        # --- SEQUENCE 3: Z2 SYMMETRY AND CONVENTION (ROBUST VERSION) ---
+        # --- SEQUENCE 3: Z2 SYMMETRY AND CONVENTION  ---
 
-        # 1. Show the compact Hamiltonian
         hamiltonian_compact = MathTex("H", "=", r"\frac{1}{2}", r"\pmb{s}^T", "J", r"\pmb{s}", font_size=48)
         hamiltonian_compact.next_to(full_s_g_display, DOWN, buff=1.0)
         hamiltonian_compact[0].set_color(H_COLOR)
@@ -2152,13 +2239,8 @@ class GroundStateCalculation(Scene):
         self.play(Write(hamiltonian_compact))
         self.wait(2)
 
-        # --- THE FOOLPROOF FIX ---
-        # Create BOTH the original and flipped targets right now.
-        
-        # Target 1: The original "+1 first" state
         original_spins_target = spin_vector_content.copy()
 
-        # Target 2: The flipped "-1 first" state
         flipped_spins_target = spin_vector_content.copy()
         for elem in flipped_spins_target:
             if isinstance(elem, MathTex) and elem.get_tex_string() != r"\dots":
@@ -2166,44 +2248,37 @@ class GroundStateCalculation(Scene):
                     elem.become(MathTex("-1", color=MINUS_ONE_COLOR).move_to(elem))
                 else:
                     elem.become(MathTex("+1", color=PLUS_ONE_COLOR).move_to(elem))
-        
-        # Create the flipped formula target
+
         hamiltonian_flipped = MathTex("H", "=", r"\frac{1}{2}", r"(-\pmb{s})^T", "J", r"(-\pmb{s})", font_size=48).move_to(hamiltonian_compact)
         hamiltonian_flipped[0].set_color(H_COLOR)
         hamiltonian_flipped[4].set_color(J_COLOR)
 
-        # 2. Animate the FIRST flip
-        # The on-screen 'spin_vector_content' becomes the flipped target.
         self.play(
             spin_vector_content.animate.become(flipped_spins_target),
             hamiltonian_compact.animate.become(hamiltonian_flipped),
-            run_time=2.0
-        )
+            run_time=2.0)
         self.wait(3)
 
-        # 3. State the convention and flip BACK
         self.play(FadeOut(hamiltonian_compact, m_brace, m_label))
-        convention_text = Text(
-            "In his notation, he chose the first cluster to be up (+1).",
-            font_size=32, color=YELLOW
-        ).next_to(full_s_g_display, DOWN, buff=0.8)
+        text1 = MarkupText("In his notation, he chose the first cluster to be up ", font_size=34, color=WHITE)
+        plus_one = MathTex(r"\:\mathbf{(+1)}", font_size=45, color=YELLOW)
+    
+        convention_text = VGroup(text1, plus_one).arrange(RIGHT, buff=0.05)
+        convention_text.next_to(full_s_g_display, DOWN, buff=0.8)
+
         self.play(Write(convention_text))
         self.wait(1)
 
-        # Animate the on-screen vector becoming the original target.
         self.play(
             spin_vector_content.animate.become(original_spins_target),
-            run_time=1.5
-        )
+            run_time=1.5)
         self.wait(5)
 
-        # 4. ONE. FINAL. FUCKING. FLIP.
-        # Animate the on-screen vector becoming the flipped target again.
         self.play(
             spin_vector_content.animate.become(flipped_spins_target),
-            run_time=2.0
-        )
+            run_time=2.0)
         self.wait(5)
+
 
 
 
@@ -2929,7 +3004,7 @@ class GroundStateCalculationPart2(Scene):
 from scipy.optimize import root
 
 class MasterEquationofGroundState(Scene):
-    # Constants
+
     N = 1000
     left = -2.4  # lower log exponent for symlog threshold
 
@@ -2951,9 +3026,9 @@ class MasterEquationofGroundState(Scene):
         return np.array(roots)
 
     def construct(self):
-        # 1) Title + equation
+  
         eq = MathTex(r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0", font_size=48).set_color(YELLOW_D)
-        title = Text("The Master Equation of Ground State", font_size=36, color=GOLD)
+        title = Text('"The Master Equation of Ground State"', font_size=36, color=WHITE)
         title.to_edge(UP, buff=1.5)
         self.add(eq, title)
         self.play(eq.animate.next_to(title, DOWN, buff=0.2))
@@ -2962,8 +3037,7 @@ class MasterEquationofGroundState(Scene):
         self.play(grouped_eq.animate.scale(0.8).to_corner(UP))
         self.wait(0.5)
 
-        # 2) Rebuild domain here so we can change expo at will:
-        expo = 4.1   # ← change this to any exponent (e.g. 4.5) and the plot will follow
+        expo = 4.1 
         r1 = np.logspace(self.left, expo, 2000)
         r2 = -np.logspace(-1e-6, self.left, 2000)
         domain = np.sort(np.concatenate((r2, r1)))
@@ -2991,11 +3065,8 @@ class MasterEquationofGroundState(Scene):
             y_axis_config={
                 "decimal_number_config": {"num_decimal_places": 1},
                 "numbers_to_include": np.arange(0.2, 1.1, 0.2),
-                "font_size": 24
-            },
-        )
+                "font_size": 24})
 
-        # manual ticks & labels (will now respect your dynamic d_max)
         all_ticks = [-1e0, -1e-1, -1e-2, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
         ticks = VGroup()
         labels = []
@@ -3004,13 +3075,12 @@ class MasterEquationofGroundState(Scene):
             ticks.add(Line(
                 axes.x_axis.n2p(xp),
                 axes.x_axis.n2p(xp) + DOWN*0.1,
-                color=TEAL, stroke_width=2
-            ))
+                color=TEAL, stroke_width=2))
             exp = int(np.log10(abs(v)))
             lab = MathTex(f'{"-" if v<0 else ""}10^{{{exp}}}', font_size=24)
             lab.next_to(axes.x_axis.n2p(xp), DOWN, buff=0.2)
             labels.append(lab)
-        # zero label
+
         if d_min < 0 < d_max:
             zp = symlog(0) - x_min_t
             zero_lab = MathTex("0", font_size=24).next_to(axes.x_axis.n2p(zp), DOWN, buff=0.2)
@@ -3022,15 +3092,16 @@ class MasterEquationofGroundState(Scene):
 
         axes.x_axis.add(*labels)
         axis_labels = axes.get_axis_labels(
-            x_label=MathTex("d", font_size=42),
-            y_label=MathTex("q", font_size=42)
-        )
+        x_label=MathTex("d", font_size=42),
+        y_label=MathTex("q", font_size=42))
 
-        # Group and shift entire graph down
+        axis_labels[0].shift(LEFT * 0.35)
+
+        axis_labels[1].shift(LEFT * 0.3 + UP * 0.2)
+
         axes_group = VGroup(axes, axis_labels, ticks).shift(DOWN * 0.5)
         self.play(Create(axes_group), run_time=2)
 
-        # 4) Compute and plot
         q_vals = self._MasterGroundState(domain)
         mask = (np.isfinite(q_vals))
         x_plot = symlog(domain[mask]) - x_min_t
@@ -3039,32 +3110,31 @@ class MasterEquationofGroundState(Scene):
             x_values=x_plot,
             y_values=q_vals[mask],
             line_color=WHITE,
-            add_vertex_dots=False
-        )
+            add_vertex_dots=False)
         self.play(Create(curve), run_time=3)
         self.wait(2)
 
-# --- CONFIGURATION (Consistent Colors) ---
+
 PLUS_ONE_COLOR = BLUE_D
 MINUS_ONE_COLOR = RED_D
+LIGHT_YELLOW = YELLOW_D
 J_COLOR = YELLOW
 H_COLOR = GREEN
-Q_COLOR = YELLOW # For the 'q' ratio and domain walls
-D_COLOR = ORANGE # For the 'd' parameter
-DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR, GREEN_D, ORANGE]
+Q_COLOR = YELLOW 
+D_COLOR = ORANGE 
+DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR]
 
 class TheLingeringDoubt(Scene):
     def construct(self):
         # --- SEQUENCE 1: The "Perfect" State ---
-        
-        # 1. Start with the problem statement
+ 
         problem_text = Text(
             "His entire Master Equation was built on a foundation...",
             font_size=36
         ).to_edge(UP, buff=1.0)
         
         assumption_text = Text(
-            "...a powerful, but unproven, assumption.",
+            "a powerful, but unproven, assumption.",
             font_size=36
         ).next_to(problem_text, DOWN)
         
@@ -3074,9 +3144,11 @@ class TheLingeringDoubt(Scene):
         self.wait(3)
 
         # 2. Show the clean, postulated ground state
-        postulate = Text("Postulate: The ground state is always two clusters.", font_size=40, color=Q_COLOR)
-        postulate.move_to(ORIGIN)
-        
+        postulate = MarkupText(
+            " <span foreground='{}'>Postulate:</span> The ground state is always <span foreground='{}'>two clusters.</span>"
+            .format(Q_COLOR, LIGHT_YELLOW),
+            font_size=40).move_to(ORIGIN)
+                
         self.play(
             FadeOut(problem_text, assumption_text),
             Write(postulate)
@@ -3109,23 +3181,23 @@ class TheLingeringDoubt(Scene):
 
         # 2. The chaos of possibilities
         for _ in range(5):
-            # Create a new random state each time
-            random_state_dots = s_g_perfect.copy()
-            # More clusters for visual effect
+            random_state_dots = VGroup(*[Dot(radius=0.15) for _ in range(12)])
+            random_state_dots.arrange(RIGHT, buff=0.3).move_to(s_g_perfect.get_center())
+
             breakpoints = sorted(random.sample(range(1, 12), k=random.randint(3, 5)))
-            
+
             color_idx = 0
             start_idx = 0
             for bp in breakpoints:
                 for i in range(start_idx, bp):
-                    random_state_dots[i].set_color(DOMAIN_COLORS[color_idx % len(DOMAIN_COLORS)])
+                    random_state_dots[i].set_color(DOMAIN_COLORS[color_idx % 2])
                 start_idx = bp
                 color_idx += 1
-            # Color the last segment
             for i in range(start_idx, 12):
-                random_state_dots[i].set_color(DOMAIN_COLORS[color_idx % len(DOMAIN_COLORS)])
-                
+                random_state_dots[i].set_color(DOMAIN_COLORS[color_idx % 2])
+
             self.play(Transform(s_g_perfect, random_state_dots), run_time=0.3)
+
         
         self.wait(2)
 
@@ -3136,8 +3208,7 @@ class TheLingeringDoubt(Scene):
         self.play(
             FadeOut(s_g_perfect),
             ReplacementTransform(what_if_text, final_question_mark),
-            run_time=1.5
-        )
+            run_time=1.5)
         self.wait(4)
 
 
