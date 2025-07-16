@@ -2,6 +2,7 @@ from manim import *
 import random
 import itertools
 
+
 class Introduction(Scene):
     def construct(self):
         node_radius = 0.3
@@ -986,9 +987,7 @@ class Introduction(Scene):
         self.play(
             FadeOut(one_half),
             FadeOut(j_matrix),
-            FadeOut(s_vec),
-            FadeOut(s_T_vec)
-        )
+            FadeOut(s_vec))
 
         # Re-create a fresh s_T_vec for the spin vector and label it
         labeled_s_vector = MathTex(
@@ -1004,7 +1003,7 @@ class Introduction(Scene):
 
         labeled_s_vector.move_to(ORIGIN)
 
-        self.play(FadeIn(labeled_s_vector))
+        self.play(ReplacementTransform(s_T_vec, labeled_s_vector))
         self.wait(1)
 
         question_text = MarkupText(
@@ -1014,7 +1013,8 @@ class Introduction(Scene):
             justify=True)
 
         latex_H = MathTex("H", font_size=40, color="#90ee90")
-        question = VGroup(question_text, latex_H).arrange(RIGHT, buff=0.2)
+        question_mark = MathTex("?", font_size = 40, color = WHITE)
+        question = VGroup(question_text, latex_H, question_mark).arrange(RIGHT, buff=0.2)
         question.next_to(labeled_s_vector, UP, buff=1.0)
 
 
@@ -1158,7 +1158,7 @@ class Introduction(Scene):
             r"\text{ people, the number of configurations }", 
             r"2^{300}", 
             r"\text{,}",
-            font_size=45)
+            font_size=50)
         
         line1.set_color_by_tex("300", GREEN)
 
@@ -1167,14 +1167,14 @@ class Introduction(Scene):
             r"\textbf{greater}",
             r"\text{ than }",
             r"\text{the number of atoms}",
-            font_size=45)
+            font_size=50)
         
         line2a.set_color_by_tex("the number of atoms", YELLOW)
         line2a.set_color_by_tex(r"\textbf{greater}", WHITE)
         
         line2b = MathTex(
             r"\text{in the known universe!}",
-            font_size=38,
+            font_size=50,
             color=WHITE)
 
         line2_group = VGroup(line2a, line2b).arrange(DOWN, buff=0.2)
@@ -1186,7 +1186,6 @@ class Introduction(Scene):
         self.wait(1.5)
         self.play(Write(line2_group))
         self.wait(5)
-
 
 
 class LinkToNPHardness(Scene):
