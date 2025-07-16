@@ -2054,11 +2054,12 @@ class GroundStateCalculation(Scene):
         # --- SEQUENCE 1: FORMALIZING THE INTERACTION MATRIX ---
         
         text1 = MarkupText("So, having seen the ratio ", font_size=32, color=WHITE)
-        q_latex = MathTex("\:q\:", font_size=46).set_color(YELLOW)
+        q_latex = MathTex("\:q\:", font_size=48).set_color(YELLOW)
         text2 = MarkupText(" converge for any given ", font_size=32, color=WHITE)
-        d_latex = MathTex("\:d:", font_size=46).set_color(YELLOW)
+        d_latex = MathTex("\:d", font_size=48).set_color(YELLOW)
+        question_mark = MathTex(":", font_size=48).set_color(WHITE)
 
-        recap_text = VGroup(text1, q_latex, text2, d_latex).arrange(RIGHT, buff=0.15)
+        recap_text = VGroup(text1, q_latex, text2, d_latex,question_mark).arrange(RIGHT, buff=0.15)
 
         proportional_formula = MathTex("J_{ij}", r"\propto", "i^d", "+", "j^d", font_size=60)
         proportional_formula[0].set_color(D_COLOR)
@@ -2090,7 +2091,7 @@ class GroundStateCalculation(Scene):
         self.wait(3)
 
         part1 = VGroup(
-            MathTex(r"J_{ij}^{(N, d)}", font_size=60, color=J_COLOR),
+            MathTex(r"J_{ij}^{(N, d)}", font_size=60, color=LIGHT_YELLOW),
             MathTex(r"=", font_size=60, color=WHITE),
             MathTex(r"\frac{1}{N^d}", font_size=60, color=D_COLOR),
             MathTex(r"(i^d + j^d)", font_size=60, color=H_COLOR)
@@ -2148,7 +2149,7 @@ class GroundStateCalculation(Scene):
 
         # LHS expression
         j52_lhs = MathTex(r"J^{(5, 2)}", "=", r"\frac{1}{5^2}")
-        j52_lhs.set_color_by_tex("J", J_COLOR)
+        j52_lhs.set_color_by_tex("J", LIGHT_YELLOW)
         j52_lhs.set_color_by_tex("=", SIGN_COLOR)
 
         # Integer matrix
@@ -2226,6 +2227,8 @@ class GroundStateCalculation(Scene):
         hamiltonian_compact.next_to(full_s_g_display, DOWN, buff=1.0)
         hamiltonian_compact[0].set_color(H_COLOR)
         hamiltonian_compact[4].set_color(J_COLOR)
+        hamiltonian_compact[3].set_color(PLUS_ONE_COLOR)
+        hamiltonian_compact[5].set_color(PLUS_ONE_COLOR)
         self.play(Write(hamiltonian_compact))
         self.wait(2)
 
@@ -2242,6 +2245,8 @@ class GroundStateCalculation(Scene):
         hamiltonian_flipped = MathTex("H", "=", r"\frac{1}{2}", r"(-\pmb{s})^T", "J", r"(-\pmb{s})", font_size=48).move_to(hamiltonian_compact)
         hamiltonian_flipped[0].set_color(H_COLOR)
         hamiltonian_flipped[4].set_color(J_COLOR)
+        hamiltonian_compact[3].set_color(MINUS_ONE_COLOR)
+        hamiltonian_compact[5].set_color(MINUS_ONE_COLOR)
 
         self.play(
             spin_vector_content.animate.become(flipped_spins_target),
@@ -2251,9 +2256,9 @@ class GroundStateCalculation(Scene):
 
         self.play(FadeOut(hamiltonian_compact, m_brace, m_label))
         text1 = MarkupText("In his notation, he chose the first cluster to be up ", font_size=34, color=WHITE)
-        plus_one = MathTex(r"\:\mathbf{(+1)}", font_size=45, color=YELLOW)
+        plus_one = MathTex(r"\mathbf{\;(+1)}", font_size=45, color=YELLOW)
     
-        convention_text = VGroup(text1, plus_one).arrange(RIGHT, buff=0.05)
+        convention_text = VGroup(text1, plus_one).arrange(RIGHT, buff=0.15)
         convention_text.next_to(full_s_g_display, DOWN, buff=0.8)
 
         self.play(Write(convention_text))
@@ -2268,7 +2273,6 @@ class GroundStateCalculation(Scene):
             spin_vector_content.animate.become(flipped_spins_target),
             run_time=2.0)
         self.wait(5)
-
 
 
 
