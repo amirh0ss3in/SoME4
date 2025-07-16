@@ -3255,7 +3255,7 @@ DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR]
 class TheLingeringDoubt(Scene):
     def construct(self):
         # --- SEQUENCE 1: The "Perfect" State ---
- 
+        
         problem_text = Text(
             "His entire Master Equation was built on a foundation...",
             font_size=36
@@ -3271,7 +3271,6 @@ class TheLingeringDoubt(Scene):
         self.play(Write(assumption_text))
         self.wait(3)
 
-        # 2. Show the clean, postulated ground state
         postulate = MarkupText(
             " <span foreground='{}'>Postulate:</span> The ground state is always <span foreground='{}'>two clusters.</span>"
             .format(Q_COLOR, LIGHT_YELLOW),
@@ -3279,8 +3278,7 @@ class TheLingeringDoubt(Scene):
                 
         self.play(
             FadeOut(problem_text, assumption_text),
-            Write(postulate)
-        )
+            Write(postulate))
         self.wait(2)
 
         s_g_perfect = VGroup(*[
@@ -3292,13 +3290,12 @@ class TheLingeringDoubt(Scene):
         self.wait(2)
         
         # --- SEQUENCE 2: The Doubt Creeps In ---
-        
-        # 1. The flicker of imperfection
+
         what_if_text = Text("But what if the true ground state was more complicated?", font_size=36)
         what_if_text.move_to(postulate.get_center())
 
         s_g_imperfect = s_g_perfect.copy()
-        s_g_imperfect[3].set_color(MINUS_ONE_COLOR) # The flipped spin
+        s_g_imperfect[3].set_color(MINUS_ONE_COLOR)
 
         self.play(
             ReplacementTransform(postulate, what_if_text),
@@ -3307,7 +3304,7 @@ class TheLingeringDoubt(Scene):
         )
         self.wait(3)
 
-        # 2. The chaos of possibilities
+        # The chaos of possibilities
         for _ in range(5):
             random_state_dots = VGroup(*[Dot(radius=0.15) for _ in range(12)])
             random_state_dots.arrange(RIGHT, buff=0.3).move_to(s_g_perfect.get_center())
@@ -3329,7 +3326,6 @@ class TheLingeringDoubt(Scene):
         
         self.wait(2)
 
-        # 3. The final question mark
         final_question_mark = MathTex("?", font_size=160, color=RED)
         final_question_mark.move_to(what_if_text.get_center())
         
@@ -3337,8 +3333,8 @@ class TheLingeringDoubt(Scene):
             FadeOut(s_g_perfect),
             ReplacementTransform(what_if_text, final_question_mark),
             run_time=1.5)
+        
         self.wait(4)
-
 
 # --- CONFIGURATION (Consistent Colors) ---
 PLUS_ONE_COLOR = BLUE_D
