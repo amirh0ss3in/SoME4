@@ -2275,7 +2275,6 @@ class GroundStateCalculation(Scene):
         self.wait(5)
 
 
-
 class NewPerspective(Scene):
     def construct(self):
         # --- CONFIGURATION ---
@@ -2283,111 +2282,129 @@ class NewPerspective(Scene):
         S_COLOR = BLUE_D
         H_COLOR = GREEN
         
-        # --- SEQUENCE 1: THE IDENTITY ---
+        
+        s_formula = MathTex(r"(\pmb{s}\pmb{s}^T)_{ij} = s_i s_j",
+            tex_to_color_map={
+                r"(\pmb{s}\pmb{s}^T)_{ij}": BLUE,
+                "=": WHITE,
+                "s_i s_j": BLUE})
+        
+        step1_group = VGroup(s_formula).arrange(RIGHT, buff=0.3)
+        step1_group.move_to(ORIGIN)
 
-        # 1. Start with the core identity to be proven, faded out
-        identity = MathTex(
-            r"\sum_{i,j} s_i J_{ij} s_j", "=", r"\sum_{i,j} \left[ J \odot (\pmb{s}\pmb{s}^T) \right]_{ij}",
-            font_size=60
-        )
-        identity.set_color_by_tex_to_color_map({
-            "J": J_COLOR,
-            "s": S_COLOR,
-            r"\odot": RED,
-            r"\pmb{s}": S_COLOR
-        })
-        identity.to_edge(1.1*UP)
-        
-        # 2. Step 1: Define the Outer Product
-        proof_step1_lhs = MathTex(r"(\pmb{s}\pmb{s}^T)_{ij}", font_size=48)
-        proof_step1_lhs.set_color_by_tex("s", S_COLOR)
-        
-        proof_step1_rhs = MathTex("=", "s_i s_j", font_size=48)
-        proof_step1_rhs.set_color_by_tex("s", S_COLOR)
+        # Step 1: Create markup part and latex part separately
+        step1_label_text = MarkupText('<span foreground="YELLOW">Step </span>', font_size=36)
+        step1_label_math = MathTex(r"\mathbf{1}", font_size=46).set_color(YELLOW)
+        step1_label_rest = MarkupText(": The Outer Product", font_size=36)
 
-        step1_group = VGroup(proof_step1_lhs, proof_step1_rhs).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
-        
-        step1_title = Text("Step 1: The Outer Product", font_size=32).next_to(step1_group, 0.9*UP, buff=0.5)
+        step1_title = VGroup(step1_label_text, step1_label_math, step1_label_rest).arrange(RIGHT, buff=0.15)
+
+        step1_title.next_to(step1_group, 0.9 * UP, buff=1)
+
+
         self.play(Write(step1_title))
         self.play(Write(step1_group))
         self.wait(3)
 
         # 3. Step 2: Define the Hadamard Product
-        self.play(step1_group.animate.shift(UP*2), FadeOut(step1_title))
+        self.play(step1_group.animate.shift(UP * 2.5), FadeOut(step1_title))
         
-        proof_step2_lhs = MathTex(r"\big[ J \odot (\pmb{s}\pmb{s}^T) \big]_{ij}", font_size=48)
-        proof_step2_lhs.set_color_by_tex_to_color_map({
-            "J": J_COLOR, "s": S_COLOR, r"\odot": RED
-        })
+        proof_step2_lhs = MathTex(
+            r"\big[", "J", r"\odot", r"\pmb{s}", r"\pmb{s}^T", r"\big]_{ij}",
+            font_size=48)
+
+        proof_step2_lhs[0].set_color(WHITE)          # "["
+        proof_step2_lhs[1].set_color(J_COLOR)        # "J"
+        proof_step2_lhs[2].set_color(WHITE)          # "\odot"
+        proof_step2_lhs[3].set_color(S_COLOR)        # "s"
+        proof_step2_lhs[4].set_color(S_COLOR)        # "s^T"
+        proof_step2_lhs[5].set_color(WHITE)          # "]_{ij}"
 
         proof_step2_rhs = MathTex("=", "J_{ij}", r"(\pmb{s}\pmb{s}^T)_{ij}", font_size=48)
         proof_step2_rhs.set_color_by_tex_to_color_map({
-            "J": J_COLOR, "s": S_COLOR
-        })
+            "J": J_COLOR, "s": S_COLOR})
 
         step2_group = VGroup(proof_step2_lhs, proof_step2_rhs).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
         
-        step2_title = Text("Step 2: The Hadamard Product", font_size=32).next_to(step2_group, 0.9*UP, buff=0.5)
+        
+        step2_label_text = MarkupText('<span foreground="YELLOW">Step </span>', font_size=32)
+        step2_label_math = MathTex(r"\mathbf{2}", font_size=46).set_color(YELLOW)
+        step2_label_rest = MarkupText(": The Hadamard Product", font_size=32)
+
+        step2_title = VGroup(step2_label_text, step2_label_math, step2_label_rest).arrange(RIGHT, buff=0.15)
+        
+        step2_title.next_to(step2_group, 0.9 * UP, buff=0.75)
+
         self.play(Write(step2_title))
         self.play(Write(step2_group))
         self.wait(3)
 
-        # 4. Substitute Step 1 into Step 2
-        # Highlight the term to be substituted
+        # Substitute Step 1 into Step 2
         term_to_sub = proof_step2_rhs.get_part_by_tex(r"(\pmb{s}\pmb{s}^T)_{ij}")
         self.play(Indicate(term_to_sub))
-        
-        # The result of the substitution
+
         proof_step3_rhs = MathTex("=","J_{ij}", "s_i s_j", font_size=48)
         proof_step3_rhs.set_color_by_tex_to_color_map({"J": J_COLOR, "s": S_COLOR})
         proof_step3_rhs.next_to(proof_step2_lhs, RIGHT, buff=0.3)
         
         self.play(
             FadeOut(step2_title),
-            Transform(proof_step2_rhs, proof_step3_rhs)
-        )
+            Transform(proof_step2_rhs, proof_step3_rhs))
         self.wait(3)
-        
-        # (The code for steps 1-4 remains the same)
-        # self.wait(3)
 
         # 5. Final Step: Sum over all elements
+        identity = MathTex(
+            r"\sum_{i,j}", r"s_i", r"J_{ij}", r"s_j", 
+            "=", 
+            r"\sum_{i,j}", r"\left[", r"J", r"\odot", r"\pmb{s}\pmb{s}^T", r"\right]", r"_{ij}",
+            font_size=50)
+
+        identity[0].set_color(WHITE)    # \sum_{i,j} lhs
+        identity[4].set_color(WHITE)    # "="
+        identity[5].set_color(WHITE)    # \sum_{i,j} rhs
+        identity[2].set_color(J_COLOR)  # J_{ij} lhs
+        identity[7].set_color(J_COLOR)  # J rhs
+        identity[1].set_color(S_COLOR)  # s_i lhs
+        identity[3].set_color(S_COLOR)  # s_j lhs
+        identity[9].set_color(S_COLOR)  # \pmb{s}\pmb{s}^T rhs
+        identity[8].set_color(WHITE)    # \odot
+        identity[6].set_color(WHITE)    # [
+        identity[10].set_color(WHITE)   # ]
+        identity[11].set_color(WHITE)   # _{ij} rhs
+        identity.to_edge(1.1 * UP)
         
-        # Group the result of the substitution
+        
         final_element_identity = VGroup(proof_step2_lhs, proof_step2_rhs)
         
-        # Create the final equation parts
-        sum_symbol_lhs = MathTex(r"\sum_{i,j}", font_size=64)
-        sum_symbol_rhs = MathTex(r"= \sum_{i,j}", font_size=64) # The equals sign is now part of the RHS
+        final_eq = MathTex(r"\sum_{i,j}", r"\big[", r"J", r"\odot", r"\pmb{s} \pmb{s}^T",
+                        r"\big]_{ij}", r"=",r"\sum_{i,j}", r"J_{ij}", r"s_i s_j", font_size = 48)  
         
-        # Build the final equation visually
-        # Target for the left part of the transform
-        final_lhs_target = VGroup(sum_symbol_lhs, proof_step2_lhs.copy()).arrange(RIGHT, buff=0.2)
-        
-        # Target for the right part of the transform
-        final_rhs_target = VGroup(sum_symbol_rhs, proof_step3_rhs[1:].copy()).arrange(RIGHT, buff=0.2)
-        
-        # Position the final equation in the center
-        final_eq = VGroup(final_lhs_target, final_rhs_target).arrange(RIGHT, buff=0.4).move_to(ORIGIN)
-        
-        # Animate the transformation precisely
+        final_eq[0].set_color(WHITE)
+        final_eq[1].set_color(WHITE)
+        final_eq[2].set_color(J_COLOR)
+        final_eq[3].set_color(WHITE)
+        final_eq[4].set_color(S_COLOR)
+        final_eq[5].set_color(WHITE)
+        final_eq[6].set_color(WHITE)
+        final_eq[7].set_color(WHITE)
+        final_eq[8].set_color(J_COLOR)
+        final_eq[9].set_color(S_COLOR)
+
+    
         self.play(
             FadeOut(step1_group),
-            Transform(final_element_identity[0], final_lhs_target),
-            Transform(final_element_identity[1], final_rhs_target)
-        )
+            Transform(final_element_identity, final_eq))
         self.wait(2)
 
-        # 6. Show the final identity clearly at the top
-        identity.set_color(YELLOW_E)
-        # The object `final_element_identity` now looks like `final_eq`
-        self.play(ReplacementTransform(final_element_identity, identity))
-        self.wait(5)
-
+     
+        self.play(
+            ReplacementTransform(final_element_identity,identity),# shift makes the fadeout more visible
+        )
+        self.wait(3)
 
         # --- NEW SEQUENCE: VISUALLY PROVING THE IDENTITY FOR s_g ---
         
-        # 1. Add the explanatory text (Corrected: with line break)
+        # 1. Add the explanatory text
         explanation_text = Text(
             "For our postulated ground state, let's visualize each side:",
             font_size=32, line_spacing=1.2
@@ -2398,57 +2415,85 @@ class NewPerspective(Scene):
         # 2. Define ALL components for the final layout first
         s_g = np.array([1, 1, 1, -1, -1])
         RED_COLOR = RED_D
-        # -- LHS Components --
+        S_COLOR = BLUE_D
+
+        # Prepare s_row_vals for column usage (string format "+1" or "-1")
         s_row_vals = [f"{v:+.0f}" for v in s_g]
-        s_row_mobs = [MathTex(v, color=S_COLOR if v=="+1" else RED_COLOR) for v in s_row_vals]
+
+        # --- Row spins ---
+        s_row_mobs = []
+        for v in s_g:
+            sign = "+" if v == 1 else "-"
+            sign_tex = MathTex(sign, font_size=48)
+            num_tex = MathTex("1", font_size=48)
+
+            color = S_COLOR if v == 1 else RED_COLOR
+            sign_tex.set_color(color)
+            num_tex.set_color(color)
+
+            combined = VGroup(sign_tex, num_tex).arrange(RIGHT, buff=0)
+            s_row_mobs.append(combined)
+
         s_row = MobjectMatrix([s_row_mobs], h_buff=0.8)
-        
-        s_col_vals = [[v] for v in s_row_vals]
-        s_col_mobs = [[MathTex(v[0], color=S_COLOR if v[0]=="+1" else RED_COLOR)] for v in s_col_vals]
+
+        # --- Column spins ---
+        s_col_mobs = []
+        for v in s_g:
+            sign = "+" if v == 1 else "-"
+            sign_tex = MathTex(sign, font_size=48)
+            num_tex = MathTex("1", font_size=48)
+
+            color = S_COLOR if v == 1 else RED_COLOR
+            sign_tex.set_color(color)
+            num_tex.set_color(color)
+
+            combined = VGroup(sign_tex, num_tex).arrange(RIGHT, buff=0)
+            s_col_mobs.append([combined]) 
+
         s_col = MobjectMatrix(s_col_mobs, v_buff=0.6)
 
-        # Corrected: Using proper subscripts for J
-        J_matrix_vals = [[f"J_{{{i}{j}}}" for j in range(1,6)] for i in range(1,6)]
+        J_matrix_vals = [[f"J_{{{i}{j}}}" for j in range(1, 6)] for i in range(1, 6)]
         J_matrix = Matrix(J_matrix_vals, h_buff=1.0, v_buff=0.7)
         J_matrix.elements.set_color(J_COLOR)
 
         lhs_group = VGroup(s_row, J_matrix, s_col).arrange(RIGHT, buff=0.2)
-        
-        # -- RHS Components --
+
+        # RHS Components
         ssT_matrix_vals = np.outer(s_g, s_g)
-        ssT_mobs = [
-            [MathTex(f"{val:+.0f}", color=S_COLOR if val == 1 else RED_COLOR) for val in row]
-            for row in ssT_matrix_vals
-        ]
+
+        ssT_mobs = []
+        for row in ssT_matrix_vals:
+            row_mobs = []
+            for val in row:
+                tex = MathTex(f"{val:+.0f}", font_size=48)
+                tex.set_color(S_COLOR if val == 1 else RED_COLOR)
+                tex.set(width=0.7)
+                row_mobs.append(tex)
+            ssT_mobs.append(row_mobs)
+
         ssT_matrix = MobjectMatrix(ssT_mobs, h_buff=0.8, v_buff=0.7)
 
         hadamard_symbol = MathTex(r"\odot", font_size=72)
         hadamard_group = VGroup(J_matrix.copy(), hadamard_symbol, ssT_matrix).arrange(RIGHT, buff=0.2)
-        
+
         sum_text = Text("Sum of all elements", font_size=36)
         sum_brackets = SurroundingRectangle(hadamard_group, buff=0.2, color=WHITE)
-        sum_text.next_to(sum_brackets, UP, buff=0.1)
+        sum_text.next_to(sum_brackets, UP, buff=0.3)
         rhs_group = VGroup(hadamard_group, sum_brackets, sum_text)
-        
-        # -- Equation Assembly --
+
         equals_sign = MathTex("=").scale(1.5)
-        
-        # This is the final layout group. We create it now to get the final positions.
+
         full_equation = VGroup(lhs_group, equals_sign, rhs_group).arrange(RIGHT, buff=0.3)
-        full_equation.scale(0.55).move_to(ORIGIN).shift(DOWN*0.5)
+        full_equation.scale(0.55).move_to(ORIGIN).shift(DOWN * 0.5)
+
 
         # 3. Animate smoothly into the final layout
-        
-        # First, show only the LHS in the center
         lhs_initial = lhs_group.copy().scale(1.8).next_to(explanation_text, DOWN, buff=0.3)
-        self.play(FadeOut(explanation_text), Write(lhs_initial))
+        self.play(FadeOut(explanation_text), Write(lhs_initial), FadeOut(identity))
         self.wait(3)
 
-        # Now, animate all parts moving to their final, pre-calculated positions
         self.play(
-            # The LHS moves from its initial spot to its final spot in the equation
             Transform(lhs_initial, full_equation[0]),
-            # The equals sign and RHS fade in at their final spots
             FadeIn(full_equation[1]),
             FadeIn(full_equation[2])
         )
@@ -2456,22 +2501,15 @@ class NewPerspective(Scene):
 
         # --- NEW SEQUENCE: EVALUATING THE HADAMARD PRODUCT (FRESH START) ---
 
-        # 1. Start by explicitly clearing the scene of old objects
-        # and adding back ONLY the ones we want to keep.
         self.play(
             FadeOut(lhs_group),
             FadeOut(equals_sign),
-            FadeOut(lhs_initial),
-        )
-        # rhs_group is the only thing left.
-        
-        # 2. Animate the RHS to the center
+            FadeOut(lhs_initial))
+
         self.play(
-            rhs_group.animate.move_to(ORIGIN).scale(1.2)
-        )
+            rhs_group.animate.move_to(ORIGIN).scale(1.2))
         self.wait(1)
 
-        # 3. Define the final, resulting matrix with corrected logic
         hadamard_group = rhs_group[0]
         sum_brackets = rhs_group[1]
         sum_text = rhs_group[2]
@@ -2500,12 +2538,9 @@ class NewPerspective(Scene):
         final_matrix = MobjectMatrix(result_mobs, h_buff=1.0, v_buff=0.7)
         final_matrix.move_to(hadamard_group)
 
-        # 4. Create a new, correctly sized bounding box for the final state
         new_sum_brackets = SurroundingRectangle(final_matrix, buff=0.2, color=WHITE)
-        new_sum_text = Text("Sum of all elements", font_size=24).next_to(new_sum_brackets, DOWN, buff=0.1)
+        new_sum_text = Text("Sum of all elements", font_size=24).next_to(new_sum_brackets, DOWN, buff=0.3)
 
-        # 5. Animate the transformation
-        # Use ReplacementTransform for robustness
         self.play(
             ReplacementTransform(hadamard_group, final_matrix),
             ReplacementTransform(sum_brackets, new_sum_brackets),
@@ -2513,32 +2548,36 @@ class NewPerspective(Scene):
         )
         self.wait(4)
 
-
-        # group them all
         final_group = VGroup(final_matrix, new_sum_brackets, new_sum_text)
         
-        # remove the identity formula and bring the matrix with the sum text and box into middle, then left of the panel:
         self.play(
-            FadeOut(identity),
-            final_group.animate.move_to(ORIGIN).scale(1.2)
-        )
+            final_group.animate.move_to(ORIGIN).scale(1.2) )
 
         self.wait(3)
 
-        # move left
         self.play(
-            final_group.animate.move_to(LEFT*2)
-        )
+            final_group.animate.move_to(LEFT*2))
 
         self.wait(1.5)
 
-        # add Mathtext : = \sum_{i,j \in \text{blue}} J_{ij} - \sum_{i,j \in \text{red}} J_{ij}
+        blue_sum_text = MathTex(
+            "=", r"\sum_{i,j \in \text{blue}}", r"J_{ij}",
+            font_size=36
+        )
+        blue_sum_text[0].set_color(WHITE)     # '=' sign white
+        blue_sum_text[1].set_color(S_COLOR)   # sum part blue (S_COLOR)
+        blue_sum_text[2].set_color(S_COLOR)   # J_{ij} part blue (or keep S_COLOR if you prefer)
 
-        blue_sum_text = MathTex(r"= \sum_{i,j \in \text{blue}}J_{ij}", font_size=36, color=S_COLOR)
-        red_sum_text = MathTex(r"- \sum_{i,j \in \text{red}}J_{ij}", font_size=36, color=RED_COLOR)
+        red_sum_text = MathTex(
+            "-", r"\sum_{i,j \in \text{red}}", r"J_{ij}",
+            font_size=36
+        )
+        red_sum_text[0].set_color(WHITE)      # '-' sign white
+        red_sum_text[1].set_color(RED_COLOR)  # sum part red
+        red_sum_text[2].set_color(RED_COLOR)  # J_{ij} part red (or keep RED_COLOR if you prefer)
+
         color_based_text = VGroup(blue_sum_text, red_sum_text).arrange(RIGHT, buff=0.5)
-        
-        # add next to brackets
+
         color_based_text.next_to(new_sum_brackets, RIGHT, buff=0.5)
 
         self.play(
@@ -2547,97 +2586,117 @@ class NewPerspective(Scene):
 
         self.wait(3)
         
-
-        # --- INTERMEDIATE STEP: CONNECTING COLOR TO INDICES ---
         D_COLOR = YELLOW_D
-        # 1. Fade out the matrix and identity, keep the color sum
         self.play(
             FadeOut(final_group),
-            # Center the color-based sum
-            color_based_text.animate.center()
-        )
+            color_based_text.animate.center())
         self.wait(1)
 
         s_g_vector_text = MathTex(
             r"\pmb{s}_g^T = [",
-            r"+1 \dots, +1", # Blue part
-            r",",             # Comma
-            r"-1 \dots, -1", # Red part
+            r"+1 \dots +1", # Blue part
+            r"\;-1 \dots -1", # Red part
             r"]",
-            font_size=42
-        )
-        
-        # Color the specific parts by index
+            font_size=42)
+
         s_g_vector_text[1].set_color(S_COLOR)
-        s_g_vector_text[3].set_color(RED_COLOR)
+        s_g_vector_text[2].set_color(RED_COLOR)
 
         s_g_vector_text.next_to(color_based_text, DOWN, buff=0.8)
 
-        # NOW, create the Brace objects targeting the colored parts
         blue_brace = Brace(s_g_vector_text[1], direction=DOWN, buff=0.1)
         blue_label = blue_brace.get_tex(r"M \text{ spins}")
-        blue_label.set_font_size(22)
+        blue_label.set_font_size(28)
 
-        red_brace = Brace(s_g_vector_text[3], direction=DOWN, buff=0.1)
+        red_brace = Brace(s_g_vector_text[2], direction=DOWN, buff=0.1)
         red_label = red_brace.get_tex(r"N-M \text{ spins}")
-        red_label.set_font_size(22)
+        red_label.set_font_size(28)
 
-        
-        # Group everything for the animation
         s_g_reminder = VGroup(s_g_vector_text, blue_brace, blue_label, red_brace, red_label)
-        # --- END OF FIX ---
+
 
         self.play(
             Write(s_g_vector_text),
             LaggedStart(
                 GrowFromCenter(blue_brace),
                 Write(blue_label),
-                lag_ratio=0.5
-            )
-        )
+                lag_ratio=0.5))
         self.play(
             LaggedStart(
                 GrowFromCenter(red_brace),
                 Write(red_label),
-                lag_ratio=0.5
-            )
-        )
+                lag_ratio=0.5))
         self.wait(3)
 
         # 3. Create and transform to the intermediate, index-based formula
-        # This formula is a bridge between the color names and the formal indices
         intermediate_formula = MathTex(
-            r"H = \sum_{1 \le i,j \le M} J_{ij} + \sum_{M+1 \le i,j \le N} J_{ij} - 2\sum_{\substack{i \le M \\ j > M}} J_{ij}",
-            font_size=40
-        )
-        intermediate_formula.set_color_by_tex("M", S_COLOR) # Use the spin color for M
+            r"H", 
+            r"\;=", 
+            r"\sum_{1 \le i,j \le M}", 
+            r"J_{ij}", 
+            r"\;+ ", 
+            r"\sum_{M+1 \le i,j \le N}", 
+            r"J_{ij} ",
+            r"\;- ", 
+            r" 2\; ",
+            r"\sum_{\substack{i \le M \\ j > M}}", 
+            r"J_{ij}",
+            font_size=40)
+        
+        intermediate_formula[0].set_color(H_COLOR)   # H
+        intermediate_formula[1].set_color(WHITE)     # =
+        intermediate_formula[2].set_color(WHITE)     # sum 1
+        intermediate_formula[3].set_color(J_COLOR)  # J_{ij}
+        intermediate_formula[4].set_color(WHITE)     # plus with spaces
+        intermediate_formula[5].set_color(WHITE)     # sum 2
+        intermediate_formula[6].set_color(J_COLOR) # J_{ij}
+        intermediate_formula[7].set_color(WHITE)     # minus with spaces
+        intermediate_formula[8].set_color(WHITE)     # 2
+        intermediate_formula[9].set_color(WHITE)     # sum 3
+        intermediate_formula[10].set_color(J_COLOR)# J_{ij}
 
-        # Animate the transition from the simple color sum to the more formal index sum
         self.play(
             ReplacementTransform(VGroup(color_based_text, s_g_reminder), intermediate_formula)
         )
         self.wait(4)
 
-        # --- FINAL TRANSFORMATION TO THE PAPER'S FORMULA ---
-
-        # 4. Create the final, paper-accurate formula from your paper
         final_hamiltonian_formula = MathTex(
-            r"""
-            H(M, N, d) = \frac{1}{2N^{d}} \Bigg\{ 
-            &\sum_{1 \le i \neq j \le M} (i^d+j^d) + \sum_{M+1 \le i \neq j \le N} (i^d+j^d) 
-            - &\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d) - \sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d) \Bigg\}
-            """,
-            font_size=26
-        )
-        # Color the key variables for clarity
-        final_hamiltonian_formula.set_color_by_tex_to_color_map({
-            "H": H_COLOR, "M": S_COLOR, "d": D_COLOR
-        })
+            r"H(M, N, d)",      # 0 - H_COLOR
+            r"=",               # 1 - SIGN_COLOR
+            r"\frac{1}{2N^{d}}",# 2 - D_COLOR
+            r"\Bigg\{",         # 3 - WHITE
+            r"\sum_{1 \le i \neq j \le M} (i^d+j^d)",  # 4 - D_COLOR
+            r"+",               # 5 -
+            r"\sum_{M+1 \le i \neq j \le N} (i^d+j^d)",# 6 - D_COLOR
+            r"-",               # 7 
+            r"\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d)",  # 8 - D_COLOR
+            r"-",               # 9 
+            r"\sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d)",  # 10 - D_COLOR
+            r"\Bigg\}",         # 11 
+            font_size=26)
+        
+        final_hamiltonian_formula[0].set_color(H_COLOR)
+        final_hamiltonian_formula[1].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[2].set_color(D_COLOR)
+        final_hamiltonian_formula[3].set_color(D_COLOR)
+        final_hamiltonian_formula[4].set_color(D_COLOR)
+        final_hamiltonian_formula[5].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[6].set_color(D_COLOR)
+        final_hamiltonian_formula[7].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[8].set_color(D_COLOR)
+        final_hamiltonian_formula[9].set_colo(SIGN_COLOR)
+        final_hamiltonian_formula[10].set_color(D_COLOR)
+        final_hamiltonian_formula[11].set_color(D_COLOR)
 
-        # 5. Animate the final transformation from the intermediate to the final formula
+        final_hamiltonian_formula[5].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[7].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[8].shift(RIGHT * 0.25) 
+        final_hamiltonian_formula[9].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[10].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[11].shift(RIGHT * 0.25)   
+
         self.play(
-            ReplacementTransform(intermediate_formula, final_hamiltonian_formula)
-        )
+            ReplacementTransform(intermediate_formula, final_hamiltonian_formula))
         self.wait(5)
 
 
@@ -2651,6 +2710,7 @@ def calculate_min_J_o(J):
     
     min_H_idx = np.argmin(H_l)
     return min_H_idx
+
 
 import math
 
