@@ -4265,6 +4265,7 @@ class TheGreatSchism(Scene):
 
 # Now, in the next and final scene, we reveal that this student is Amirhossein Rezaei, which is me! me! And reveal this picture (I'm the one on right, the middle is Alireza Rezaei, the left is Mahmood Hasani). (We don't mention Halataei as he's not in the picture.) and we also show a picture of the paper (https://arxiv.org/abs/2411.19604). I want it to be poetic, like the end of AlphaGo documentary. To show them how significant and incredible this is.
 
+
 class TheFinalReveal(Scene):
     def construct(self):
         # --- SEQUENCE 1: The Reveal of the Student ---
@@ -4284,21 +4285,14 @@ class TheFinalReveal(Scene):
             photo.set_height(6.0)
             self.play(FadeIn(photo, shift=DOWN)); self.wait(2)
 
-            # --- THIS IS THE FIX ---
-            # 1. Create the labels first, without positioning them.
-            # The narration order is Mahmood, Alireza, Amirhossein.
             mahmood_label = Text("Mahmood Hasani", font_size=28)
             alireza_label = Text("Alireza Rezaei", font_size=28)
             amir_label = Text("Amirhossein Rezaei", font_size=28)
 
-            # 2. Group them and arrange them relative to each other.
             names_group = VGroup(mahmood_label, alireza_label, amir_label)
-            names_group.arrange(RIGHT, buff=0.5) # Arrange them horizontally with a buffer
-
-            # 3. Now, position the entire group cleanly under the photo.
+            names_group.arrange(RIGHT, buff=0.5)
             names_group.next_to(photo, DOWN, buff=0.3)
             
-            # The LaggedStart animation will still work on the individual elements.
             self.play(LaggedStart(
                 Write(mahmood_label), Write(alireza_label), Write(amir_label),
                 lag_ratio=0.7, run_time=3
@@ -4309,11 +4303,10 @@ class TheFinalReveal(Scene):
             paper_image.move_to(photo.get_center())
 
             self.play(
-                FadeOut(name_text, names_group),
+                FadeOut( names_group),
                 FadeOut(photo, scale=0.95),
                 FadeIn(paper_image, scale=1.05),
-                run_time=2
-            )
+                run_time=2)
             self.wait(5)
             
             # --- SEQUENCE 3: The Coda ---
@@ -4323,7 +4316,7 @@ class TheFinalReveal(Scene):
             final_quote = Text(
                 "The journey of discovery only leads to new, more beautiful questions.",
                 font_size=32, slant=ITALIC, color=GRAY_B
-            ).next_to(final_photo, DOWN, buff=0.5)
+            ).next_to(final_photo, DOWN, buff=0.3)
 
             self.play(FadeIn(final_photo))
             self.wait(2)
