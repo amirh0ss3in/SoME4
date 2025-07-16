@@ -2714,82 +2714,147 @@ def calculate_min_J_o(J):
 
 import math
 
+
+
 class GroundStateCalculationPart2(Scene):
     def construct(self):
         # --- CONFIGURATION & FORMULAE SETUP ---
         S_COLOR = BLUE_D
         D_COLOR = YELLOW_D
         H_COLOR = GREEN
+        SIGN_COLOR = WHITE
+        LIGHE_YELLOW = YELLOW_E
         
-        # 1) Final H(M,N,d) formula
         final_hamiltonian_formula = MathTex(
-            r"""
-            H(M, N, d) = \frac{1}{2N^{d}} \Bigg\{
-            &\sum_{1 \le i \neq j \le M} (i^d+j^d)
-            + \sum_{M+1 \le i \neq j \le N} (i^d+j^d)
-            - \sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d)
-            - \sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d)
-            \Bigg\}
-            """,
-            font_size=26
-        ).set_color(YELLOW_D)
+            r"H(M, N, d)",      # 0
+            r"=",               # 1 
+            r"\frac{1}{2N^{d}}",# 2 
+            r"\Bigg\{",         # 3
+            r"\sum_{1 \le i \neq j \le M} (i^d+j^d)",  # 4
+            r"+",               # 5 -
+            r"\sum_{M+1 \le i \neq j \le N} (i^d+j^d)",# 6
+            r"-",               # 7 
+            r"\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d)",  # 8 -
+            r"-",               # 9 
+            r"\sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d)",  # 10 
+            r"\Bigg\}",         # 11 
+            font_size=26)
+
+        final_hamiltonian_formula[0].set_color(H_COLOR)
+        final_hamiltonian_formula[1].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[2].set_color(D_COLOR)
+        final_hamiltonian_formula[3].set_color(D_COLOR)
+        final_hamiltonian_formula[4].set_color(D_COLOR)
+        final_hamiltonian_formula[5].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[6].set_color(D_COLOR)
+        final_hamiltonian_formula[7].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[8].set_color(D_COLOR)
+        final_hamiltonian_formula[9].set_colo(SIGN_COLOR)
+        final_hamiltonian_formula[10].set_color(D_COLOR)
+        final_hamiltonian_formula[11].set_color(D_COLOR)
+
+        final_hamiltonian_formula[5].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[7].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[8].shift(RIGHT * 0.25) 
+        final_hamiltonian_formula[9].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[10].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[11].shift(RIGHT * 0.25)   
+
+
         self.add(final_hamiltonian_formula)
         self.wait()
         self.play(final_hamiltonian_formula.animate.to_edge(UP, buff=1))
         self.wait()
 
+
         # 2) Faulhaber’s formula
         faulhaber_formula = MathTex(
-            r"F^{d}(N)", r"=", r"\sum_{i=1}^N i^d",
-            r"=", r"\sum_{r=0}^{d} \frac{(-1)^r B_r}{d+1} \binom{d+1}{r} N^{d+1-r}",
+            r"F^{d}(N)",                                        
+            r"=",                                              
+            r"\sum_{i=1}^N i^d",                               
+            r"=",                                              
+            r"\sum_{r=0}^{d} \frac{(-1)^r B_r}{d+1} \binom{d+1}{r} N^{d+1-r}", 
             font_size=36
         ).move_to(ORIGIN)
+
+        faulhaber_formula.set_color(WHITE)
+
         faulhaber_formula.set_color_by_tex_to_color_map({
             r"F^{d}(N)": PURPLE_A,
-            r"\sum_{i=1}^N i^d": YELLOW_D,
-        })
-        # color the B_r in orange
+            r"\sum_{i=1}^N i^d": D_COLOR})
+
         faulhaber_formula[4][10:12].set_color(ORANGE)
+        faulhaber_formula[1].set_color(SIGN_COLOR)
+        faulhaber_formula[3].set_color(SIGN_COLOR)
+
         self.play(Write(faulhaber_formula))
         self.wait()
 
         # 3) Shortened H
         shorten_H = MathTex(
-            r"H(M,N,d) = \frac{1}{N^{d}}\bigl((N - 2M - 1)F^d(N) + (4M-2N)F^{d}(M)\bigr)",
+            r"H(M,N,d)",                          # 0 
+            r"=",                                 # 1 
+            r"\frac{1}{N^{d}}",                   # 2 
+            r"\bigl(",                            # 3 
+            r"(N - 2M - 1)F^d(N)",                # 4 
+            r"+",                                 # 5 
+            r"(4M - 2N)F^{d}(M)",                 # 6 
+            r"\bigr)",                            # 7 
             font_size=36
         ).move_to(ORIGIN)
+
+        shorten_H[0].set_color(H_COLOR)  
+        shorten_H[1].set_color(SIGN_COLOR)
+        shorten_H[3].set_color(H_COLOR)  
+        shorten_H[5].set_color(H_COLOR)  
+        shorten_H[7].set_color(H_COLOR)  
+
         self.play(
-            faulhaber_formula.animate.to_edge(UP, buff=1),
-            ReplacementTransform(final_hamiltonian_formula, shorten_H)
-        )
+            faulhaber_formula.animate.to_edge(UP, buff=1.25),
+            ReplacementTransform(final_hamiltonian_formula, shorten_H))
         self.wait()
 
         # 4) M_g formula
         M_g_formula = MathTex(
-            r"M_{g}^{(N, d)} = \arg\min_M H(M, N, d)",
-            font_size=32
+            r"M_{g}^{(N, d)}",      
+            r"=",                   
+            r"\arg\min_M",          
+            r"H(M, N, d)",         
+            font_size=36
         ).next_to(shorten_H, DOWN, buff=1)
+
+        M_g_formula.set_color(WHITE)
+
+        M_g_formula[0].set_color(D_COLOR)
+        M_g_formula[3].set_color(H_COLOR)
+        
         self.play(Write(M_g_formula))
         self.wait()
+
 
         # --- SEQUENCE 3: VISUALIZING THE MINIMIZATION OVER M ---
         formulas_panel = VGroup(faulhaber_formula, shorten_H, M_g_formula)
         self.play(formulas_panel.animate.scale(0.8).to_edge(LEFT, buff=0.5))
         self.wait()
 
-        # fixed parameters
         d_val = 1
         N0 = 10
 
-        # 2) Setup the viz area+box (never changes)
+        # 2) Setup the viz area+box 
         viz_area = Square(side_length=3.5, color=None)
         viz_area.to_edge(RIGHT, buff=1.0)
         viz_box  = SurroundingRectangle(viz_area, color=WHITE, buff=0.2)
-        viz_box_tex = MathTex(fr"J^{{(N = {N0}, d = {d_val})}}", font_size=36).next_to(viz_box, UP, buff=0.2)
+        viz_box_tex = MathTex(
+            fr"J^{{(N = {N0}, d = {d_val})}}",
+            font_size=36
+        ).next_to(viz_box, UP, buff=0.2)
+
+        viz_box_tex.set_color(PURPLE_A)
+
         self.add(viz_area)
         self.play(Write(viz_box_tex), 
                   Create(viz_box))
-
+        
         # helper to build & return a VGroup of dots for a given N
         def build_dots(N):
             matrix = J_order(N, d=d_val)
@@ -2843,23 +2908,26 @@ class GroundStateCalculationPart2(Scene):
                 MathTex(
                     fr"J^{{(N = {N0}, d = {d_val})}} \odot (\mathbf{{s}}\mathbf{{s}}^T)",
                     font_size=36
-                ).next_to(viz_box, UP, buff=0.2),
+                ).set_color(PURPLE_A).next_to(viz_box, UP, buff=0.2)
             ),
-            run_time=3
-        )
+            run_time=3)
+
         self.wait()
         N_grid = N0
         curly_bracket   = Brace(viz_box, DOWN, buff=0.1)
-        curly_bracket_tex = always_redraw(lambda: MathTex(
-            fr"\displaystyle H\bigl(M = {math.ceil(M_g_tracker.get_value())}, "
-            fr"N = {N_grid}, d = {d_val}\bigr)",
-            font_size=32
-        ).next_to(curly_bracket, DOWN, buff=0.2))
+        curly_bracket_tex = always_redraw(lambda: VGroup(
+            MathTex("H", font_size=32).set_color(H_COLOR),
+            MathTex(
+                fr"\bigl(M = {math.ceil(M_g_tracker.get_value())}, "
+                fr"N = {N_grid}, d = {d_val}\bigr)",
+                font_size=32
+            )).arrange(buff=0.05).next_to(curly_bracket, DOWN, buff=0.2))
+
 
         self.play(FadeIn(curly_bracket), Write(curly_bracket_tex))
         self.wait()
 
-        # attach a *single* updater to recolor via ceil(tracker)
+        # attach a single updater to recolor via ceil(tracker)
         def updater(group):
             M_val = M_g_tracker.get_value()
             for dot, (i, j) in zip(group, index_list):
@@ -2894,8 +2962,7 @@ class GroundStateCalculationPart2(Scene):
             self.play(
                 FadeOut(dots),
                 FadeIn(new_dots),
-                run_time=1.5
-            )
+                run_time=1.5)
             self.wait(0.5)
 
             # 5) Rebind our references & reattach the updater:
@@ -2915,69 +2982,65 @@ class GroundStateCalculationPart2(Scene):
             self.play(M_g_tracker.animate.set_value(true_minimizer), run_time=2.5)
             self.wait(1)
 
-        self.wait(2)
-    
-        # 1) create the “implies” part
+        self.wait(2.5)
+
+        self.play(
+        *[FadeOut(mobj) for mobj in [
+                viz_area,
+                viz_box,
+                viz_box_tex,
+                dots,
+                curly_bracket,
+                curly_bracket_tex]])
+
+
         deriv_condition = MathTex(
             r"\Rightarrow",
             r"\frac{\partial H(M,\,N,\,d)}{\partial q} = 0",
-            font_size=32
-        )
+            font_size=32)
 
-        # write next to M_g_formula
-        deriv_condition.next_to(M_g_formula, RIGHT, buff=0.2)
+        deriv_condition.next_to(M_g_formula, DOWN, buff=0.5)
 
-        # group them together
-        implied_group = VGroup(M_g_formula, deriv_condition)
-
-        # create the q explanation
-        q_explanation = MathTex(r"q = \frac{M}{N}", font_size=32).next_to(implied_group, DOWN, buff=0.2)
-        # play animations
-        self.play(Write(deriv_condition))
-        self.play(implied_group.animate.next_to(shorten_H, DOWN, buff=0.2))
-        q_explanation.next_to(implied_group, DOWN, buff=0.2)
+        self.play(Write(deriv_condition))  
         self.wait(1)
+
+        self.play(FadeOut(faulhaber_formula),
+            M_g_formula.animate.next_to(shorten_H, DOWN, buff=0.8),
+            deriv_condition.animate.next_to(M_g_formula, DOWN, buff=0.7),
+            run_time=1)
+
+        implied_group = VGroup(M_g_formula, deriv_condition)
+        top_group = VGroup(shorten_H, implied_group)
+
+        self.play(top_group.animate.move_to(UP * 1), run_time=1)
+        self.wait(1)
+
+        q_explanation = MathTex(r"q = \frac{M}{N}", font_size=32).next_to(top_group, DOWN, buff=0.5)
         self.play(Write(q_explanation))
-        self.wait(2)
+        self.wait(1.5)
 
-        # group the faulhaber_formula, shorten_H, implied_group, q_explanation
-
-        new_formulas_panel = VGroup(faulhaber_formula, shorten_H, implied_group, q_explanation)
-
-        # remove everything else and move the new_formulas_panel to the middle
-        self.play(
-            FadeOut(viz_area),
-            FadeOut(viz_box),
-            FadeOut(viz_box_tex),
-            FadeOut(dots),
-            FadeOut(curly_bracket),
-            FadeOut(curly_bracket_tex)
-        )
-
-        # Move the grouped formulas back to center
-        self.play(new_formulas_panel.animate.scale(1.25).move_to(ORIGIN))
-        self.wait(2)
-
-        # (This code follows immediately after the previous sequence)
-        # self.wait(2)
         Q_COLOR = YELLOW
-        # --- SEQUENCE 5: THE FINAL DERIVATION ---
-        deriv_condition[1].next_to(shorten_H, DOWN, buff=0.2)
-        # 1. Isolate the key formulas for the derivation
-        self.play(
-            FadeOut(faulhaber_formula, M_g_formula, q_explanation, deriv_condition[0]),
-            VGroup(shorten_H, deriv_condition[1]).animate.to_edge(UP, buff=1.0)
-        )
-        deriv_condition = deriv_condition[1]
+
+        self.play(FadeOut(M_g_formula, q_explanation))
+        self.wait(1)
+
+        self.play(deriv_condition.animate.next_to(shorten_H, DOWN, buff=0.35))
+
+        self.play(VGroup(shorten_H, deriv_condition).animate.to_edge(UP, buff=1.0))
 
         self.wait(2)
 
-        # 2. Start with Eq. (11) from your paper
-        # We need to minimize H_tilde = M*F(N) + (N-2M)*F(M)
-        h_tilde_intro = Text("We only need to minimize the M-dependent terms:", font_size=28)
+
+        h_tilde_intro = MarkupText("We only need to minimize the <span foreground='YELLOW'>M-dependant</span> terms:"
+                        .format(D_COLOR),font_size=28)
         h_tilde_formula = MathTex(
-            r"\tilde{H}(M, N, d) = M F^{d}(N) + (N-2M)F^{d}(M)", font_size=36
-        )
+            r"\tilde{H}(M, N, d)",          
+            r"=",                           
+            r"M F^{d}(N) + (N-2M)F^{d}(M)", 
+            font_size=36)
+
+        h_tilde_formula[0].set_color(H_COLOR)
+
         VGroup(h_tilde_intro, h_tilde_formula).arrange(DOWN, buff=0.3).next_to(deriv_condition, DOWN, buff=0.8)
 
         self.play(Write(h_tilde_intro))
@@ -2990,68 +3053,78 @@ class GroundStateCalculationPart2(Scene):
             r"N\left\{F^{d}(N) - 2 F^{d}(M) + (1-2q) \frac{\partial F^{d}(M)}{\partial q}\right\} = 0",
             font_size=36
         )
-        eq12.next_to(h_tilde_formula, 0.1*DOWN, buff=0)
+        eq12.next_to(h_tilde_formula,DOWN, buff=0)
 
-        self.play(
-            FadeOut(h_tilde_intro),
-            ReplacementTransform(h_tilde_formula, eq12)
-        )
+        self.play(ReplacementTransform(h_tilde_formula, eq12))
         self.wait(3)
 
-        # 4. Show the derivative of F^d(M) (Eq. 13)
+        # Step 1: Create the formula as usual
         df_formula = MathTex(
-            r"\frac{\partial F^{d}(M)}{\partial M} = d F^{d-1}(M) + (-1)^{d} B_d", font_size=36
-        )
+            r"\frac{\partial F^{d}(M)}{\partial M} = d F^{d-1}(M) + (-1)^{d} B_d",
+            font_size=32)
+
         df_formula.set_color_by_tex("B_d", ORANGE)
-        df_formula.move_to(ORIGIN)
-        self.play(Write(df_formula))
+        df_formula.set_color_by_tex("=", SIGN_COLOR)
+
+        # Step 2: Position below eq12
+        df_formula.next_to(eq12, DOWN, buff=0.6)
+
+        # Step 3: Surrounding box with PURPLE_A color
+        df_box = SurroundingRectangle(df_formula, color=PURPLE, buff=0.2)
+        boxed_df_formula = VGroup(df_box, df_formula)
+
+        # Step 4: Show both
+        self.play(Write(df_formula), Create(df_box))
         self.wait(2)
+
 
         # 5. Substitute it in to get Eq. (14)
         eq14 = MathTex(
             r"F^{d}(N) - 2 F^{d}(M) + (1-2q)N \{dF^{d-1}(M) + (-1)^{d} B_d \}  = 0",
             font_size=36
         ).move_to(eq12)
+
         self.play(
-            ReplacementTransform(VGroup(eq12, df_formula), eq14)
-        )
+            FadeOut(boxed_df_formula),
+            ReplacementTransform(VGroup(eq12, df_formula.copy()), eq14))
         self.wait(3)
 
-        # 6. The Large N approximation for Faulhaber's formula
+        # 6. Large N approximation
         large_n_approx = MathTex(
-            r"\text{For large N, } F^{d}(N) \approx \frac{N^{d+1}}{d+1}", font_size=36
-        ).next_to(eq14, DOWN, buff=0.8)
-        
+        r"\text{For large N:\; } F^{d}(N) \approx \frac{N^{d+1}}{d+1}", font_size=36)
+        large_n_approx.next_to(eq14, DOWN, buff=0.8)
+
+
         self.play(Write(large_n_approx))
         self.wait(3)
 
-        # 7. Substitute the approximation to get Eq. (16)
+        # 7. Final Equation (Eq. 16)
         eq16 = MathTex(
             r"\frac{N^{d+1}}{d+1}(1-2q^{d+1}) + (1-2q)N\left\{(qN)^d + \dots\right\} = 0",
             font_size=36
         ).move_to(eq14)
-        
+
         self.play(ReplacementTransform(VGroup(eq14, large_n_approx), eq16))
         self.wait(3)
 
-        # 8. Simplify to the final, beautiful result (Eq. 17)
         final_equation = MathTex(
-            r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0",
-            font_size=48
-        )
-        final_equation.set_color_by_tex("q", Q_COLOR)
-        final_equation.set_color_by_tex("d", D_COLOR)
+            "1 + (1 + ", "d", ")",
+            "q", "^", "d",
+            " - 2 (2 + ", "d", ") ",
+            "q", "^{", "d + 1}",
+            " = 0",
+            font_size=48)
 
-        # Show a title for the final equation
-        final_title = Text("The Master Equation of Ground State", font_size=36, color=GOLD)
+        final_equation.set_color(GOLD) 
+
+        final_title = Text('The Master Equation of Ground State', font_size=36, color=WHITE)
         final_title.to_edge(UP, buff=1.5)
 
-        # Animate the final transformation
         self.play(
-            FadeOut(shorten_H, deriv_condition),
+            FadeOut(shorten_H, deriv_condition, h_tilde_intro), 
             ReplacementTransform(eq16, final_equation),
-            Write(final_title)
-        )
+            Write(final_title))
+
         self.wait(8)
 
 
