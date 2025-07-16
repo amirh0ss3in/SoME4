@@ -3133,7 +3133,7 @@ from scipy.optimize import root
 class MasterEquationofGroundState(Scene):
 
     N = 1000
-    left = -2.4  # lower log exponent for symlog threshold
+    left = -2.4  
 
     def _func_positive(self, p, d):
         return 1 + (1 + d) * p**d - 2 * (2 + d) * p**(d + 1)
@@ -3154,8 +3154,8 @@ class MasterEquationofGroundState(Scene):
 
     def construct(self):
   
-        eq = MathTex(r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0", font_size=48).set_color(YELLOW_D)
-        title = Text('"The Master Equation of Ground State"', font_size=36, color=WHITE)
+        eq = MathTex(r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0", font_size=48).set_color(GOLD)
+        title = Text('The Master Equation of Ground State', font_size=36, color=PURPLE_A)
         title.to_edge(UP, buff=1.5)
         self.add(eq, title)
         self.play(eq.animate.next_to(title, DOWN, buff=0.2))
@@ -3169,7 +3169,6 @@ class MasterEquationofGroundState(Scene):
         r2 = -np.logspace(-1e-6, self.left, 2000)
         domain = np.sort(np.concatenate((r2, r1)))
 
-        # derive min/max from the actual domain
         d_min, d_max = domain[0], domain[-1]
 
         # symlog transform
@@ -3177,7 +3176,6 @@ class MasterEquationofGroundState(Scene):
         def symlog(x): return np.arcsinh(x / C)
         x_min_t, x_max_t = symlog(d_min), symlog(d_max)
 
-        # 3) Build axes
         axes = Axes(
             x_range=[0, x_max_t - x_min_t, 1],
             y_range=[0, 1.1, 0.2],
@@ -3203,6 +3201,7 @@ class MasterEquationofGroundState(Scene):
                 axes.x_axis.n2p(xp),
                 axes.x_axis.n2p(xp) + DOWN*0.1,
                 color=TEAL, stroke_width=2))
+            
             exp = int(np.log10(abs(v)))
             lab = MathTex(f'{"-" if v<0 else ""}10^{{{exp}}}', font_size=24)
             lab.next_to(axes.x_axis.n2p(xp), DOWN, buff=0.2)
@@ -3238,8 +3237,10 @@ class MasterEquationofGroundState(Scene):
             y_values=q_vals[mask],
             line_color=WHITE,
             add_vertex_dots=False)
+        
         self.play(Create(curve), run_time=3)
         self.wait(2)
+
 
 
 PLUS_ONE_COLOR = BLUE_D
