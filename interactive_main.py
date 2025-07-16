@@ -3336,7 +3336,6 @@ class TheLingeringDoubt(Scene):
         
         self.wait(4)
 
-# --- CONFIGURATION (Consistent Colors) ---
 PLUS_ONE_COLOR = BLUE_D
 MINUS_ONE_COLOR = RED_D
 J_COLOR = YELLOW
@@ -3347,19 +3346,14 @@ DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR, GREEN_D, ORANGE]
 
 class TheContinuousLeap(Scene):
     def construct(self):
-        # --- NEW: CUSTOM TEX TEMPLATE FOR \sgn ---
-        # This is the fix. We define a new template that includes the amsmath
-        # package and explicitly declares the \sgn operator.
         sgn_template = TexTemplate()
         sgn_template.add_to_preamble(r"\usepackage{amsmath}")
         sgn_template.add_to_preamble(r"\DeclareMathOperator{\sgn}{sgn}")
 
-        # --- PREPARATION ---
         q_values_initial = [0.3, 0.65, 0.85]
         N_INITIAL = 20
         N_FINAL = 400
 
-        # --- HELPER FUNCTIONS (UNCHANGED) ---
         def get_domain_info(n, q_vals):
             if n <= 1: return [{'size': n, 'color': DOMAIN_COLORS[0], 'spin_val': 1}]
             boundaries = sorted([0] + list(q_vals) + [1])
@@ -3382,7 +3376,7 @@ class TheContinuousLeap(Scene):
             l_bracket = MathTex("[", font_size=72)
             r_bracket = MathTex("]", font_size=72)
             domain_blocks = VGroup()
-            for i, info in enumerate(domain_info):
+            for info in domain_info:
                 block = Rectangle(
                     height=0.4, width=info['size'] * 0.02 + 0.1,
                     fill_color=info['color'], fill_opacity=0.8,
@@ -3408,22 +3402,28 @@ class TheContinuousLeap(Scene):
                     spin_index += 1
             return plot
 
-        # --- ANIMATION PART 1 (UNCHANGED) ---
         axes = Axes(
-            x_range=[0, 1.05, 0.2], y_range=[-1.5, 1.5, 1],
+            x_range=[0, 1.1, 0.2], y_range=[-1.5, 1.5, 1],
             x_length=11, y_length=3.5, axis_config={"color": BLUE},
             x_axis_config={"numbers_to_include": np.arange(0, 1.1, 0.2)}
         ).to_edge(DOWN, buff=1.0)
-        x_label = axes.get_x_axis_label(MathTex("x = i/N"))
-        plot_title = MathTex("s_i", font_size=40).next_to(axes.y_axis, LEFT, buff=0.3)
+
+        x_label = MathTex(r"x = \frac{i}{N}", font_size=42)
+        x_label.move_to(axes.x_axis.get_end() + RIGHT * 0.8)
+        x_label.align_to(axes.x_axis, DOWN)
+
+        y_label = MathTex(r"s_i", font_size=42)
+        y_label.move_to(axes.y_axis.get_end() + UP * 0.4)
+        y_label.align_to(axes.y_axis, LEFT)
+
         s_T_display_group = VGroup().to_edge(UP, buff=0.5)
         N_tracker = ValueTracker(N_INITIAL)
         s_T_display_group.add_updater(lambda mob: mob.become(create_refined_s_T_group(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial))).to_edge(UP, buff=0.5))
         discrete_plot = VGroup()
         discrete_plot.add_updater(lambda mob: mob.become(create_colored_discrete_plot(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial), axes)))
-        
+
         self.add(s_T_display_group, discrete_plot)
-        self.play(Create(axes), Write(x_label), Write(plot_title), run_time=1)
+        self.play(Create(axes), Write(x_label), Write(y_label), run_time=1)
         self.play(N_tracker.animate.set_value(N_FINAL), run_time=5, rate_func=rate_functions.ease_in_out_sine)
         self.wait(0.5)
 
@@ -3437,104 +3437,180 @@ class TheContinuousLeap(Scene):
                 spin_val = 1 if i % 2 == 0 else -1
                 start_p, end_p = axes_obj.c2p(boundaries[i], spin_val), axes_obj.c2p(boundaries[i+1], spin_val)
                 func.add(Line(start_p, end_p, color=WHITE, stroke_width=6))
-            for q_val in q_vals:
+            for i, q_val in enumerate(q_vals):
                 func.add(DashedLine(axes_obj.c2p(q_val, -1), axes_obj.c2p(q_val, 1), color=Q_COLOR, stroke_width=3))
-                label = MathTex(f"q_{list(q_vals).index(q_val)+1}", color=Q_COLOR, font_size=36).next_to(axes_obj.c2p(q_val,0), DOWN)
-                func.add(label)
+                circle = Circle(radius=0.22, color=WHITE, fill_opacity=0.85).move_to(axes_obj.c2p(q_val, 0.3))
+                label = MathTex(f"q_{{{i+1}}}", color=BLACK, font_size=34).move_to(circle.get_center())
+                func.add(circle, label)
             return func
 
         continuous_function_initial = create_continuous_function(q_values_initial, axes)
         final_symbolic_text = MathTex("S(x, \\mathbf{q})", font_size=48).move_to(s_T_display_group)
+        final_symbolic_text.set_color(PURPLE_A)
+
 
         self.play(
             FadeOut(discrete_plot, s_T_display_group, shift=UP),
             FadeIn(continuous_function_initial, shift=UP),
             Write(final_symbolic_text),
-            run_time=1.5
-        )
+            run_time=1.5 )
         self.wait(2)
 
-        # --- ANIMATION PART 2: GENERALITY OF S(x, q) (UNCHANGED) ---
-        generality_text = Text("This can represent any number of clusters (Λ+1)...", font_size=32)
+        generality_text = VGroup(
+            Text("This can represent any number of clusters", font_size=32),
+            MathTex(r"(\Lambda + 1)", font_size=32, color=PURPLE_A)).arrange(RIGHT, buff=0.2)
+
         generality_text.next_to(final_symbolic_text, DOWN, buff=0.2)
         self.play(Write(generality_text))
         self.wait(1)
-        q_vals_1 = [0.6]; func_1 = create_continuous_function(q_vals_1, axes)
-        self.play(Transform(continuous_function_initial, func_1), run_time=1.5); self.wait(1.5)
-        q_vals_2 = [0.4, 0.8]; func_2 = create_continuous_function(q_vals_2, axes)
-        self.play(Transform(continuous_function_initial, func_2), run_time=1.5); self.wait(1.5)
-        q_vals_many = np.linspace(0.1, 0.9, 10); func_many = create_continuous_function(q_vals_many, axes)
-        self.play(Transform(continuous_function_initial, func_many), run_time=2); self.wait(2)
-        
+
+        for q_vals in [[0.6], [0.4, 0.8], np.linspace(0.1, 0.9, 10)]:
+            new_func = create_continuous_function(q_vals, axes)
+            
+            self.play(
+                FadeOut(continuous_function_initial, shift=UP*0.5), 
+                FadeIn(new_func, shift=UP*0.5), 
+                run_time=2)
+
+            continuous_function_initial = new_func
+            self.wait(1.5)
+
         def create_general_schematic(axes_obj):
             schematic = VGroup()
-            schematic.add(Line(axes_obj.c2p(0, 1), axes_obj.c2p(0.2, 1), color=WHITE, stroke_width=6))
-            schematic.add(DashedLine(axes_obj.c2p(0.2, 1), axes_obj.c2p(0.2, -1), color=Q_COLOR, stroke_width=3))
-            schematic.add(Line(axes_obj.c2p(0.2, -1), axes_obj.c2p(0.35, -1), color=WHITE, stroke_width=6))
-            ellipsis_y_up = axes_obj.c2p(0,1)[1]; ellipsis_y_down = axes_obj.c2p(0,-1)[1]
-            schematic.add(MathTex(r"\dots").scale(2).move_to(axes_obj.c2p(0.5, ellipsis_y_up)))
-            schematic.add(MathTex(r"\dots").scale(2).move_to(axes_obj.c2p(0.5, ellipsis_y_down)))
-            schematic.add(Line(axes_obj.c2p(0.65, -1), axes_obj.c2p(0.8, -1), color=WHITE, stroke_width=6))
-            schematic.add(DashedLine(axes_obj.c2p(0.8, -1), axes_obj.c2p(0.8, 1), color=Q_COLOR, stroke_width=3))
-            schematic.add(Line(axes_obj.c2p(0.8, 1), axes_obj.c2p(1.0, 1), color=WHITE, stroke_width=6))
-            labels = VGroup(
-                MathTex("q_1", color=Q_COLOR).next_to(axes_obj.c2p(0.2,0),DOWN),
-                MathTex("q_2", color=Q_COLOR).next_to(axes_obj.c2p(0.35,0),DOWN),
-                MathTex("q_{\Lambda-1}", color=Q_COLOR).next_to(axes_obj.c2p(0.65,0),DOWN),
-                MathTex("q_{\Lambda}", color=Q_COLOR).next_to(axes_obj.c2p(0.8,0),DOWN)
-            )
-            schematic.add(labels)
+            
+            original_numbers = axes_obj.x_axis.numbers.copy()
+
+            for num in axes_obj.x_axis.numbers:
+                if not np.isclose(num.get_value(), 1.0):
+                    num.set_opacity(0)
+
+            for tick in axes_obj.x_axis.get_tick_marks():
+                tick.set_opacity(0)
+            
+            def step_segment(x_start, x_end, y_val):
+                return Line(
+                    axes_obj.c2p(x_start, y_val),
+                    axes_obj.c2p(x_end, y_val),
+                    color=WHITE, stroke_width=6)
+
+            def full_dashed_q_line(x_val):
+                return DashedLine(
+                    axes_obj.c2p(x_val, -1),
+                    axes_obj.c2p(x_val, 1),
+                    color=Q_COLOR, stroke_width=3,
+                    stroke_opacity=0.7)
+
+            def circle_q_label(x_val, label_tex, y_pos=0.3, font_size=24):
+                circle = Circle(radius=0.22, color=WHITE, fill_opacity=0.9)
+                circle.move_to(axes_obj.c2p(x_val, y_pos))
+                label = MathTex(label_tex, color=BLACK, font_size=font_size).move_to(circle.get_center())
+                return VGroup(circle, label)
+
+            schematic.add(step_segment(0.0, 0.1, 1))
+            schematic.add(full_dashed_q_line(0.1))
+            schematic.add(circle_q_label(0.1, "q_1"))
+            
+            schematic.add(step_segment(0.1, 0.3, -1))
+            schematic.add(full_dashed_q_line(0.3))
+            schematic.add(circle_q_label(0.3, "q_2"))
+            
+            schematic.add(step_segment(0.3, 0.4, 1))
+            schematic.add(MathTex(r"\cdots").scale(1.2).move_to(axes_obj.c2p(0.5, 1)))
+            schematic.add(MathTex(r"\cdots").scale(1.2).move_to(axes_obj.c2p(0.5, -1)))
+            
+            schematic.add(step_segment(0.6, 0.7, +1))
+            schematic.add(full_dashed_q_line(0.7))
+            schematic.add(circle_q_label(0.7, r"q_{\Lambda-1}", font_size=22))
+
+            schematic.add(step_segment(0.7, 0.85, -1))
+            schematic.add(full_dashed_q_line(0.85))
+            schematic.add(circle_q_label(0.85, r"q_{\Lambda}", font_size=22))
+            
+            schematic.add(step_segment(0.85, 1.0, 1))
+            schematic.add(full_dashed_q_line(1.0))
+            schematic.add(circle_q_label(1.0, r"q_{\Lambda+1}", font_size=22))
+            
+            schematic.original_numbers = original_numbers
+            schematic.axes_obj = axes_obj
+            
             return schematic
+
         general_schematic = create_general_schematic(axes)
-        self.play(Transform(continuous_function_initial, general_schematic), run_time=2)
+        self.play(
+            FadeOut(continuous_function_initial, shift = UP),
+            FadeIn(general_schematic, shift = UP),
+            run_time=2)
         self.wait(2)
 
         self.play(FadeOut(generality_text))
-        
-        # --- THIS IS THE FIX ---
-        # We pass our custom template to the MathTex object that needs it.
-        s_formula = MathTex(
-            r"S(x, \mathbf{q}) = (-1)^\Lambda \prod_{\alpha=1}^{\Lambda} \sgn(x-q_{\alpha})",
+
+        rest_formula = MathTex(
+            r"= (-1)^\Lambda \prod_{\alpha=1}^\Lambda \sgn\left(x - q_{\alpha}\right)",
             font_size=42,
-            tex_template=sgn_template  # Pass the custom template here
-        ).next_to(final_symbolic_text, DOWN, buff=0.3)
-        self.play(Write(s_formula))
-        self.wait(5)
+            tex_template=sgn_template
+        ).set_color(WHITE)
+
+        final_position = final_symbolic_text.get_center() + DOWN * 1.0  
 
 
-        # --- ANIMATION PART 3: Morphing the Hamiltonian (UNCHANGED) ---
+        s_formula = VGroup(
+            final_symbolic_text.copy(),  
+            rest_formula
+        ).arrange(RIGHT, buff=0.2).move_to(final_position)
+
+
         self.play(
-            FadeOut(axes, x_label, plot_title, continuous_function_initial),
-            VGroup(final_symbolic_text, s_formula).animate.move_to(UP*2.5)
+            Transform(final_symbolic_text, s_formula[0]),  
+            FadeIn(rest_formula), 
+            run_time=2
         )
+        self.wait(5)
+        
+        mobjects_to_fade = [
+            mob for mob in self.mobjects 
+            if mob not in [final_symbolic_text, rest_formula] 
+            and not isinstance(mob, ValueTracker)]
+
+        self.play(
+            *[FadeOut(mob) for mob in mobjects_to_fade],
+            VGroup(final_symbolic_text, rest_formula).animate.move_to(UP*2.5),
+            run_time=1.5)
         self.wait(1)
         
-        H_part_d = MathTex("H = \\frac{1}{2} \\sum_{i,j}").set_color_by_tex("H", H_COLOR)
-        J_part_d = MathTex("J_{ij}").set_color(J_COLOR)
-        s_i_part_d = MathTex("s_i").set_color(PLUS_ONE_COLOR)
-        s_j_part_d = MathTex("s_j").set_color(MINUS_ONE_COLOR)
-        discrete_H = VGroup(H_part_d, J_part_d, s_i_part_d, s_j_part_d).arrange(RIGHT, buff=0.2).scale(1.2)
+        discrete_H = MathTex(
+            "H", "=", r"\sum_{i,j}", "J_{ij}", "s_i", "s_j",
+            font_size=60)
+
+        discrete_H.set_color_by_tex("H", H_COLOR)
+        discrete_H.set_color_by_tex("=", WHITE)
+        discrete_H.set_color_by_tex(r"\sum_{i<j}", WHITE)
+        discrete_H.set_color_by_tex("J_{ij}", J_COLOR)
+        discrete_H.set_color_by_tex("s_i", BLUE_D)
+        discrete_H.set_color_by_tex("s_j", RED)
+
         self.play(Write(discrete_H))
         self.wait(2)
         
-        H_part_c = MathTex(r"H = \frac{N^2}{2} \int_0^1 \! \int_0^1").set_color_by_tex("H", H_COLOR)
-        J_part_c = MathTex("(x^d + y^d)").set_color_by_tex_to_color_map({"d":D_COLOR})
-        J_part_c.get_part_by_tex("x").set_color(J_COLOR); J_part_c.get_part_by_tex("y").set_color(J_COLOR)
-        s_x_part_c = MathTex(r"S(x, \mathbf{q})").set_color(PLUS_ONE_COLOR)
-        s_y_part_c = MathTex(r"S(y, \mathbf{q})").set_color(MINUS_ONE_COLOR)
-        integrand_part_c = MathTex(r"\,dx\,dy").set_color(WHITE)
-        continuous_H_group = VGroup(H_part_c, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.2).scale(1.1)
-        
+        H_part_c = MathTex("H", font_size=48).set_color(H_COLOR)
+        eq_part_c = MathTex("=", font_size=48).set_color(SIGN_COLOR)
+        N_frac_integral = MathTex(r"\frac{N^2}{2} \int_0^1 \! \int_0^1", font_size=48).set_color(SIGN_COLOR)
+
+        J_part_c = MathTex("(x^d + y^d)", font_size=48).set_color_by_tex_to_color_map({"d": D_COLOR})
+        J_part_c.get_part_by_tex("x").set_color(J_COLOR)
+        J_part_c.get_part_by_tex("y").set_color(J_COLOR)
+
+        s_x_part_c = MathTex(r"S(x, \mathbf{q})", font_size=48).set_color(PLUS_ONE_COLOR)
+        s_y_part_c = MathTex(r"S(y, \mathbf{q})", font_size=48).set_color(MINUS_ONE_COLOR)
+        integrand_part_c = MathTex(r"\,dx\,dy", font_size=48).set_color(SIGN_COLOR)
+
+        continuous_H_group = VGroup(H_part_c, eq_part_c, N_frac_integral, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.2).scale(1.1)
+    
         self.play(
-            FadeOut(final_symbolic_text, s_formula),
-            ReplacementTransform(H_part_d, H_part_c),
-            ReplacementTransform(J_part_d, J_part_c),
-            ReplacementTransform(s_i_part_d, s_x_part_c),
-            ReplacementTransform(s_j_part_d, s_y_part_c),
-            FadeIn(integrand_part_c, shift=RIGHT),
-            run_time=2.5
-        )
+            FadeOut(rest_formula,final_symbolic_text),
+            Transform(discrete_H, continuous_H_group),
+            run_time=2.5)
         self.wait(5)
+
 
 
 H_COLOR = GREEN
