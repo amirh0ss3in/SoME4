@@ -4077,15 +4077,14 @@ D_COLOR = ORANGE
 class TheGreatSchism(Scene):
     def _get_q_for_d(self, d):
         def equation(q):
-            # Clamp q to avoid math errors for d<0
             q_safe = np.clip(q, 1e-9, 1.0)
             return 1 + (1 + d) * q_safe**d - 2 * (2 + d) * q_safe**(d + 1)
         
-        # Use root finding to solve the equation for q
         sol = root(equation, x0=0.5, tol=1e-9)
         if sol.success:
             return np.clip(sol.x[0], 0, 1)
-        return 0.5 # Default to 0.5 on failure
+        return 0.5 
+    
     def construct(self):
         # --- SEQUENCE 1: The J_ij Rule and the Ranked Society Analogy ---
 
@@ -4096,14 +4095,15 @@ class TheGreatSchism(Scene):
         self.wait(3)
         self.play(FadeOut(interaction_formula))
         self.wait(0.5)
-        
+
         table_data = [
             [r"\text{Rank (i)}", r"\text{Name}", r"\text{Status/Wealth}"],
             ["1", r"\text{Titan Corp.}", r"\$1.2 \text{ Trillion}"],
             ["2", r"\text{Innovate Inc.}", r"\$980 \text{ Billion}"],
             [r"\vdots", r"\vdots", r"\vdots"],
             ["999", r"\text{Alice}", r"\$52,000"],
-            ["1000", r"\text{Bob}", r"\$48,000"],]
+            ["1000", r"\text{Bob}", r"\$48,000"]]
+        
         table = Table(
             table_data, include_outer_lines=True, line_config={"stroke_width": 2, "color": TEAL},
             h_buff=0.5, element_to_mobject=MathTex
@@ -4113,7 +4113,7 @@ class TheGreatSchism(Scene):
         self.wait(4)
         self.play(FadeOut(table))
         self.wait(0.5)
-        
+
         def create_interaction_viz(rank1_str, rank2_str, is_high_tension=False):
             node1 = VGroup(
                 Circle(radius=0.4, color=WHITE), 
@@ -4155,6 +4155,7 @@ class TheGreatSchism(Scene):
         self.play(FadeIn(top_bottom_viz, shift=DOWN))
         self.wait(4)
 
+
         self.play(FadeOut(top_top_viz, bottom_bottom_viz, top_bottom_viz))
         self.wait(1)
 
@@ -4178,7 +4179,7 @@ class TheGreatSchism(Scene):
         viz_height = 4
         
         d_tracker = ValueTracker(1.0) 
-        
+
         polarization_viz = always_redraw(lambda: 
             VGroup(
                 Rectangle(
@@ -4208,7 +4209,7 @@ class TheGreatSchism(Scene):
                 f"q = {self._get_q_for_d(d_tracker.get_value()):.2f}",
                 font_size=42, color=Q_COLOR
             ).next_to(polarization_viz, UP, buff=0.4))
-
+        
         self.play(
             Create(polarization_viz),
             Create(d_dial),
@@ -4216,7 +4217,7 @@ class TheGreatSchism(Scene):
             GrowArrow(pointer),
             Write(q_value_text))
         self.wait(2)
-        
+
         self.play(
             d_tracker.animate.set_value(4.0),
             run_time=3, rate_func=rate_functions.ease_in_out_sine)
@@ -4244,8 +4245,7 @@ class TheGreatSchism(Scene):
         pol_group = VGroup(polarization_viz, d_dial, d_label, pointer, q_value_text)
         
         self.play(
-            pol_group.animate.scale(0.7).to_edge(UP, buff=1.0)
-        )
+            pol_group.animate.scale(0.7).to_edge(UP, buff=1.0))
         self.wait(1)
 
         schism_text = Text("The Great Schism", font_size=48, color=YELLOW)
@@ -4258,9 +4258,10 @@ class TheGreatSchism(Scene):
         self.wait(1)
         self.play(Write(conclusion_text))
         self.wait(5)
-    
+        
         self.play(FadeOut(pol_group, final_text_group))
         self.wait(1)
+
 
 # Now, in the next and final scene, we reveal that this student is Amirhossein Rezaei, which is me! me! And reveal this picture (I'm the one on right, the middle is Alireza Rezaei, the left is Mahmood Hasani). (We don't mention Halataei as he's not in the picture.) and we also show a picture of the paper (https://arxiv.org/abs/2411.19604). I want it to be poetic, like the end of AlphaGo documentary. To show them how significant and incredible this is.
 
