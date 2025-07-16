@@ -3624,7 +3624,6 @@ SIGN_COLOR = WHITE
 LIGHT_YELLOW = YELLOW_D
 YELLOW  = YELLOW
 
-
 class ContinuousHDerivation(Scene):
     def construct(self):
         # --- PART 1: Recap The Analytical Hamiltonian ---
@@ -3636,23 +3635,23 @@ class ContinuousHDerivation(Scene):
         J_part_c.get_part_by_tex("x").set_color(J_COLOR)
         J_part_c.get_part_by_tex("y").set_color(J_COLOR)
 
-        s_x_part_c = MathTex(r"S(x, \mathbf{q})", font_size=48).set_color(PURPLE_A)
+        s_x_part_c = MathTex(r"S(x, \mathbf{q})", font_size=48).set_color(PLUS_ONE_COLOR)
         s_y_part_c = MathTex(r"S(y, \mathbf{q})", font_size=48).set_color(MINUS_ONE_COLOR)
         integrand_part_c = MathTex(r"\,dx\,dy", font_size=48).set_color(SIGN_COLOR)
 
         continuous_H_group = VGroup(H_part_c, eq_part_c, N_frac_integral, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.2).scale(1.1)
 
         part1 = MathTex(
-            r"H_{\Lambda}",  # H and Lambda colored H_COLOR
-            r"(d, \mathbf{q})",  # also colored H_COLOR
-            r"=",  # colored LIGHT_YELLOW
-            r"\frac{N^2}{1+d}",  # colored LIGHT_YELLOW
+            r"H_{\Lambda}",  
+            r"(d, \mathbf{q})", 
+            r"=", 
+            r"\frac{N^2}{1+d}",  
             font_size=48)
 
-        part1[0].set_color(H_COLOR)     # H_{\Lambda}
-        part1[1].set_color(H_COLOR)     # (d, \mathbf{q})
-        part1[2].set_color(SIGN_COLOR)  # =
-        part1[3].set_color(LIGHT_YELLOW)  # fraction
+        part1[0].set_color(H_COLOR)    
+        part1[1].set_color(H_COLOR)    
+        part1[2].set_color(SIGN_COLOR) 
+        part1[3].set_color(LIGHT_YELLOW)  
 
         part2 = MathTex(
             r"\Bigg( (-1)^{\Lambda} + 2\sum_{\alpha=1}^{\Lambda} (-1)^{\alpha+1}q_\alpha \Bigg)", 
@@ -3669,6 +3668,13 @@ class ContinuousHDerivation(Scene):
         self.play(ReplacementTransform(continuous_H_group, analytical_H_formula), run_time=2.5)
         self.wait(2)
         self.play(analytical_H_formula.animate.to_edge(UP, buff=0.5).scale(0.7))
+        line = Line(
+        start=analytical_H_formula.get_corner(DL) + LEFT*0.2,  
+        end=analytical_H_formula.get_corner(DR) + RIGHT*0.2,   
+        color=GRAY).next_to(analytical_H_formula, DOWN, buff=0.4)  
+
+        self.play(Create(line))
+        self.wait(2)
 
         
         # --- PART 2: The Λ=1 Case (Appendix C) ---
@@ -3680,9 +3686,8 @@ class ContinuousHDerivation(Scene):
         title_case1[1].set_color(YELLOW)         
         title_case1[3].set_color(LAMBDA_COLOR)  
 
-        title_case1.next_to(analytical_H_formula, DOWN, buff=1)
+        title_case1.next_to(analytical_H_formula, DOWN, buff=0.7)
         self.play(Write(title_case1))
-
 
         h1_formula = MathTex(r"H_1", r"=", r"\frac{N^2}{1+d}", r"(2q_1-1)(2q_1^{d+1}-1)", font_size=40)
         h1_formula[0].set_color(H_COLOR)
@@ -3722,7 +3727,10 @@ class ContinuousHDerivation(Scene):
         self.play(Write(title_case2))
 
         # --- Step 1: Present the core equation from Appendix D ---
-        insight_text = Tex(f"At a critical point, the sum of derivatives for adjacent boundaries is zero:").scale(0.8)
+        insight_text = MarkupText(
+            "At a <span weight='bold'>critical point</span>, the sum of derivatives for adjacent boundaries is zero:",
+            font_size=25)
+
         sum_deriv_full_eq = VGroup(
             MathTex(r"\frac{\partial H_{\Lambda}}{\partial q_j} + \frac{\partial H_{\Lambda}}{\partial q_{j+1}}", font_size=48).set_color(LIGHT_YELLOW),
             MathTex(r"=", font_size=48).set_color(WHITE),
@@ -3751,7 +3759,7 @@ class ContinuousHDerivation(Scene):
         
         # --- Step 3: Rule out Term A ---
         part1_text = MarkupText("Since boundaries are ordered ", font_size=30, color=WHITE)
-        part1_math = MathTex(r"\mathbf{(q_j < q_{j+1})},", font_size=39).set_color(WHITE)
+        part1_math = MathTex(r"(q_j < q_{j+1})", font_size=39).set_color(WHITE)
 
         part1 = VGroup(part1_text, part1_math).arrange(RIGHT, buff=0.2).to_edge(UP)
         term_a = MarkupText("Term A", font_size=30).set_color(BLUE)
@@ -3780,7 +3788,7 @@ class ContinuousHDerivation(Scene):
         self.play(FadeOut(VGroup(insight_text, sum_deriv_full_eq, brace_A, brace_B, label_A, label_B, conclusion_text)))
 
         # --- Step 5: The final punchline ---
-        final_condition_text = MarkupText("So, at any critical point:", font_size=32).set_color(WHITE)
+        final_condition_text = MarkupText("So, at any critical point:", font_size=28).set_color(WHITE)
 
         chunk1 = MathTex(r"(-1)^{\Lambda}", font_size=38).set_color(J_COLOR)
         chunk2 = MathTex(r"+", font_size=38).set_color(SIGN_COLOR)
@@ -3793,11 +3801,10 @@ class ContinuousHDerivation(Scene):
 
         final_condition = VGroup(final_condition_text, final_condition_formula).arrange(RIGHT, buff=0.7)
 
-        final_condition.next_to(title_case2, DOWN, buff=0.7)
+        final_condition.next_to(title_case2, DOWN, buff=1.2)
 
         self.play(Write(final_condition))
         self.wait(2)
-
 
         q_factor_box_on_formula = SurroundingRectangle(analytical_H_formula[1], color=LIGHT_YELLOW, buff=0.05)
         zero_box_on_proof = SurroundingRectangle(final_condition[1], color=LIGHT_YELLOW, buff=0.1)
@@ -3823,6 +3830,8 @@ class ContinuousHDerivation(Scene):
         self.wait(4)
         self.play(FadeOut(VGroup(title_case2, final_condition, zero_box_on_proof, q_factor_box_on_formula, final_result_case2)))
         
+        self.play(FadeOut(line))
+
         # --- PART 4: Boundary Case (Interface Shedding) ---
         boundary_case_part1 = MarkupText("Boundary Case: ", font_size=28, color=YELLOW)
         domains_merge_part = MarkupText("Domains Merge", font_size=28, color=WHITE)
@@ -3841,12 +3850,12 @@ class ContinuousHDerivation(Scene):
 
         boundary_title.next_to(analytical_H_formula, DOWN, buff=1)
         reduction_eq = MathTex(
-            r"H_{\Lambda}",         # index 0 — first H_{\Lambda}, color: H_COLOR
-            r"(",                   # index 1 — open parenthesis, color: WHITE
-            r"q_{\Lambda} \to 1",   # index 2 — argument going to 1, color: LAMBDA_COLOR
-            r")",                   # index 3 — close parenthesis, color: WHITE
-            r"\longrightarrow",     # index 4 — arrow, color: WHITE
-            r"H_{\Lambda-1}",       # index 5 — final term, color: LIGHT_YELLOW
+            r"H_{\Lambda}",         
+            r"(",                 
+            r"q_{\Lambda} \to 1",   
+            r")",                   
+            r"\longrightarrow",     
+            r"H_{\Lambda-1}",       
             font_size=48)
 
         reduction_eq[0].set_color(H_COLOR)
@@ -3857,18 +3866,18 @@ class ContinuousHDerivation(Scene):
         reduction_eq[5].set_color(LIGHT_YELLOW)
 
         cascade = MarkupText(
-            f"The system sheds interfaces to find <span foreground='{J_COLOR}'>lower energy</span>:",
-            font_size=28,
+            f"The system sheds interfaces to find <span foreground='{J_COLOR}'>lower energy</span> :",
+            font_size=25,
             color=WHITE)
 
         cascade_math = MathTex(
-            r"\Lambda",        # index 0
-            r"\to",            # index 1
-            r"\Lambda - 1",    # index 2
-            r"\to",            # index 3
-            r"\dots",          # index 4
-            r"\to",            # index 5
-            r"1",              # index 6
+            r"\Lambda",        
+            r"\to",           
+            r"\Lambda - 1",    
+            r"\to",            
+            r"\dots",          
+            r"\to",            
+            r"1",              
             font_size=48)
 
         cascade_math[0].set_color(LAMBDA_COLOR)
@@ -3883,7 +3892,127 @@ class ContinuousHDerivation(Scene):
         boundary_group.next_to(boundary_title, DOWN, buff=0.6)
         self.play(Write(boundary_title), Write(boundary_group))
         self.wait(5)
-        self.play(FadeOut(boundary_title), FadeOut(boundary_group))
+
+        combined_group = VGroup(boundary_title, boundary_group)
+        self.play(
+            Transform(boundary_group, combined_group),
+            combined_group.animate.scale(0.8)
+                        .to_edge(LEFT, buff=1.0)
+                        .set_y(combined_group.get_y()),  
+            run_time=1.5)
+        self.wait(0.5)
+
+
+        q_values_initial = [0.01, 0.5, 0.99]
+        N_INITIAL = 20
+        N_FINAL = 400
+
+        axes = Axes(
+            x_range=[0, 1.05, 0.2], 
+            y_range=[-1.5, 1.5, 1],
+            x_length=7.5,  
+            y_length=4, 
+            axis_config={
+                "color": BLUE,
+                "include_numbers": False,
+                "tick_size": 0,
+                "include_tip": True,}
+        ).scale(0.7).to_edge(RIGHT, buff=0.5)
+
+
+        PLUS_COLOR = BLUE_D
+        MINUS_COLOR = RED_D
+        DOMAIN_COLORS = [PLUS_COLOR, MINUS_COLOR]
+
+
+        def get_domain_info(n, q_vals):
+            if n <= 1: return [{'size': n, 'color': DOMAIN_COLORS[0], 'spin_val': 1}]
+            boundaries = sorted([0] + list(q_vals) + [1])
+            domain_info = []
+            bin_edges = [b * (n - 1) for b in boundaries]
+            spin_counts = np.histogram(np.arange(n), bins=bin_edges)[0].tolist()
+            if len(spin_counts) < len(boundaries) - 1:
+                spin_counts.append(n - sum(spin_counts))
+            for i, count in enumerate(spin_counts):
+                if count > 0:
+                    domain_info.append({
+                        'size': count, 'color': DOMAIN_COLORS[i % len(DOMAIN_COLORS)],
+                        'spin_val': 1 if i % 2 == 0 else -1
+                    })
+            return domain_info
+
+        def create_refined_s_T_group(n, domain_info):
+            if n == 0: return VGroup()
+            s_T_label = MathTex(r"\pmb{s}^T = ", font_size=40)
+            l_bracket = MathTex("[", font_size=72)
+            r_bracket = MathTex("]", font_size=72)
+            domain_blocks = VGroup()
+            for info in domain_info:
+                block = Rectangle(
+                    height=0.4, width=info['size'] * 0.02 + 0.1,
+                    fill_color=info['color'], fill_opacity=0.8,
+                    stroke_width=1, stroke_color=WHITE
+                )
+                brace = Brace(block, DOWN, buff=SMALL_BUFF)
+                counter = Integer(info['size'], font_size=28).next_to(brace, DOWN, buff=SMALL_BUFF)
+                counter.set_color(info['color'])
+                domain_blocks.add(VGroup(block, brace, counter))
+            domain_blocks.arrange(RIGHT, buff=0.1)
+            return VGroup(s_T_label, l_bracket, domain_blocks, r_bracket).arrange(RIGHT, buff=0.15)
+
+        def create_colored_discrete_plot(n, domain_info, axes_obj):
+            plot = VGroup()
+            if n <= 1: return plot
+            spin_index = 0
+            for info in domain_info:
+                for _ in range(info['size']):
+                    x_pos = spin_index / (n - 1)
+                    dot = Dot(axes_obj.c2p(x_pos, info['spin_val']), color=info['color'], radius=0.04)
+                    stem = Line(axes_obj.c2p(x_pos, 0), dot.get_center(), stroke_width=1.5, color=info['color'])
+                    plot.add(VGroup(stem, dot))
+                    spin_index += 1
+            return plot
+
+        N_tracker = ValueTracker(N_INITIAL)
+        
+        discrete_plot = VGroup()
+        discrete_plot.add_updater(lambda mob: mob.become(create_colored_discrete_plot(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial), axes)))
+        
+
+        x_label = MathTex(r"x = \frac{i}{N}", font_size=20)  
+        x_label.next_to(axes.x_axis.get_end(), RIGHT*0.3)
+
+        y_label = MathTex(r"s_i", font_size=25)  
+        y_label.next_to(axes.y_axis.get_end(), UP*0.2)
+
+        discrete_plot = VGroup()
+        discrete_plot.add_updater(lambda mob: mob.become(
+            create_colored_discrete_plot(
+                int(N_tracker.get_value()),
+                get_domain_info(int(N_tracker.get_value()), q_values_initial),
+                axes)))
+
+
+        plot_group = VGroup(axes, discrete_plot, x_label, y_label)
+
+        plot_group.next_to(combined_group, RIGHT, buff=1)
+        self.add(plot_group)
+
+        self.play(
+            Create(axes),
+            Write(x_label),
+            Write(y_label),
+            run_time=1)
+        self.play(
+            N_tracker.animate.set_value(N_FINAL),
+            run_time=5,
+            rate_func=rate_functions.ease_in_out_sine)
+        self.wait(0.5)
+
+        self.play(
+            FadeOut(axes,discrete_plot,x_label,y_label,combined_group),
+            run_time=1.5)
+
 
         # --- PART 5: Final Conclusion ---
         
@@ -3891,34 +4020,30 @@ class ContinuousHDerivation(Scene):
         line = Line(UP * 2.25, DOWN * 3.5, color=GRAY)
         self.play(Create(line))
         
-        # --- Left Column: The Winning Case (Λ=1) ---
         left_anchor = line.get_center() + LEFT * (self.camera.frame_width / 4)
-        
-        # Create the elements for the left column
+
         title_L1 = Tex(r"Case ",r"$\Lambda=1$",font_size=42)
 
-        title_L1[0].set_color(WHITE)           # "Case"
-        title_L1[1].set_color(LAMBDA_COLOR)    # "$\Lambda=1$"
+        title_L1[0].set_color(WHITE)         
+        title_L1[1].set_color(LAMBDA_COLOR)   
 
         result_L1 = MathTex(r"H_1", r"<", r"0", font_size=60)
 
-        result_L1[0].set_color(GREEN)         # "H_1"
-        result_L1[1].set_color(WHITE)         # "<"
-        result_L1[2].set_color(GREEN)         # "0"
+        result_L1[0].set_color(GREEN)         
+        result_L1[1].set_color(WHITE)         
+        result_L1[2].set_color(GREEN)         
 
         label_L1 = Tex("Stable, Energetically, Favorable Ground State", font_size=32)
         
-        # Group and position them relative to the anchor
         group_L1 = VGroup(title_L1, result_L1, label_L1).arrange(DOWN, buff=1)
         group_L1.move_to(left_anchor)
 
-        # --- Right Column: The Unstable Case (Λ>=2) ---
         
         right_anchor = line.get_center() + RIGHT * (self.camera.frame_width / 4)
 
         title_L2 = Tex(r"Case ",r"$\Lambda \geq 2$",font_size=42)
-        title_L2[0].set_color(WHITE)         # "Case"
-        title_L2[1].set_color(LAMBDA_COLOR)  # "$\Lambda \geq 2$"
+        title_L2[0].set_color(WHITE)         
+        title_L2[1].set_color(LAMBDA_COLOR)  
 
         part1 = MathTex(r"H_{\Lambda}", font_size=60).set_color(RED)
         part2 = MathTex(r"=", font_size=60).set_color(SIGN_COLOR)
@@ -3926,20 +4051,17 @@ class ContinuousHDerivation(Scene):
 
         result_L2 = VGroup(part1, part2, part3).arrange(RIGHT, buff=0.1)
 
-
         label_L2 = Tex("Unstable or Higher Energy (Decays to $\Lambda=1$)", font_size=32)
         
-        # Group and position them relative to the anchor
         group_L2 = VGroup(title_L2, result_L2, label_L2).arrange(DOWN, buff=1)
         group_L2.move_to(right_anchor)
 
-        # --- Animate the final comparison ---
         self.play(
             Write(group_L1),
             Write(group_L2),
             run_time=2)
         self.wait(6)
-# now in the next scene, we want to focus on this ordered J again. We want to show what this truly represents. We can show a table that has the name of richest people, and some other people that are poor. a ranked table. this rank is the index i, and we can show that again what interaction means. as an example, we can show number 1 and 2 have the interaction 1^d+2^d (with other constants) and the 1^d+1000^d, and so on (we'll show all of the possibilities for total of 4 people, two rich and two poor). and discuss how this can be extended to the other ranked systems. and show the obvious conclusion that such system turns into two opposing poles (such as class gap). we say each pole agrees with itself but disagrees with the other one. 
+
 
 from scipy.optimize import root
 import numpy as np
