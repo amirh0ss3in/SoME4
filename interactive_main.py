@@ -13,7 +13,6 @@ class Introduction(Scene):
         H_COLOR = GREEN
         LIGHT_YELLOW = YELLOW_D
 
-
         title = MarkupText(
             'Each person decides <span color="{0}">yes</span> or <span color="{0}">no</span> on some question.'.format(TEXT_COLOR),
             font_size=36)
@@ -1329,7 +1328,7 @@ class LinkToNPHardness(Scene):
         expanded_term1_plus = MathTex(r"+", font_size=47, color= H_COLOR)
         expanded_term2 = MathTex(r"\sum_{i \neq j}", r"a_i a_j", r"s_i s_j", font_size =47)
         expanded_form = VGroup(expanded_term0, expanded_term1, expanded_term1_plus, expanded_term2).arrange(RIGHT, buff=0.2)
-        expanded_form.next_to(squared_sum, DOWN, buff=0.5)
+        expanded_form.next_to(squared_sum, DOWN, buff=0.8)
 
         self.play(Write(expanded_form))
         self.wait(2)
@@ -1386,16 +1385,11 @@ class LinkToNPHardness(Scene):
 
         equiv_box = SurroundingRectangle(equivalence_map, color=PURPLE_A, buff=0.3)
 
-        self.play(FadeIn(equivalence_map), Create(equiv_box))
-
-        equivalence_map = VGroup(arrow, equivalence_map).arrange(RIGHT, buff=0.3)
-        equivalence_map.next_to(variable_part, DOWN, buff=1.0)
-
-
         self.play(Create(rect1), Create(rect2))
         self.wait(1)
-        self.play(Write(equivalence_map))
-        self.wait(4)
+
+        self.play(FadeIn(equivalence_map), Create(equiv_box))
+        self.wait(5)
 
         self.play(
             FadeOut(variable_part, hamiltonian, rect1, rect2, equivalence_map, equiv_box))
@@ -1546,20 +1540,18 @@ class LinkToNPHardness(Scene):
         self.play(Create(graph_system))
         self.wait(2)
 
-        flicker_duration = 0.15 # Slightly faster flicker
+        flicker_duration = 0.15 
         for _ in range(12): 
             new_colors = [random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR]) for _ in range(num_nodes)]
             self.play(
                 *[nodes[i].animate.set_color(new_colors[i]) for i in range(num_nodes)],
                 run_time=flicker_duration)
         
-        # Settle into a final state
         final_colors = [random.choice([PLUS_ONE_COLOR, MINUS_ONE_COLOR]) for _ in range(num_nodes)]
         self.play(
             *[nodes[i].animate.set_color(final_colors[i]) for i in range(num_nodes)],
             run_time=0.5 )
 
-        # Highlight the minimized Hamiltonian
         self.play(Indicate(hamiltonian_essence, color=H_COLOR, scale_factor=1.1))
         self.wait(3)
 
@@ -1567,7 +1559,7 @@ class LinkToNPHardness(Scene):
         self.wait(0.5)
 
         final_question = MarkupText(
-            'But if brute force is impossible... <span color="YELLOW">how do we find it?</span>',
+            'But if brute force is impossible... <span color="YELLOW">how do we find it</span><span color="WHITE">?</span>',
             font_size=38,
             justify=True
         ).move_to(ORIGIN) 
@@ -1578,7 +1570,6 @@ class LinkToNPHardness(Scene):
 
         # --- NEW SEQUENCE: THE EDGE OF SOLVABILITY ---
 
-        # 1. Answer the question with nuance (with text wrapping)
         answer_text = MarkupText(
             'The short answer: for a general, complex system...\n<span color="YELLOW">you don\'t.</span>',
             font_size=38)
@@ -1595,7 +1586,6 @@ class LinkToNPHardness(Scene):
         self.play(FadeOut(explanation_text))
         self.wait(0.5)
         
-        # 2. Show the "Rare Exact Solutions"
         title = Text('Rare Exact Solutions', font_size=42, color=PURPLE_A).to_edge(UP)
         self.play(Write(title))
         self.wait(1)
@@ -1679,6 +1669,7 @@ class LinkToNPHardness(Scene):
         except FileNotFoundError:
             self.play(Write(Text("Image 'dwave_computer.jpeg' not found.", color=RED)))
             self.wait(3)
+
 
 
 def J_order(N, d):
