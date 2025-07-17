@@ -2054,11 +2054,12 @@ class GroundStateCalculation(Scene):
         # --- SEQUENCE 1: FORMALIZING THE INTERACTION MATRIX ---
         
         text1 = MarkupText("So, having seen the ratio ", font_size=32, color=WHITE)
-        q_latex = MathTex("\:q\:", font_size=46).set_color(YELLOW)
+        q_latex = MathTex("\:q\:", font_size=48).set_color(YELLOW)
         text2 = MarkupText(" converge for any given ", font_size=32, color=WHITE)
-        d_latex = MathTex("\:d:", font_size=46).set_color(YELLOW)
+        d_latex = MathTex("\:d", font_size=48).set_color(YELLOW)
+        question_mark = MathTex(":", font_size=48).set_color(WHITE)
 
-        recap_text = VGroup(text1, q_latex, text2, d_latex).arrange(RIGHT, buff=0.15)
+        recap_text = VGroup(text1, q_latex, text2, d_latex,question_mark).arrange(RIGHT, buff=0.15)
 
         proportional_formula = MathTex("J_{ij}", r"\propto", "i^d", "+", "j^d", font_size=60)
         proportional_formula[0].set_color(D_COLOR)
@@ -2090,7 +2091,7 @@ class GroundStateCalculation(Scene):
         self.wait(3)
 
         part1 = VGroup(
-            MathTex(r"J_{ij}^{(N, d)}", font_size=60, color=J_COLOR),
+            MathTex(r"J_{ij}^{(N, d)}", font_size=60, color=LIGHT_YELLOW),
             MathTex(r"=", font_size=60, color=WHITE),
             MathTex(r"\frac{1}{N^d}", font_size=60, color=D_COLOR),
             MathTex(r"(i^d + j^d)", font_size=60, color=H_COLOR)
@@ -2148,7 +2149,7 @@ class GroundStateCalculation(Scene):
 
         # LHS expression
         j52_lhs = MathTex(r"J^{(5, 2)}", "=", r"\frac{1}{5^2}")
-        j52_lhs.set_color_by_tex("J", J_COLOR)
+        j52_lhs.set_color_by_tex("J", LIGHT_YELLOW)
         j52_lhs.set_color_by_tex("=", SIGN_COLOR)
 
         # Integer matrix
@@ -2226,6 +2227,8 @@ class GroundStateCalculation(Scene):
         hamiltonian_compact.next_to(full_s_g_display, DOWN, buff=1.0)
         hamiltonian_compact[0].set_color(H_COLOR)
         hamiltonian_compact[4].set_color(J_COLOR)
+        hamiltonian_compact[3].set_color(PLUS_ONE_COLOR)
+        hamiltonian_compact[5].set_color(PLUS_ONE_COLOR)
         self.play(Write(hamiltonian_compact))
         self.wait(2)
 
@@ -2242,6 +2245,8 @@ class GroundStateCalculation(Scene):
         hamiltonian_flipped = MathTex("H", "=", r"\frac{1}{2}", r"(-\pmb{s})^T", "J", r"(-\pmb{s})", font_size=48).move_to(hamiltonian_compact)
         hamiltonian_flipped[0].set_color(H_COLOR)
         hamiltonian_flipped[4].set_color(J_COLOR)
+        hamiltonian_compact[3].set_color(MINUS_ONE_COLOR)
+        hamiltonian_compact[5].set_color(MINUS_ONE_COLOR)
 
         self.play(
             spin_vector_content.animate.become(flipped_spins_target),
@@ -2251,9 +2256,9 @@ class GroundStateCalculation(Scene):
 
         self.play(FadeOut(hamiltonian_compact, m_brace, m_label))
         text1 = MarkupText("In his notation, he chose the first cluster to be up ", font_size=34, color=WHITE)
-        plus_one = MathTex(r"\:\mathbf{(+1)}", font_size=45, color=YELLOW)
+        plus_one = MathTex(r"\mathbf{\;(+1)}", font_size=45, color=YELLOW)
     
-        convention_text = VGroup(text1, plus_one).arrange(RIGHT, buff=0.05)
+        convention_text = VGroup(text1, plus_one).arrange(RIGHT, buff=0.15)
         convention_text.next_to(full_s_g_display, DOWN, buff=0.8)
 
         self.play(Write(convention_text))
@@ -2270,8 +2275,6 @@ class GroundStateCalculation(Scene):
         self.wait(5)
 
 
-
-
 class NewPerspective(Scene):
     def construct(self):
         # --- CONFIGURATION ---
@@ -2279,111 +2282,129 @@ class NewPerspective(Scene):
         S_COLOR = BLUE_D
         H_COLOR = GREEN
         
-        # --- SEQUENCE 1: THE IDENTITY ---
+        
+        s_formula = MathTex(r"(\pmb{s}\pmb{s}^T)_{ij} = s_i s_j",
+            tex_to_color_map={
+                r"(\pmb{s}\pmb{s}^T)_{ij}": BLUE,
+                "=": WHITE,
+                "s_i s_j": BLUE})
+        
+        step1_group = VGroup(s_formula).arrange(RIGHT, buff=0.3)
+        step1_group.move_to(ORIGIN)
 
-        # 1. Start with the core identity to be proven, faded out
-        identity = MathTex(
-            r"\sum_{i,j} s_i J_{ij} s_j", "=", r"\sum_{i,j} \left[ J \odot (\pmb{s}\pmb{s}^T) \right]_{ij}",
-            font_size=60
-        )
-        identity.set_color_by_tex_to_color_map({
-            "J": J_COLOR,
-            "s": S_COLOR,
-            r"\odot": RED,
-            r"\pmb{s}": S_COLOR
-        })
-        identity.to_edge(1.1*UP)
-        
-        # 2. Step 1: Define the Outer Product
-        proof_step1_lhs = MathTex(r"(\pmb{s}\pmb{s}^T)_{ij}", font_size=48)
-        proof_step1_lhs.set_color_by_tex("s", S_COLOR)
-        
-        proof_step1_rhs = MathTex("=", "s_i s_j", font_size=48)
-        proof_step1_rhs.set_color_by_tex("s", S_COLOR)
+        # Step 1: Create markup part and latex part separately
+        step1_label_text = MarkupText('<span foreground="YELLOW">Step </span>', font_size=36)
+        step1_label_math = MathTex(r"\mathbf{1}", font_size=46).set_color(YELLOW)
+        step1_label_rest = MarkupText(": The Outer Product", font_size=36)
 
-        step1_group = VGroup(proof_step1_lhs, proof_step1_rhs).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
-        
-        step1_title = Text("Step 1: The Outer Product", font_size=32).next_to(step1_group, 0.9*UP, buff=0.5)
+        step1_title = VGroup(step1_label_text, step1_label_math, step1_label_rest).arrange(RIGHT, buff=0.15)
+
+        step1_title.next_to(step1_group, 0.9 * UP, buff=1)
+
+
         self.play(Write(step1_title))
         self.play(Write(step1_group))
         self.wait(3)
 
         # 3. Step 2: Define the Hadamard Product
-        self.play(step1_group.animate.shift(UP*2), FadeOut(step1_title))
+        self.play(step1_group.animate.shift(UP * 2.5), FadeOut(step1_title))
         
-        proof_step2_lhs = MathTex(r"\big[ J \odot (\pmb{s}\pmb{s}^T) \big]_{ij}", font_size=48)
-        proof_step2_lhs.set_color_by_tex_to_color_map({
-            "J": J_COLOR, "s": S_COLOR, r"\odot": RED
-        })
+        proof_step2_lhs = MathTex(
+            r"\big[", "J", r"\odot", r"\pmb{s}", r"\pmb{s}^T", r"\big]_{ij}",
+            font_size=48)
+
+        proof_step2_lhs[0].set_color(WHITE)          # "["
+        proof_step2_lhs[1].set_color(J_COLOR)        # "J"
+        proof_step2_lhs[2].set_color(WHITE)          # "\odot"
+        proof_step2_lhs[3].set_color(S_COLOR)        # "s"
+        proof_step2_lhs[4].set_color(S_COLOR)        # "s^T"
+        proof_step2_lhs[5].set_color(WHITE)          # "]_{ij}"
 
         proof_step2_rhs = MathTex("=", "J_{ij}", r"(\pmb{s}\pmb{s}^T)_{ij}", font_size=48)
         proof_step2_rhs.set_color_by_tex_to_color_map({
-            "J": J_COLOR, "s": S_COLOR
-        })
+            "J": J_COLOR, "s": S_COLOR})
 
         step2_group = VGroup(proof_step2_lhs, proof_step2_rhs).arrange(RIGHT, buff=0.3).move_to(ORIGIN)
         
-        step2_title = Text("Step 2: The Hadamard Product", font_size=32).next_to(step2_group, 0.9*UP, buff=0.5)
+        
+        step2_label_text = MarkupText('<span foreground="YELLOW">Step </span>', font_size=32)
+        step2_label_math = MathTex(r"\mathbf{2}", font_size=46).set_color(YELLOW)
+        step2_label_rest = MarkupText(": The Hadamard Product", font_size=32)
+
+        step2_title = VGroup(step2_label_text, step2_label_math, step2_label_rest).arrange(RIGHT, buff=0.15)
+        
+        step2_title.next_to(step2_group, 0.9 * UP, buff=0.75)
+
         self.play(Write(step2_title))
         self.play(Write(step2_group))
         self.wait(3)
 
-        # 4. Substitute Step 1 into Step 2
-        # Highlight the term to be substituted
+        # Substitute Step 1 into Step 2
         term_to_sub = proof_step2_rhs.get_part_by_tex(r"(\pmb{s}\pmb{s}^T)_{ij}")
         self.play(Indicate(term_to_sub))
-        
-        # The result of the substitution
+
         proof_step3_rhs = MathTex("=","J_{ij}", "s_i s_j", font_size=48)
         proof_step3_rhs.set_color_by_tex_to_color_map({"J": J_COLOR, "s": S_COLOR})
         proof_step3_rhs.next_to(proof_step2_lhs, RIGHT, buff=0.3)
         
         self.play(
             FadeOut(step2_title),
-            Transform(proof_step2_rhs, proof_step3_rhs)
-        )
+            Transform(proof_step2_rhs, proof_step3_rhs))
         self.wait(3)
-        
-        # (The code for steps 1-4 remains the same)
-        # self.wait(3)
 
         # 5. Final Step: Sum over all elements
+        identity = MathTex(
+            r"\sum_{i,j}", r"s_i", r"J_{ij}", r"s_j", 
+            "=", 
+            r"\sum_{i,j}", r"\left[", r"J", r"\odot", r"\pmb{s}\pmb{s}^T", r"\right]", r"_{ij}",
+            font_size=50)
+
+        identity[0].set_color(WHITE)    # \sum_{i,j} lhs
+        identity[4].set_color(WHITE)    # "="
+        identity[5].set_color(WHITE)    # \sum_{i,j} rhs
+        identity[2].set_color(J_COLOR)  # J_{ij} lhs
+        identity[7].set_color(J_COLOR)  # J rhs
+        identity[1].set_color(S_COLOR)  # s_i lhs
+        identity[3].set_color(S_COLOR)  # s_j lhs
+        identity[9].set_color(S_COLOR)  # \pmb{s}\pmb{s}^T rhs
+        identity[8].set_color(WHITE)    # \odot
+        identity[6].set_color(WHITE)    # [
+        identity[10].set_color(WHITE)   # ]
+        identity[11].set_color(WHITE)   # _{ij} rhs
+        identity.to_edge(1.1 * UP)
         
-        # Group the result of the substitution
+        
         final_element_identity = VGroup(proof_step2_lhs, proof_step2_rhs)
         
-        # Create the final equation parts
-        sum_symbol_lhs = MathTex(r"\sum_{i,j}", font_size=64)
-        sum_symbol_rhs = MathTex(r"= \sum_{i,j}", font_size=64) # The equals sign is now part of the RHS
+        final_eq = MathTex(r"\sum_{i,j}", r"\big[", r"J", r"\odot", r"\pmb{s} \pmb{s}^T",
+                        r"\big]_{ij}", r"=",r"\sum_{i,j}", r"J_{ij}", r"s_i s_j", font_size = 48)  
         
-        # Build the final equation visually
-        # Target for the left part of the transform
-        final_lhs_target = VGroup(sum_symbol_lhs, proof_step2_lhs.copy()).arrange(RIGHT, buff=0.2)
-        
-        # Target for the right part of the transform
-        final_rhs_target = VGroup(sum_symbol_rhs, proof_step3_rhs[1:].copy()).arrange(RIGHT, buff=0.2)
-        
-        # Position the final equation in the center
-        final_eq = VGroup(final_lhs_target, final_rhs_target).arrange(RIGHT, buff=0.4).move_to(ORIGIN)
-        
-        # Animate the transformation precisely
+        final_eq[0].set_color(WHITE)
+        final_eq[1].set_color(WHITE)
+        final_eq[2].set_color(J_COLOR)
+        final_eq[3].set_color(WHITE)
+        final_eq[4].set_color(S_COLOR)
+        final_eq[5].set_color(WHITE)
+        final_eq[6].set_color(WHITE)
+        final_eq[7].set_color(WHITE)
+        final_eq[8].set_color(J_COLOR)
+        final_eq[9].set_color(S_COLOR)
+
+    
         self.play(
             FadeOut(step1_group),
-            Transform(final_element_identity[0], final_lhs_target),
-            Transform(final_element_identity[1], final_rhs_target)
-        )
+            Transform(final_element_identity, final_eq))
         self.wait(2)
 
-        # 6. Show the final identity clearly at the top
-        identity.set_color(YELLOW_E)
-        # The object `final_element_identity` now looks like `final_eq`
-        self.play(ReplacementTransform(final_element_identity, identity))
-        self.wait(5)
-
+     
+        self.play(
+            ReplacementTransform(final_element_identity,identity),# shift makes the fadeout more visible
+        )
+        self.wait(3)
 
         # --- NEW SEQUENCE: VISUALLY PROVING THE IDENTITY FOR s_g ---
         
-        # 1. Add the explanatory text (Corrected: with line break)
+        # 1. Add the explanatory text
         explanation_text = Text(
             "For our postulated ground state, let's visualize each side:",
             font_size=32, line_spacing=1.2
@@ -2394,57 +2415,85 @@ class NewPerspective(Scene):
         # 2. Define ALL components for the final layout first
         s_g = np.array([1, 1, 1, -1, -1])
         RED_COLOR = RED_D
-        # -- LHS Components --
+        S_COLOR = BLUE_D
+
+        # Prepare s_row_vals for column usage (string format "+1" or "-1")
         s_row_vals = [f"{v:+.0f}" for v in s_g]
-        s_row_mobs = [MathTex(v, color=S_COLOR if v=="+1" else RED_COLOR) for v in s_row_vals]
+
+        # --- Row spins ---
+        s_row_mobs = []
+        for v in s_g:
+            sign = "+" if v == 1 else "-"
+            sign_tex = MathTex(sign, font_size=48)
+            num_tex = MathTex("1", font_size=48)
+
+            color = S_COLOR if v == 1 else RED_COLOR
+            sign_tex.set_color(color)
+            num_tex.set_color(color)
+
+            combined = VGroup(sign_tex, num_tex).arrange(RIGHT, buff=0)
+            s_row_mobs.append(combined)
+
         s_row = MobjectMatrix([s_row_mobs], h_buff=0.8)
-        
-        s_col_vals = [[v] for v in s_row_vals]
-        s_col_mobs = [[MathTex(v[0], color=S_COLOR if v[0]=="+1" else RED_COLOR)] for v in s_col_vals]
+
+        # --- Column spins ---
+        s_col_mobs = []
+        for v in s_g:
+            sign = "+" if v == 1 else "-"
+            sign_tex = MathTex(sign, font_size=48)
+            num_tex = MathTex("1", font_size=48)
+
+            color = S_COLOR if v == 1 else RED_COLOR
+            sign_tex.set_color(color)
+            num_tex.set_color(color)
+
+            combined = VGroup(sign_tex, num_tex).arrange(RIGHT, buff=0)
+            s_col_mobs.append([combined]) 
+
         s_col = MobjectMatrix(s_col_mobs, v_buff=0.6)
 
-        # Corrected: Using proper subscripts for J
-        J_matrix_vals = [[f"J_{{{i}{j}}}" for j in range(1,6)] for i in range(1,6)]
+        J_matrix_vals = [[f"J_{{{i}{j}}}" for j in range(1, 6)] for i in range(1, 6)]
         J_matrix = Matrix(J_matrix_vals, h_buff=1.0, v_buff=0.7)
         J_matrix.elements.set_color(J_COLOR)
 
         lhs_group = VGroup(s_row, J_matrix, s_col).arrange(RIGHT, buff=0.2)
-        
-        # -- RHS Components --
+
+        # RHS Components
         ssT_matrix_vals = np.outer(s_g, s_g)
-        ssT_mobs = [
-            [MathTex(f"{val:+.0f}", color=S_COLOR if val == 1 else RED_COLOR) for val in row]
-            for row in ssT_matrix_vals
-        ]
+
+        ssT_mobs = []
+        for row in ssT_matrix_vals:
+            row_mobs = []
+            for val in row:
+                tex = MathTex(f"{val:+.0f}", font_size=48)
+                tex.set_color(S_COLOR if val == 1 else RED_COLOR)
+                tex.set(width=0.7)
+                row_mobs.append(tex)
+            ssT_mobs.append(row_mobs)
+
         ssT_matrix = MobjectMatrix(ssT_mobs, h_buff=0.8, v_buff=0.7)
 
         hadamard_symbol = MathTex(r"\odot", font_size=72)
         hadamard_group = VGroup(J_matrix.copy(), hadamard_symbol, ssT_matrix).arrange(RIGHT, buff=0.2)
-        
+
         sum_text = Text("Sum of all elements", font_size=36)
         sum_brackets = SurroundingRectangle(hadamard_group, buff=0.2, color=WHITE)
-        sum_text.next_to(sum_brackets, UP, buff=0.1)
+        sum_text.next_to(sum_brackets, UP, buff=0.3)
         rhs_group = VGroup(hadamard_group, sum_brackets, sum_text)
-        
-        # -- Equation Assembly --
+
         equals_sign = MathTex("=").scale(1.5)
-        
-        # This is the final layout group. We create it now to get the final positions.
+
         full_equation = VGroup(lhs_group, equals_sign, rhs_group).arrange(RIGHT, buff=0.3)
-        full_equation.scale(0.55).move_to(ORIGIN).shift(DOWN*0.5)
+        full_equation.scale(0.55).move_to(ORIGIN).shift(DOWN * 0.5)
+
 
         # 3. Animate smoothly into the final layout
-        
-        # First, show only the LHS in the center
         lhs_initial = lhs_group.copy().scale(1.8).next_to(explanation_text, DOWN, buff=0.3)
-        self.play(FadeOut(explanation_text), Write(lhs_initial))
+        self.play(FadeOut(explanation_text), Write(lhs_initial), FadeOut(identity))
         self.wait(3)
 
-        # Now, animate all parts moving to their final, pre-calculated positions
         self.play(
-            # The LHS moves from its initial spot to its final spot in the equation
             Transform(lhs_initial, full_equation[0]),
-            # The equals sign and RHS fade in at their final spots
             FadeIn(full_equation[1]),
             FadeIn(full_equation[2])
         )
@@ -2452,22 +2501,15 @@ class NewPerspective(Scene):
 
         # --- NEW SEQUENCE: EVALUATING THE HADAMARD PRODUCT (FRESH START) ---
 
-        # 1. Start by explicitly clearing the scene of old objects
-        # and adding back ONLY the ones we want to keep.
         self.play(
             FadeOut(lhs_group),
             FadeOut(equals_sign),
-            FadeOut(lhs_initial),
-        )
-        # rhs_group is the only thing left.
-        
-        # 2. Animate the RHS to the center
+            FadeOut(lhs_initial))
+
         self.play(
-            rhs_group.animate.move_to(ORIGIN).scale(1.2)
-        )
+            rhs_group.animate.move_to(ORIGIN).scale(1.2))
         self.wait(1)
 
-        # 3. Define the final, resulting matrix with corrected logic
         hadamard_group = rhs_group[0]
         sum_brackets = rhs_group[1]
         sum_text = rhs_group[2]
@@ -2496,12 +2538,9 @@ class NewPerspective(Scene):
         final_matrix = MobjectMatrix(result_mobs, h_buff=1.0, v_buff=0.7)
         final_matrix.move_to(hadamard_group)
 
-        # 4. Create a new, correctly sized bounding box for the final state
         new_sum_brackets = SurroundingRectangle(final_matrix, buff=0.2, color=WHITE)
-        new_sum_text = Text("Sum of all elements", font_size=24).next_to(new_sum_brackets, DOWN, buff=0.1)
+        new_sum_text = Text("Sum of all elements", font_size=24).next_to(new_sum_brackets, DOWN, buff=0.3)
 
-        # 5. Animate the transformation
-        # Use ReplacementTransform for robustness
         self.play(
             ReplacementTransform(hadamard_group, final_matrix),
             ReplacementTransform(sum_brackets, new_sum_brackets),
@@ -2509,32 +2548,36 @@ class NewPerspective(Scene):
         )
         self.wait(4)
 
-
-        # group them all
         final_group = VGroup(final_matrix, new_sum_brackets, new_sum_text)
         
-        # remove the identity formula and bring the matrix with the sum text and box into middle, then left of the panel:
         self.play(
-            FadeOut(identity),
-            final_group.animate.move_to(ORIGIN).scale(1.2)
-        )
+            final_group.animate.move_to(ORIGIN).scale(1.2) )
 
         self.wait(3)
 
-        # move left
         self.play(
-            final_group.animate.move_to(LEFT*2)
-        )
+            final_group.animate.move_to(LEFT*2))
 
         self.wait(1.5)
 
-        # add Mathtext : = \sum_{i,j \in \text{blue}} J_{ij} - \sum_{i,j \in \text{red}} J_{ij}
+        blue_sum_text = MathTex(
+            "=", r"\sum_{i,j \in \text{blue}}", r"J_{ij}",
+            font_size=36
+        )
+        blue_sum_text[0].set_color(WHITE)     # '=' sign white
+        blue_sum_text[1].set_color(S_COLOR)   # sum part blue (S_COLOR)
+        blue_sum_text[2].set_color(S_COLOR)   # J_{ij} part blue (or keep S_COLOR if you prefer)
 
-        blue_sum_text = MathTex(r"= \sum_{i,j \in \text{blue}}J_{ij}", font_size=36, color=S_COLOR)
-        red_sum_text = MathTex(r"- \sum_{i,j \in \text{red}}J_{ij}", font_size=36, color=RED_COLOR)
+        red_sum_text = MathTex(
+            "-", r"\sum_{i,j \in \text{red}}", r"J_{ij}",
+            font_size=36
+        )
+        red_sum_text[0].set_color(WHITE)      # '-' sign white
+        red_sum_text[1].set_color(RED_COLOR)  # sum part red
+        red_sum_text[2].set_color(RED_COLOR)  # J_{ij} part red (or keep RED_COLOR if you prefer)
+
         color_based_text = VGroup(blue_sum_text, red_sum_text).arrange(RIGHT, buff=0.5)
-        
-        # add next to brackets
+
         color_based_text.next_to(new_sum_brackets, RIGHT, buff=0.5)
 
         self.play(
@@ -2543,97 +2586,117 @@ class NewPerspective(Scene):
 
         self.wait(3)
         
-
-        # --- INTERMEDIATE STEP: CONNECTING COLOR TO INDICES ---
         D_COLOR = YELLOW_D
-        # 1. Fade out the matrix and identity, keep the color sum
         self.play(
             FadeOut(final_group),
-            # Center the color-based sum
-            color_based_text.animate.center()
-        )
+            color_based_text.animate.center())
         self.wait(1)
 
         s_g_vector_text = MathTex(
             r"\pmb{s}_g^T = [",
-            r"+1 \dots, +1", # Blue part
-            r",",             # Comma
-            r"-1 \dots, -1", # Red part
+            r"+1 \dots +1", # Blue part
+            r"\;-1 \dots -1", # Red part
             r"]",
-            font_size=42
-        )
-        
-        # Color the specific parts by index
+            font_size=42)
+
         s_g_vector_text[1].set_color(S_COLOR)
-        s_g_vector_text[3].set_color(RED_COLOR)
+        s_g_vector_text[2].set_color(RED_COLOR)
 
         s_g_vector_text.next_to(color_based_text, DOWN, buff=0.8)
 
-        # NOW, create the Brace objects targeting the colored parts
         blue_brace = Brace(s_g_vector_text[1], direction=DOWN, buff=0.1)
         blue_label = blue_brace.get_tex(r"M \text{ spins}")
-        blue_label.set_font_size(22)
+        blue_label.set_font_size(28)
 
-        red_brace = Brace(s_g_vector_text[3], direction=DOWN, buff=0.1)
+        red_brace = Brace(s_g_vector_text[2], direction=DOWN, buff=0.1)
         red_label = red_brace.get_tex(r"N-M \text{ spins}")
-        red_label.set_font_size(22)
+        red_label.set_font_size(28)
 
-        
-        # Group everything for the animation
         s_g_reminder = VGroup(s_g_vector_text, blue_brace, blue_label, red_brace, red_label)
-        # --- END OF FIX ---
+
 
         self.play(
             Write(s_g_vector_text),
             LaggedStart(
                 GrowFromCenter(blue_brace),
                 Write(blue_label),
-                lag_ratio=0.5
-            )
-        )
+                lag_ratio=0.5))
         self.play(
             LaggedStart(
                 GrowFromCenter(red_brace),
                 Write(red_label),
-                lag_ratio=0.5
-            )
-        )
+                lag_ratio=0.5))
         self.wait(3)
 
         # 3. Create and transform to the intermediate, index-based formula
-        # This formula is a bridge between the color names and the formal indices
         intermediate_formula = MathTex(
-            r"H = \sum_{1 \le i,j \le M} J_{ij} + \sum_{M+1 \le i,j \le N} J_{ij} - 2\sum_{\substack{i \le M \\ j > M}} J_{ij}",
-            font_size=40
-        )
-        intermediate_formula.set_color_by_tex("M", S_COLOR) # Use the spin color for M
+            r"H", 
+            r"\;=", 
+            r"\sum_{1 \le i,j \le M}", 
+            r"J_{ij}", 
+            r"\;+ ", 
+            r"\sum_{M+1 \le i,j \le N}", 
+            r"J_{ij} ",
+            r"\;- ", 
+            r" 2\; ",
+            r"\sum_{\substack{i \le M \\ j > M}}", 
+            r"J_{ij}",
+            font_size=40)
+        
+        intermediate_formula[0].set_color(H_COLOR)   # H
+        intermediate_formula[1].set_color(WHITE)     # =
+        intermediate_formula[2].set_color(WHITE)     # sum 1
+        intermediate_formula[3].set_color(J_COLOR)  # J_{ij}
+        intermediate_formula[4].set_color(WHITE)     # plus with spaces
+        intermediate_formula[5].set_color(WHITE)     # sum 2
+        intermediate_formula[6].set_color(J_COLOR) # J_{ij}
+        intermediate_formula[7].set_color(WHITE)     # minus with spaces
+        intermediate_formula[8].set_color(WHITE)     # 2
+        intermediate_formula[9].set_color(WHITE)     # sum 3
+        intermediate_formula[10].set_color(J_COLOR)# J_{ij}
 
-        # Animate the transition from the simple color sum to the more formal index sum
         self.play(
             ReplacementTransform(VGroup(color_based_text, s_g_reminder), intermediate_formula)
         )
         self.wait(4)
 
-        # --- FINAL TRANSFORMATION TO THE PAPER'S FORMULA ---
-
-        # 4. Create the final, paper-accurate formula from your paper
         final_hamiltonian_formula = MathTex(
-            r"""
-            H(M, N, d) = \frac{1}{2N^{d}} \Bigg\{ 
-            &\sum_{1 \le i \neq j \le M} (i^d+j^d) + \sum_{M+1 \le i \neq j \le N} (i^d+j^d) 
-            - &\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d) - \sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d) \Bigg\}
-            """,
-            font_size=26
-        )
-        # Color the key variables for clarity
-        final_hamiltonian_formula.set_color_by_tex_to_color_map({
-            "H": H_COLOR, "M": S_COLOR, "d": D_COLOR
-        })
+            r"H(M, N, d)",      # 0 - H_COLOR
+            r"=",               # 1 - SIGN_COLOR
+            r"\frac{1}{2N^{d}}",# 2 - D_COLOR
+            r"\Bigg\{",         # 3 - WHITE
+            r"\sum_{1 \le i \neq j \le M} (i^d+j^d)",  # 4 - D_COLOR
+            r"+",               # 5 -
+            r"\sum_{M+1 \le i \neq j \le N} (i^d+j^d)",# 6 - D_COLOR
+            r"-",               # 7 
+            r"\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d)",  # 8 - D_COLOR
+            r"-",               # 9 
+            r"\sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d)",  # 10 - D_COLOR
+            r"\Bigg\}",         # 11 
+            font_size=26)
+        
+        final_hamiltonian_formula[0].set_color(H_COLOR)
+        final_hamiltonian_formula[1].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[2].set_color(D_COLOR)
+        final_hamiltonian_formula[3].set_color(D_COLOR)
+        final_hamiltonian_formula[4].set_color(D_COLOR)
+        final_hamiltonian_formula[5].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[6].set_color(D_COLOR)
+        final_hamiltonian_formula[7].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[8].set_color(D_COLOR)
+        final_hamiltonian_formula[9].set_colo(SIGN_COLOR)
+        final_hamiltonian_formula[10].set_color(D_COLOR)
+        final_hamiltonian_formula[11].set_color(D_COLOR)
 
-        # 5. Animate the final transformation from the intermediate to the final formula
+        final_hamiltonian_formula[5].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[7].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[8].shift(RIGHT * 0.25) 
+        final_hamiltonian_formula[9].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[10].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[11].shift(RIGHT * 0.25)   
+
         self.play(
-            ReplacementTransform(intermediate_formula, final_hamiltonian_formula)
-        )
+            ReplacementTransform(intermediate_formula, final_hamiltonian_formula))
         self.wait(5)
 
 
@@ -2648,7 +2711,10 @@ def calculate_min_J_o(J):
     min_H_idx = np.argmin(H_l)
     return min_H_idx
 
+
 import math
+
+
 
 class GroundStateCalculationPart2(Scene):
     def construct(self):
@@ -2656,76 +2722,139 @@ class GroundStateCalculationPart2(Scene):
         S_COLOR = BLUE_D
         D_COLOR = YELLOW_D
         H_COLOR = GREEN
+        SIGN_COLOR = WHITE
+        LIGHE_YELLOW = YELLOW_E
         
-        # 1) Final H(M,N,d) formula
         final_hamiltonian_formula = MathTex(
-            r"""
-            H(M, N, d) = \frac{1}{2N^{d}} \Bigg\{
-            &\sum_{1 \le i \neq j \le M} (i^d+j^d)
-            + \sum_{M+1 \le i \neq j \le N} (i^d+j^d)
-            - \sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d)
-            - \sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d)
-            \Bigg\}
-            """,
-            font_size=26
-        ).set_color(YELLOW_D)
+            r"H(M, N, d)",      # 0
+            r"=",               # 1 
+            r"\frac{1}{2N^{d}}",# 2 
+            r"\Bigg\{",         # 3
+            r"\sum_{1 \le i \neq j \le M} (i^d+j^d)",  # 4
+            r"+",               # 5 -
+            r"\sum_{M+1 \le i \neq j \le N} (i^d+j^d)",# 6
+            r"-",               # 7 
+            r"\sum_{i=1}^M \sum_{j=M+1}^N (i^d+j^d)",  # 8 -
+            r"-",               # 9 
+            r"\sum_{i=M+1}^N \sum_{j=1}^M (i^d+j^d)",  # 10 
+            r"\Bigg\}",         # 11 
+            font_size=26)
+
+        final_hamiltonian_formula[0].set_color(H_COLOR)
+        final_hamiltonian_formula[1].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[2].set_color(D_COLOR)
+        final_hamiltonian_formula[3].set_color(D_COLOR)
+        final_hamiltonian_formula[4].set_color(D_COLOR)
+        final_hamiltonian_formula[5].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[6].set_color(D_COLOR)
+        final_hamiltonian_formula[7].set_color(SIGN_COLOR)
+        final_hamiltonian_formula[8].set_color(D_COLOR)
+        final_hamiltonian_formula[9].set_colo(SIGN_COLOR)
+        final_hamiltonian_formula[10].set_color(D_COLOR)
+        final_hamiltonian_formula[11].set_color(D_COLOR)
+
+        final_hamiltonian_formula[5].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[7].shift(RIGHT * 0.2) 
+        final_hamiltonian_formula[8].shift(RIGHT * 0.25) 
+        final_hamiltonian_formula[9].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[10].shift(RIGHT * 0.3)
+        final_hamiltonian_formula[11].shift(RIGHT * 0.25)   
+
+
         self.add(final_hamiltonian_formula)
         self.wait()
         self.play(final_hamiltonian_formula.animate.to_edge(UP, buff=1))
         self.wait()
 
+
         # 2) Faulhaber’s formula
         faulhaber_formula = MathTex(
-            r"F^{d}(N)", r"=", r"\sum_{i=1}^N i^d",
-            r"=", r"\sum_{r=0}^{d} \frac{(-1)^r B_r}{d+1} \binom{d+1}{r} N^{d+1-r}",
+            r"F^{d}(N)",                                        
+            r"=",                                              
+            r"\sum_{i=1}^N i^d",                               
+            r"=",                                              
+            r"\sum_{r=0}^{d} \frac{(-1)^r B_r}{d+1} \binom{d+1}{r} N^{d+1-r}", 
             font_size=36
         ).move_to(ORIGIN)
+
+        faulhaber_formula.set_color(WHITE)
+
         faulhaber_formula.set_color_by_tex_to_color_map({
             r"F^{d}(N)": PURPLE_A,
-            r"\sum_{i=1}^N i^d": YELLOW_D,
-        })
-        # color the B_r in orange
+            r"\sum_{i=1}^N i^d": D_COLOR})
+
         faulhaber_formula[4][10:12].set_color(ORANGE)
+        faulhaber_formula[1].set_color(SIGN_COLOR)
+        faulhaber_formula[3].set_color(SIGN_COLOR)
+
         self.play(Write(faulhaber_formula))
         self.wait()
 
         # 3) Shortened H
         shorten_H = MathTex(
-            r"H(M,N,d) = \frac{1}{N^{d}}\bigl((N - 2M - 1)F^d(N) + (4M-2N)F^{d}(M)\bigr)",
+            r"H(M,N,d)",                          # 0 
+            r"=",                                 # 1 
+            r"\frac{1}{N^{d}}",                   # 2 
+            r"\bigl(",                            # 3 
+            r"(N - 2M - 1)F^d(N)",                # 4 
+            r"+",                                 # 5 
+            r"(4M - 2N)F^{d}(M)",                 # 6 
+            r"\bigr)",                            # 7 
             font_size=36
         ).move_to(ORIGIN)
+
+        shorten_H[0].set_color(H_COLOR)  
+        shorten_H[1].set_color(SIGN_COLOR)
+        shorten_H[3].set_color(H_COLOR)  
+        shorten_H[5].set_color(H_COLOR)  
+        shorten_H[7].set_color(H_COLOR)  
+
         self.play(
-            faulhaber_formula.animate.to_edge(UP, buff=1),
-            ReplacementTransform(final_hamiltonian_formula, shorten_H)
-        )
+            faulhaber_formula.animate.to_edge(UP, buff=1.25),
+            ReplacementTransform(final_hamiltonian_formula, shorten_H))
         self.wait()
 
         # 4) M_g formula
         M_g_formula = MathTex(
-            r"M_{g}^{(N, d)} = \arg\min_M H(M, N, d)",
-            font_size=32
+            r"M_{g}^{(N, d)}",      
+            r"=",                   
+            r"\arg\min_M",          
+            r"H(M, N, d)",         
+            font_size=36
         ).next_to(shorten_H, DOWN, buff=1)
+
+        M_g_formula.set_color(WHITE)
+
+        M_g_formula[0].set_color(D_COLOR)
+        M_g_formula[3].set_color(H_COLOR)
+        
         self.play(Write(M_g_formula))
         self.wait()
+
 
         # --- SEQUENCE 3: VISUALIZING THE MINIMIZATION OVER M ---
         formulas_panel = VGroup(faulhaber_formula, shorten_H, M_g_formula)
         self.play(formulas_panel.animate.scale(0.8).to_edge(LEFT, buff=0.5))
         self.wait()
 
-        # fixed parameters
         d_val = 1
         N0 = 10
 
-        # 2) Setup the viz area+box (never changes)
+        # 2) Setup the viz area+box 
         viz_area = Square(side_length=3.5, color=None)
         viz_area.to_edge(RIGHT, buff=1.0)
         viz_box  = SurroundingRectangle(viz_area, color=WHITE, buff=0.2)
-        viz_box_tex = MathTex(fr"J^{{(N = {N0}, d = {d_val})}}", font_size=36).next_to(viz_box, UP, buff=0.2)
+        viz_box_tex = MathTex(
+            fr"J^{{(N = {N0}, d = {d_val})}}",
+            font_size=36
+        ).next_to(viz_box, UP, buff=0.2)
+
+        viz_box_tex.set_color(PURPLE_A)
+
         self.add(viz_area)
         self.play(Write(viz_box_tex), 
                   Create(viz_box))
-
+        
         # helper to build & return a VGroup of dots for a given N
         def build_dots(N):
             matrix = J_order(N, d=d_val)
@@ -2779,23 +2908,26 @@ class GroundStateCalculationPart2(Scene):
                 MathTex(
                     fr"J^{{(N = {N0}, d = {d_val})}} \odot (\mathbf{{s}}\mathbf{{s}}^T)",
                     font_size=36
-                ).next_to(viz_box, UP, buff=0.2),
+                ).set_color(PURPLE_A).next_to(viz_box, UP, buff=0.2)
             ),
-            run_time=3
-        )
+            run_time=3)
+
         self.wait()
         N_grid = N0
         curly_bracket   = Brace(viz_box, DOWN, buff=0.1)
-        curly_bracket_tex = always_redraw(lambda: MathTex(
-            fr"\displaystyle H\bigl(M = {math.ceil(M_g_tracker.get_value())}, "
-            fr"N = {N_grid}, d = {d_val}\bigr)",
-            font_size=32
-        ).next_to(curly_bracket, DOWN, buff=0.2))
+        curly_bracket_tex = always_redraw(lambda: VGroup(
+            MathTex("H", font_size=32).set_color(H_COLOR),
+            MathTex(
+                fr"\bigl(M = {math.ceil(M_g_tracker.get_value())}, "
+                fr"N = {N_grid}, d = {d_val}\bigr)",
+                font_size=32
+            )).arrange(buff=0.05).next_to(curly_bracket, DOWN, buff=0.2))
+
 
         self.play(FadeIn(curly_bracket), Write(curly_bracket_tex))
         self.wait()
 
-        # attach a *single* updater to recolor via ceil(tracker)
+        # attach a single updater to recolor via ceil(tracker)
         def updater(group):
             M_val = M_g_tracker.get_value()
             for dot, (i, j) in zip(group, index_list):
@@ -2830,8 +2962,7 @@ class GroundStateCalculationPart2(Scene):
             self.play(
                 FadeOut(dots),
                 FadeIn(new_dots),
-                run_time=1.5
-            )
+                run_time=1.5)
             self.wait(0.5)
 
             # 5) Rebind our references & reattach the updater:
@@ -2851,69 +2982,65 @@ class GroundStateCalculationPart2(Scene):
             self.play(M_g_tracker.animate.set_value(true_minimizer), run_time=2.5)
             self.wait(1)
 
-        self.wait(2)
-    
-        # 1) create the “implies” part
+        self.wait(2.5)
+
+        self.play(
+        *[FadeOut(mobj) for mobj in [
+                viz_area,
+                viz_box,
+                viz_box_tex,
+                dots,
+                curly_bracket,
+                curly_bracket_tex]])
+
+
         deriv_condition = MathTex(
             r"\Rightarrow",
             r"\frac{\partial H(M,\,N,\,d)}{\partial q} = 0",
-            font_size=32
-        )
+            font_size=32)
 
-        # write next to M_g_formula
-        deriv_condition.next_to(M_g_formula, RIGHT, buff=0.2)
+        deriv_condition.next_to(M_g_formula, DOWN, buff=0.5)
 
-        # group them together
-        implied_group = VGroup(M_g_formula, deriv_condition)
-
-        # create the q explanation
-        q_explanation = MathTex(r"q = \frac{M}{N}", font_size=32).next_to(implied_group, DOWN, buff=0.2)
-        # play animations
-        self.play(Write(deriv_condition))
-        self.play(implied_group.animate.next_to(shorten_H, DOWN, buff=0.2))
-        q_explanation.next_to(implied_group, DOWN, buff=0.2)
+        self.play(Write(deriv_condition))  
         self.wait(1)
+
+        self.play(FadeOut(faulhaber_formula),
+            M_g_formula.animate.next_to(shorten_H, DOWN, buff=0.8),
+            deriv_condition.animate.next_to(M_g_formula, DOWN, buff=0.7),
+            run_time=1)
+
+        implied_group = VGroup(M_g_formula, deriv_condition)
+        top_group = VGroup(shorten_H, implied_group)
+
+        self.play(top_group.animate.move_to(UP * 1), run_time=1)
+        self.wait(1)
+
+        q_explanation = MathTex(r"q = \frac{M}{N}", font_size=32).next_to(top_group, DOWN, buff=0.5)
         self.play(Write(q_explanation))
-        self.wait(2)
+        self.wait(1.5)
 
-        # group the faulhaber_formula, shorten_H, implied_group, q_explanation
-
-        new_formulas_panel = VGroup(faulhaber_formula, shorten_H, implied_group, q_explanation)
-
-        # remove everything else and move the new_formulas_panel to the middle
-        self.play(
-            FadeOut(viz_area),
-            FadeOut(viz_box),
-            FadeOut(viz_box_tex),
-            FadeOut(dots),
-            FadeOut(curly_bracket),
-            FadeOut(curly_bracket_tex)
-        )
-
-        # Move the grouped formulas back to center
-        self.play(new_formulas_panel.animate.scale(1.25).move_to(ORIGIN))
-        self.wait(2)
-
-        # (This code follows immediately after the previous sequence)
-        # self.wait(2)
         Q_COLOR = YELLOW
-        # --- SEQUENCE 5: THE FINAL DERIVATION ---
-        deriv_condition[1].next_to(shorten_H, DOWN, buff=0.2)
-        # 1. Isolate the key formulas for the derivation
-        self.play(
-            FadeOut(faulhaber_formula, M_g_formula, q_explanation, deriv_condition[0]),
-            VGroup(shorten_H, deriv_condition[1]).animate.to_edge(UP, buff=1.0)
-        )
-        deriv_condition = deriv_condition[1]
+
+        self.play(FadeOut(M_g_formula, q_explanation))
+        self.wait(1)
+
+        self.play(deriv_condition.animate.next_to(shorten_H, DOWN, buff=0.35))
+
+        self.play(VGroup(shorten_H, deriv_condition).animate.to_edge(UP, buff=1.0))
 
         self.wait(2)
 
-        # 2. Start with Eq. (11) from your paper
-        # We need to minimize H_tilde = M*F(N) + (N-2M)*F(M)
-        h_tilde_intro = Text("We only need to minimize the M-dependent terms:", font_size=28)
+
+        h_tilde_intro = MarkupText("We only need to minimize the <span foreground='YELLOW'>M-dependant</span> terms:"
+                        .format(D_COLOR),font_size=28)
         h_tilde_formula = MathTex(
-            r"\tilde{H}(M, N, d) = M F^{d}(N) + (N-2M)F^{d}(M)", font_size=36
-        )
+            r"\tilde{H}(M, N, d)",          
+            r"=",                           
+            r"M F^{d}(N) + (N-2M)F^{d}(M)", 
+            font_size=36)
+
+        h_tilde_formula[0].set_color(H_COLOR)
+
         VGroup(h_tilde_intro, h_tilde_formula).arrange(DOWN, buff=0.3).next_to(deriv_condition, DOWN, buff=0.8)
 
         self.play(Write(h_tilde_intro))
@@ -2926,68 +3053,78 @@ class GroundStateCalculationPart2(Scene):
             r"N\left\{F^{d}(N) - 2 F^{d}(M) + (1-2q) \frac{\partial F^{d}(M)}{\partial q}\right\} = 0",
             font_size=36
         )
-        eq12.next_to(h_tilde_formula, 0.1*DOWN, buff=0)
+        eq12.next_to(h_tilde_formula,DOWN, buff=0)
 
-        self.play(
-            FadeOut(h_tilde_intro),
-            ReplacementTransform(h_tilde_formula, eq12)
-        )
+        self.play(ReplacementTransform(h_tilde_formula, eq12))
         self.wait(3)
 
-        # 4. Show the derivative of F^d(M) (Eq. 13)
+        # Step 1: Create the formula as usual
         df_formula = MathTex(
-            r"\frac{\partial F^{d}(M)}{\partial M} = d F^{d-1}(M) + (-1)^{d} B_d", font_size=36
-        )
+            r"\frac{\partial F^{d}(M)}{\partial M} = d F^{d-1}(M) + (-1)^{d} B_d",
+            font_size=32)
+
         df_formula.set_color_by_tex("B_d", ORANGE)
-        df_formula.move_to(ORIGIN)
-        self.play(Write(df_formula))
+        df_formula.set_color_by_tex("=", SIGN_COLOR)
+
+        # Step 2: Position below eq12
+        df_formula.next_to(eq12, DOWN, buff=0.6)
+
+        # Step 3: Surrounding box with PURPLE_A color
+        df_box = SurroundingRectangle(df_formula, color=PURPLE, buff=0.2)
+        boxed_df_formula = VGroup(df_box, df_formula)
+
+        # Step 4: Show both
+        self.play(Write(df_formula), Create(df_box))
         self.wait(2)
+
 
         # 5. Substitute it in to get Eq. (14)
         eq14 = MathTex(
             r"F^{d}(N) - 2 F^{d}(M) + (1-2q)N \{dF^{d-1}(M) + (-1)^{d} B_d \}  = 0",
             font_size=36
         ).move_to(eq12)
+
         self.play(
-            ReplacementTransform(VGroup(eq12, df_formula), eq14)
-        )
+            FadeOut(boxed_df_formula),
+            ReplacementTransform(VGroup(eq12, df_formula.copy()), eq14))
         self.wait(3)
 
-        # 6. The Large N approximation for Faulhaber's formula
+        # 6. Large N approximation
         large_n_approx = MathTex(
-            r"\text{For large N, } F^{d}(N) \approx \frac{N^{d+1}}{d+1}", font_size=36
-        ).next_to(eq14, DOWN, buff=0.8)
-        
+        r"\text{For large N:\; } F^{d}(N) \approx \frac{N^{d+1}}{d+1}", font_size=36)
+        large_n_approx.next_to(eq14, DOWN, buff=0.8)
+
+
         self.play(Write(large_n_approx))
         self.wait(3)
 
-        # 7. Substitute the approximation to get Eq. (16)
+        # 7. Final Equation (Eq. 16)
         eq16 = MathTex(
             r"\frac{N^{d+1}}{d+1}(1-2q^{d+1}) + (1-2q)N\left\{(qN)^d + \dots\right\} = 0",
             font_size=36
         ).move_to(eq14)
-        
+
         self.play(ReplacementTransform(VGroup(eq14, large_n_approx), eq16))
         self.wait(3)
 
-        # 8. Simplify to the final, beautiful result (Eq. 17)
         final_equation = MathTex(
-            r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0",
-            font_size=48
-        )
-        final_equation.set_color_by_tex("q", Q_COLOR)
-        final_equation.set_color_by_tex("d", D_COLOR)
+            "1 + (1 + ", "d", ")",
+            "q", "^", "d",
+            " - 2 (2 + ", "d", ") ",
+            "q", "^{", "d + 1}",
+            " = 0",
+            font_size=48)
 
-        # Show a title for the final equation
-        final_title = Text("The Master Equation of Ground State", font_size=36, color=GOLD)
+        final_equation.set_color(GOLD) 
+
+        final_title = Text('The Master Equation of Ground State', font_size=36, color=WHITE)
         final_title.to_edge(UP, buff=1.5)
 
-        # Animate the final transformation
         self.play(
-            FadeOut(shorten_H, deriv_condition),
+            FadeOut(shorten_H, deriv_condition, h_tilde_intro), 
             ReplacementTransform(eq16, final_equation),
-            Write(final_title)
-        )
+            Write(final_title))
+
         self.wait(8)
 
 
@@ -2996,7 +3133,7 @@ from scipy.optimize import root
 class MasterEquationofGroundState(Scene):
 
     N = 1000
-    left = -2.4  # lower log exponent for symlog threshold
+    left = -2.4  
 
     def _func_positive(self, p, d):
         return 1 + (1 + d) * p**d - 2 * (2 + d) * p**(d + 1)
@@ -3017,8 +3154,8 @@ class MasterEquationofGroundState(Scene):
 
     def construct(self):
   
-        eq = MathTex(r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0", font_size=48).set_color(YELLOW_D)
-        title = Text('"The Master Equation of Ground State"', font_size=36, color=WHITE)
+        eq = MathTex(r"1 + (1+d)q^d - 2(2+d)q^{d+1} = 0", font_size=48).set_color(GOLD)
+        title = Text('The Master Equation of Ground State', font_size=36, color=PURPLE_A)
         title.to_edge(UP, buff=1.5)
         self.add(eq, title)
         self.play(eq.animate.next_to(title, DOWN, buff=0.2))
@@ -3032,7 +3169,6 @@ class MasterEquationofGroundState(Scene):
         r2 = -np.logspace(-1e-6, self.left, 2000)
         domain = np.sort(np.concatenate((r2, r1)))
 
-        # derive min/max from the actual domain
         d_min, d_max = domain[0], domain[-1]
 
         # symlog transform
@@ -3040,7 +3176,6 @@ class MasterEquationofGroundState(Scene):
         def symlog(x): return np.arcsinh(x / C)
         x_min_t, x_max_t = symlog(d_min), symlog(d_max)
 
-        # 3) Build axes
         axes = Axes(
             x_range=[0, x_max_t - x_min_t, 1],
             y_range=[0, 1.1, 0.2],
@@ -3066,6 +3201,7 @@ class MasterEquationofGroundState(Scene):
                 axes.x_axis.n2p(xp),
                 axes.x_axis.n2p(xp) + DOWN*0.1,
                 color=TEAL, stroke_width=2))
+            
             exp = int(np.log10(abs(v)))
             lab = MathTex(f'{"-" if v<0 else ""}10^{{{exp}}}', font_size=24)
             lab.next_to(axes.x_axis.n2p(xp), DOWN, buff=0.2)
@@ -3101,8 +3237,10 @@ class MasterEquationofGroundState(Scene):
             y_values=q_vals[mask],
             line_color=WHITE,
             add_vertex_dots=False)
+        
         self.play(Create(curve), run_time=3)
         self.wait(2)
+
 
 
 PLUS_ONE_COLOR = BLUE_D
@@ -3117,7 +3255,7 @@ DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR]
 class TheLingeringDoubt(Scene):
     def construct(self):
         # --- SEQUENCE 1: The "Perfect" State ---
- 
+        
         problem_text = Text(
             "His entire Master Equation was built on a foundation...",
             font_size=36
@@ -3133,7 +3271,6 @@ class TheLingeringDoubt(Scene):
         self.play(Write(assumption_text))
         self.wait(3)
 
-        # 2. Show the clean, postulated ground state
         postulate = MarkupText(
             " <span foreground='{}'>Postulate:</span> The ground state is always <span foreground='{}'>two clusters.</span>"
             .format(Q_COLOR, LIGHT_YELLOW),
@@ -3141,8 +3278,7 @@ class TheLingeringDoubt(Scene):
                 
         self.play(
             FadeOut(problem_text, assumption_text),
-            Write(postulate)
-        )
+            Write(postulate))
         self.wait(2)
 
         s_g_perfect = VGroup(*[
@@ -3154,13 +3290,12 @@ class TheLingeringDoubt(Scene):
         self.wait(2)
         
         # --- SEQUENCE 2: The Doubt Creeps In ---
-        
-        # 1. The flicker of imperfection
+
         what_if_text = Text("But what if the true ground state was more complicated?", font_size=36)
         what_if_text.move_to(postulate.get_center())
 
         s_g_imperfect = s_g_perfect.copy()
-        s_g_imperfect[3].set_color(MINUS_ONE_COLOR) # The flipped spin
+        s_g_imperfect[3].set_color(MINUS_ONE_COLOR)
 
         self.play(
             ReplacementTransform(postulate, what_if_text),
@@ -3169,7 +3304,7 @@ class TheLingeringDoubt(Scene):
         )
         self.wait(3)
 
-        # 2. The chaos of possibilities
+        # The chaos of possibilities
         for _ in range(5):
             random_state_dots = VGroup(*[Dot(radius=0.15) for _ in range(12)])
             random_state_dots.arrange(RIGHT, buff=0.3).move_to(s_g_perfect.get_center())
@@ -3191,7 +3326,6 @@ class TheLingeringDoubt(Scene):
         
         self.wait(2)
 
-        # 3. The final question mark
         final_question_mark = MathTex("?", font_size=160, color=RED)
         final_question_mark.move_to(what_if_text.get_center())
         
@@ -3199,10 +3333,9 @@ class TheLingeringDoubt(Scene):
             FadeOut(s_g_perfect),
             ReplacementTransform(what_if_text, final_question_mark),
             run_time=1.5)
+        
         self.wait(4)
 
-
-# --- CONFIGURATION (Consistent Colors) ---
 PLUS_ONE_COLOR = BLUE_D
 MINUS_ONE_COLOR = RED_D
 J_COLOR = YELLOW
@@ -3213,19 +3346,14 @@ DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR, GREEN_D, ORANGE]
 
 class TheContinuousLeap(Scene):
     def construct(self):
-        # --- NEW: CUSTOM TEX TEMPLATE FOR \sgn ---
-        # This is the fix. We define a new template that includes the amsmath
-        # package and explicitly declares the \sgn operator.
         sgn_template = TexTemplate()
         sgn_template.add_to_preamble(r"\usepackage{amsmath}")
         sgn_template.add_to_preamble(r"\DeclareMathOperator{\sgn}{sgn}")
 
-        # --- PREPARATION ---
         q_values_initial = [0.3, 0.65, 0.85]
         N_INITIAL = 20
         N_FINAL = 400
 
-        # --- HELPER FUNCTIONS (UNCHANGED) ---
         def get_domain_info(n, q_vals):
             if n <= 1: return [{'size': n, 'color': DOMAIN_COLORS[0], 'spin_val': 1}]
             boundaries = sorted([0] + list(q_vals) + [1])
@@ -3248,7 +3376,7 @@ class TheContinuousLeap(Scene):
             l_bracket = MathTex("[", font_size=72)
             r_bracket = MathTex("]", font_size=72)
             domain_blocks = VGroup()
-            for i, info in enumerate(domain_info):
+            for info in domain_info:
                 block = Rectangle(
                     height=0.4, width=info['size'] * 0.02 + 0.1,
                     fill_color=info['color'], fill_opacity=0.8,
@@ -3274,22 +3402,28 @@ class TheContinuousLeap(Scene):
                     spin_index += 1
             return plot
 
-        # --- ANIMATION PART 1 (UNCHANGED) ---
         axes = Axes(
-            x_range=[0, 1.05, 0.2], y_range=[-1.5, 1.5, 1],
+            x_range=[0, 1.1, 0.2], y_range=[-1.5, 1.5, 1],
             x_length=11, y_length=3.5, axis_config={"color": BLUE},
             x_axis_config={"numbers_to_include": np.arange(0, 1.1, 0.2)}
         ).to_edge(DOWN, buff=1.0)
-        x_label = axes.get_x_axis_label(MathTex("x = i/N"))
-        plot_title = MathTex("s_i", font_size=40).next_to(axes.y_axis, LEFT, buff=0.3)
+
+        x_label = MathTex(r"x = \frac{i}{N}", font_size=42)
+        x_label.move_to(axes.x_axis.get_end() + RIGHT * 0.8)
+        x_label.align_to(axes.x_axis, DOWN)
+
+        y_label = MathTex(r"s_i", font_size=42)
+        y_label.move_to(axes.y_axis.get_end() + UP * 0.4)
+        y_label.align_to(axes.y_axis, LEFT)
+
         s_T_display_group = VGroup().to_edge(UP, buff=0.5)
         N_tracker = ValueTracker(N_INITIAL)
         s_T_display_group.add_updater(lambda mob: mob.become(create_refined_s_T_group(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial))).to_edge(UP, buff=0.5))
         discrete_plot = VGroup()
         discrete_plot.add_updater(lambda mob: mob.become(create_colored_discrete_plot(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial), axes)))
-        
+
         self.add(s_T_display_group, discrete_plot)
-        self.play(Create(axes), Write(x_label), Write(plot_title), run_time=1)
+        self.play(Create(axes), Write(x_label), Write(y_label), run_time=1)
         self.play(N_tracker.animate.set_value(N_FINAL), run_time=5, rate_func=rate_functions.ease_in_out_sine)
         self.wait(0.5)
 
@@ -3303,104 +3437,180 @@ class TheContinuousLeap(Scene):
                 spin_val = 1 if i % 2 == 0 else -1
                 start_p, end_p = axes_obj.c2p(boundaries[i], spin_val), axes_obj.c2p(boundaries[i+1], spin_val)
                 func.add(Line(start_p, end_p, color=WHITE, stroke_width=6))
-            for q_val in q_vals:
+            for i, q_val in enumerate(q_vals):
                 func.add(DashedLine(axes_obj.c2p(q_val, -1), axes_obj.c2p(q_val, 1), color=Q_COLOR, stroke_width=3))
-                label = MathTex(f"q_{list(q_vals).index(q_val)+1}", color=Q_COLOR, font_size=36).next_to(axes_obj.c2p(q_val,0), DOWN)
-                func.add(label)
+                circle = Circle(radius=0.22, color=WHITE, fill_opacity=0.85).move_to(axes_obj.c2p(q_val, 0.3))
+                label = MathTex(f"q_{{{i+1}}}", color=BLACK, font_size=34).move_to(circle.get_center())
+                func.add(circle, label)
             return func
 
         continuous_function_initial = create_continuous_function(q_values_initial, axes)
         final_symbolic_text = MathTex("S(x, \\mathbf{q})", font_size=48).move_to(s_T_display_group)
+        final_symbolic_text.set_color(PURPLE_A)
+
 
         self.play(
             FadeOut(discrete_plot, s_T_display_group, shift=UP),
             FadeIn(continuous_function_initial, shift=UP),
             Write(final_symbolic_text),
-            run_time=1.5
-        )
+            run_time=1.5 )
         self.wait(2)
 
-        # --- ANIMATION PART 2: GENERALITY OF S(x, q) (UNCHANGED) ---
-        generality_text = Text("This can represent any number of clusters (Λ+1)...", font_size=32)
+        generality_text = VGroup(
+            Text("This can represent any number of clusters", font_size=32),
+            MathTex(r"(\Lambda + 1)", font_size=32, color=PURPLE_A)).arrange(RIGHT, buff=0.2)
+
         generality_text.next_to(final_symbolic_text, DOWN, buff=0.2)
         self.play(Write(generality_text))
         self.wait(1)
-        q_vals_1 = [0.6]; func_1 = create_continuous_function(q_vals_1, axes)
-        self.play(Transform(continuous_function_initial, func_1), run_time=1.5); self.wait(1.5)
-        q_vals_2 = [0.4, 0.8]; func_2 = create_continuous_function(q_vals_2, axes)
-        self.play(Transform(continuous_function_initial, func_2), run_time=1.5); self.wait(1.5)
-        q_vals_many = np.linspace(0.1, 0.9, 10); func_many = create_continuous_function(q_vals_many, axes)
-        self.play(Transform(continuous_function_initial, func_many), run_time=2); self.wait(2)
-        
+
+        for q_vals in [[0.6], [0.4, 0.8], np.linspace(0.1, 0.9, 10)]:
+            new_func = create_continuous_function(q_vals, axes)
+            
+            self.play(
+                FadeOut(continuous_function_initial, shift=UP*0.5), 
+                FadeIn(new_func, shift=UP*0.5), 
+                run_time=2)
+
+            continuous_function_initial = new_func
+            self.wait(1.5)
+
         def create_general_schematic(axes_obj):
             schematic = VGroup()
-            schematic.add(Line(axes_obj.c2p(0, 1), axes_obj.c2p(0.2, 1), color=WHITE, stroke_width=6))
-            schematic.add(DashedLine(axes_obj.c2p(0.2, 1), axes_obj.c2p(0.2, -1), color=Q_COLOR, stroke_width=3))
-            schematic.add(Line(axes_obj.c2p(0.2, -1), axes_obj.c2p(0.35, -1), color=WHITE, stroke_width=6))
-            ellipsis_y_up = axes_obj.c2p(0,1)[1]; ellipsis_y_down = axes_obj.c2p(0,-1)[1]
-            schematic.add(MathTex(r"\dots").scale(2).move_to(axes_obj.c2p(0.5, ellipsis_y_up)))
-            schematic.add(MathTex(r"\dots").scale(2).move_to(axes_obj.c2p(0.5, ellipsis_y_down)))
-            schematic.add(Line(axes_obj.c2p(0.65, -1), axes_obj.c2p(0.8, -1), color=WHITE, stroke_width=6))
-            schematic.add(DashedLine(axes_obj.c2p(0.8, -1), axes_obj.c2p(0.8, 1), color=Q_COLOR, stroke_width=3))
-            schematic.add(Line(axes_obj.c2p(0.8, 1), axes_obj.c2p(1.0, 1), color=WHITE, stroke_width=6))
-            labels = VGroup(
-                MathTex("q_1", color=Q_COLOR).next_to(axes_obj.c2p(0.2,0),DOWN),
-                MathTex("q_2", color=Q_COLOR).next_to(axes_obj.c2p(0.35,0),DOWN),
-                MathTex("q_{\Lambda-1}", color=Q_COLOR).next_to(axes_obj.c2p(0.65,0),DOWN),
-                MathTex("q_{\Lambda}", color=Q_COLOR).next_to(axes_obj.c2p(0.8,0),DOWN)
-            )
-            schematic.add(labels)
+            
+            original_numbers = axes_obj.x_axis.numbers.copy()
+
+            for num in axes_obj.x_axis.numbers:
+                if not np.isclose(num.get_value(), 1.0):
+                    num.set_opacity(0)
+
+            for tick in axes_obj.x_axis.get_tick_marks():
+                tick.set_opacity(0)
+            
+            def step_segment(x_start, x_end, y_val):
+                return Line(
+                    axes_obj.c2p(x_start, y_val),
+                    axes_obj.c2p(x_end, y_val),
+                    color=WHITE, stroke_width=6)
+
+            def full_dashed_q_line(x_val):
+                return DashedLine(
+                    axes_obj.c2p(x_val, -1),
+                    axes_obj.c2p(x_val, 1),
+                    color=Q_COLOR, stroke_width=3,
+                    stroke_opacity=0.7)
+
+            def circle_q_label(x_val, label_tex, y_pos=0.3, font_size=24):
+                circle = Circle(radius=0.22, color=WHITE, fill_opacity=0.9)
+                circle.move_to(axes_obj.c2p(x_val, y_pos))
+                label = MathTex(label_tex, color=BLACK, font_size=font_size).move_to(circle.get_center())
+                return VGroup(circle, label)
+
+            schematic.add(step_segment(0.0, 0.1, 1))
+            schematic.add(full_dashed_q_line(0.1))
+            schematic.add(circle_q_label(0.1, "q_1"))
+            
+            schematic.add(step_segment(0.1, 0.3, -1))
+            schematic.add(full_dashed_q_line(0.3))
+            schematic.add(circle_q_label(0.3, "q_2"))
+            
+            schematic.add(step_segment(0.3, 0.4, 1))
+            schematic.add(MathTex(r"\cdots").scale(1.2).move_to(axes_obj.c2p(0.5, 1)))
+            schematic.add(MathTex(r"\cdots").scale(1.2).move_to(axes_obj.c2p(0.5, -1)))
+            
+            schematic.add(step_segment(0.6, 0.7, +1))
+            schematic.add(full_dashed_q_line(0.7))
+            schematic.add(circle_q_label(0.7, r"q_{\Lambda-1}", font_size=22))
+
+            schematic.add(step_segment(0.7, 0.85, -1))
+            schematic.add(full_dashed_q_line(0.85))
+            schematic.add(circle_q_label(0.85, r"q_{\Lambda}", font_size=22))
+            
+            schematic.add(step_segment(0.85, 1.0, 1))
+            schematic.add(full_dashed_q_line(1.0))
+            schematic.add(circle_q_label(1.0, r"q_{\Lambda+1}", font_size=22))
+            
+            schematic.original_numbers = original_numbers
+            schematic.axes_obj = axes_obj
+            
             return schematic
+
         general_schematic = create_general_schematic(axes)
-        self.play(Transform(continuous_function_initial, general_schematic), run_time=2)
+        self.play(
+            FadeOut(continuous_function_initial, shift = UP),
+            FadeIn(general_schematic, shift = UP),
+            run_time=2)
         self.wait(2)
 
         self.play(FadeOut(generality_text))
-        
-        # --- THIS IS THE FIX ---
-        # We pass our custom template to the MathTex object that needs it.
-        s_formula = MathTex(
-            r"S(x, \mathbf{q}) = (-1)^\Lambda \prod_{\alpha=1}^{\Lambda} \sgn(x-q_{\alpha})",
+
+        rest_formula = MathTex(
+            r"= (-1)^\Lambda \prod_{\alpha=1}^\Lambda \sgn\left(x - q_{\alpha}\right)",
             font_size=42,
-            tex_template=sgn_template  # Pass the custom template here
-        ).next_to(final_symbolic_text, DOWN, buff=0.3)
-        self.play(Write(s_formula))
-        self.wait(5)
+            tex_template=sgn_template
+        ).set_color(WHITE)
+
+        final_position = final_symbolic_text.get_center() + DOWN * 1.0  
 
 
-        # --- ANIMATION PART 3: Morphing the Hamiltonian (UNCHANGED) ---
+        s_formula = VGroup(
+            final_symbolic_text.copy(),  
+            rest_formula
+        ).arrange(RIGHT, buff=0.2).move_to(final_position)
+
+
         self.play(
-            FadeOut(axes, x_label, plot_title, continuous_function_initial),
-            VGroup(final_symbolic_text, s_formula).animate.move_to(UP*2.5)
+            Transform(final_symbolic_text, s_formula[0]),  
+            FadeIn(rest_formula), 
+            run_time=2
         )
+        self.wait(5)
+        
+        mobjects_to_fade = [
+            mob for mob in self.mobjects 
+            if mob not in [final_symbolic_text, rest_formula] 
+            and not isinstance(mob, ValueTracker)]
+
+        self.play(
+            *[FadeOut(mob) for mob in mobjects_to_fade],
+            VGroup(final_symbolic_text, rest_formula).animate.move_to(UP*2.5),
+            run_time=1.5)
         self.wait(1)
         
-        H_part_d = MathTex("H = \\frac{1}{2} \\sum_{i,j}").set_color_by_tex("H", H_COLOR)
-        J_part_d = MathTex("J_{ij}").set_color(J_COLOR)
-        s_i_part_d = MathTex("s_i").set_color(PLUS_ONE_COLOR)
-        s_j_part_d = MathTex("s_j").set_color(MINUS_ONE_COLOR)
-        discrete_H = VGroup(H_part_d, J_part_d, s_i_part_d, s_j_part_d).arrange(RIGHT, buff=0.2).scale(1.2)
+        discrete_H = MathTex(
+            "H", "=", r"\sum_{i,j}", "J_{ij}", "s_i", "s_j",
+            font_size=60)
+
+        discrete_H.set_color_by_tex("H", H_COLOR)
+        discrete_H.set_color_by_tex("=", WHITE)
+        discrete_H.set_color_by_tex(r"\sum_{i<j}", WHITE)
+        discrete_H.set_color_by_tex("J_{ij}", J_COLOR)
+        discrete_H.set_color_by_tex("s_i", BLUE_D)
+        discrete_H.set_color_by_tex("s_j", RED)
+
         self.play(Write(discrete_H))
         self.wait(2)
         
-        H_part_c = MathTex(r"H = \frac{N^2}{2} \int_0^1 \! \int_0^1").set_color_by_tex("H", H_COLOR)
-        J_part_c = MathTex("(x^d + y^d)").set_color_by_tex_to_color_map({"d":D_COLOR})
-        J_part_c.get_part_by_tex("x").set_color(J_COLOR); J_part_c.get_part_by_tex("y").set_color(J_COLOR)
-        s_x_part_c = MathTex(r"S(x, \mathbf{q})").set_color(PLUS_ONE_COLOR)
-        s_y_part_c = MathTex(r"S(y, \mathbf{q})").set_color(MINUS_ONE_COLOR)
-        integrand_part_c = MathTex(r"\,dx\,dy").set_color(WHITE)
-        continuous_H_group = VGroup(H_part_c, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.2).scale(1.1)
-        
+        H_part_c = MathTex("H", font_size=48).set_color(H_COLOR)
+        eq_part_c = MathTex("=", font_size=48).set_color(SIGN_COLOR)
+        N_frac_integral = MathTex(r"\frac{N^2}{2} \int_0^1 \! \int_0^1", font_size=48).set_color(SIGN_COLOR)
+
+        J_part_c = MathTex("(x^d + y^d)", font_size=48).set_color_by_tex_to_color_map({"d": D_COLOR})
+        J_part_c.get_part_by_tex("x").set_color(J_COLOR)
+        J_part_c.get_part_by_tex("y").set_color(J_COLOR)
+
+        s_x_part_c = MathTex(r"S(x, \mathbf{q})", font_size=48).set_color(PLUS_ONE_COLOR)
+        s_y_part_c = MathTex(r"S(y, \mathbf{q})", font_size=48).set_color(MINUS_ONE_COLOR)
+        integrand_part_c = MathTex(r"\,dx\,dy", font_size=48).set_color(SIGN_COLOR)
+
+        continuous_H_group = VGroup(H_part_c, eq_part_c, N_frac_integral, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.2).scale(1.1)
+    
         self.play(
-            FadeOut(final_symbolic_text, s_formula),
-            ReplacementTransform(H_part_d, H_part_c),
-            ReplacementTransform(J_part_d, J_part_c),
-            ReplacementTransform(s_i_part_d, s_x_part_c),
-            ReplacementTransform(s_j_part_d, s_y_part_c),
-            FadeIn(integrand_part_c, shift=RIGHT),
-            run_time=2.5
-        )
+            FadeOut(rest_formula,final_symbolic_text),
+            Transform(discrete_H, continuous_H_group),
+            run_time=2.5)
         self.wait(5)
+
 
 
 H_COLOR = GREEN
@@ -3414,7 +3624,6 @@ SIGN_COLOR = WHITE
 LIGHT_YELLOW = YELLOW_D
 YELLOW  = YELLOW
 
-
 class ContinuousHDerivation(Scene):
     def construct(self):
         # --- PART 1: Recap The Analytical Hamiltonian ---
@@ -3426,23 +3635,23 @@ class ContinuousHDerivation(Scene):
         J_part_c.get_part_by_tex("x").set_color(J_COLOR)
         J_part_c.get_part_by_tex("y").set_color(J_COLOR)
 
-        s_x_part_c = MathTex(r"S(x, \mathbf{q})", font_size=48).set_color(PURPLE_A)
+        s_x_part_c = MathTex(r"S(x, \mathbf{q})", font_size=48).set_color(PLUS_ONE_COLOR)
         s_y_part_c = MathTex(r"S(y, \mathbf{q})", font_size=48).set_color(MINUS_ONE_COLOR)
         integrand_part_c = MathTex(r"\,dx\,dy", font_size=48).set_color(SIGN_COLOR)
 
         continuous_H_group = VGroup(H_part_c, eq_part_c, N_frac_integral, J_part_c, s_x_part_c, s_y_part_c, integrand_part_c).arrange(RIGHT, buff=0.2).scale(1.1)
 
         part1 = MathTex(
-            r"H_{\Lambda}",  # H and Lambda colored H_COLOR
-            r"(d, \mathbf{q})",  # also colored H_COLOR
-            r"=",  # colored LIGHT_YELLOW
-            r"\frac{N^2}{1+d}",  # colored LIGHT_YELLOW
+            r"H_{\Lambda}",  
+            r"(d, \mathbf{q})", 
+            r"=", 
+            r"\frac{N^2}{1+d}",  
             font_size=48)
 
-        part1[0].set_color(H_COLOR)     # H_{\Lambda}
-        part1[1].set_color(H_COLOR)     # (d, \mathbf{q})
-        part1[2].set_color(SIGN_COLOR)  # =
-        part1[3].set_color(LIGHT_YELLOW)  # fraction
+        part1[0].set_color(H_COLOR)    
+        part1[1].set_color(H_COLOR)    
+        part1[2].set_color(SIGN_COLOR) 
+        part1[3].set_color(LIGHT_YELLOW)  
 
         part2 = MathTex(
             r"\Bigg( (-1)^{\Lambda} + 2\sum_{\alpha=1}^{\Lambda} (-1)^{\alpha+1}q_\alpha \Bigg)", 
@@ -3459,6 +3668,13 @@ class ContinuousHDerivation(Scene):
         self.play(ReplacementTransform(continuous_H_group, analytical_H_formula), run_time=2.5)
         self.wait(2)
         self.play(analytical_H_formula.animate.to_edge(UP, buff=0.5).scale(0.7))
+        line = Line(
+        start=analytical_H_formula.get_corner(DL) + LEFT*0.2,  
+        end=analytical_H_formula.get_corner(DR) + RIGHT*0.2,   
+        color=GRAY).next_to(analytical_H_formula, DOWN, buff=0.4)  
+
+        self.play(Create(line))
+        self.wait(2)
 
         
         # --- PART 2: The Λ=1 Case (Appendix C) ---
@@ -3470,9 +3686,8 @@ class ContinuousHDerivation(Scene):
         title_case1[1].set_color(YELLOW)         
         title_case1[3].set_color(LAMBDA_COLOR)  
 
-        title_case1.next_to(analytical_H_formula, DOWN, buff=1)
+        title_case1.next_to(analytical_H_formula, DOWN, buff=0.7)
         self.play(Write(title_case1))
-
 
         h1_formula = MathTex(r"H_1", r"=", r"\frac{N^2}{1+d}", r"(2q_1-1)(2q_1^{d+1}-1)", font_size=40)
         h1_formula[0].set_color(H_COLOR)
@@ -3512,7 +3727,10 @@ class ContinuousHDerivation(Scene):
         self.play(Write(title_case2))
 
         # --- Step 1: Present the core equation from Appendix D ---
-        insight_text = Tex(f"At a critical point, the sum of derivatives for adjacent boundaries is zero:").scale(0.8)
+        insight_text = MarkupText(
+            "At a <span weight='bold'>critical point</span>, the sum of derivatives for adjacent boundaries is zero:",
+            font_size=25)
+
         sum_deriv_full_eq = VGroup(
             MathTex(r"\frac{\partial H_{\Lambda}}{\partial q_j} + \frac{\partial H_{\Lambda}}{\partial q_{j+1}}", font_size=48).set_color(LIGHT_YELLOW),
             MathTex(r"=", font_size=48).set_color(WHITE),
@@ -3541,7 +3759,7 @@ class ContinuousHDerivation(Scene):
         
         # --- Step 3: Rule out Term A ---
         part1_text = MarkupText("Since boundaries are ordered ", font_size=30, color=WHITE)
-        part1_math = MathTex(r"\mathbf{(q_j < q_{j+1})},", font_size=39).set_color(WHITE)
+        part1_math = MathTex(r"(q_j < q_{j+1})", font_size=39).set_color(WHITE)
 
         part1 = VGroup(part1_text, part1_math).arrange(RIGHT, buff=0.2).to_edge(UP)
         term_a = MarkupText("Term A", font_size=30).set_color(BLUE)
@@ -3570,7 +3788,7 @@ class ContinuousHDerivation(Scene):
         self.play(FadeOut(VGroup(insight_text, sum_deriv_full_eq, brace_A, brace_B, label_A, label_B, conclusion_text)))
 
         # --- Step 5: The final punchline ---
-        final_condition_text = MarkupText("So, at any critical point:", font_size=32).set_color(WHITE)
+        final_condition_text = MarkupText("So, at any critical point:", font_size=28).set_color(WHITE)
 
         chunk1 = MathTex(r"(-1)^{\Lambda}", font_size=38).set_color(J_COLOR)
         chunk2 = MathTex(r"+", font_size=38).set_color(SIGN_COLOR)
@@ -3583,11 +3801,10 @@ class ContinuousHDerivation(Scene):
 
         final_condition = VGroup(final_condition_text, final_condition_formula).arrange(RIGHT, buff=0.7)
 
-        final_condition.next_to(title_case2, DOWN, buff=0.7)
+        final_condition.next_to(title_case2, DOWN, buff=1.2)
 
         self.play(Write(final_condition))
         self.wait(2)
-
 
         q_factor_box_on_formula = SurroundingRectangle(analytical_H_formula[1], color=LIGHT_YELLOW, buff=0.05)
         zero_box_on_proof = SurroundingRectangle(final_condition[1], color=LIGHT_YELLOW, buff=0.1)
@@ -3613,6 +3830,8 @@ class ContinuousHDerivation(Scene):
         self.wait(4)
         self.play(FadeOut(VGroup(title_case2, final_condition, zero_box_on_proof, q_factor_box_on_formula, final_result_case2)))
         
+        self.play(FadeOut(line))
+
         # --- PART 4: Boundary Case (Interface Shedding) ---
         boundary_case_part1 = MarkupText("Boundary Case: ", font_size=28, color=YELLOW)
         domains_merge_part = MarkupText("Domains Merge", font_size=28, color=WHITE)
@@ -3631,12 +3850,12 @@ class ContinuousHDerivation(Scene):
 
         boundary_title.next_to(analytical_H_formula, DOWN, buff=1)
         reduction_eq = MathTex(
-            r"H_{\Lambda}",         # index 0 — first H_{\Lambda}, color: H_COLOR
-            r"(",                   # index 1 — open parenthesis, color: WHITE
-            r"q_{\Lambda} \to 1",   # index 2 — argument going to 1, color: LAMBDA_COLOR
-            r")",                   # index 3 — close parenthesis, color: WHITE
-            r"\longrightarrow",     # index 4 — arrow, color: WHITE
-            r"H_{\Lambda-1}",       # index 5 — final term, color: LIGHT_YELLOW
+            r"H_{\Lambda}",         
+            r"(",                 
+            r"q_{\Lambda} \to 1",   
+            r")",                   
+            r"\longrightarrow",     
+            r"H_{\Lambda-1}",       
             font_size=48)
 
         reduction_eq[0].set_color(H_COLOR)
@@ -3647,18 +3866,18 @@ class ContinuousHDerivation(Scene):
         reduction_eq[5].set_color(LIGHT_YELLOW)
 
         cascade = MarkupText(
-            f"The system sheds interfaces to find <span foreground='{J_COLOR}'>lower energy</span>:",
-            font_size=28,
+            f"The system sheds interfaces to find <span foreground='{J_COLOR}'>lower energy</span> :",
+            font_size=25,
             color=WHITE)
 
         cascade_math = MathTex(
-            r"\Lambda",        # index 0
-            r"\to",            # index 1
-            r"\Lambda - 1",    # index 2
-            r"\to",            # index 3
-            r"\dots",          # index 4
-            r"\to",            # index 5
-            r"1",              # index 6
+            r"\Lambda",        
+            r"\to",           
+            r"\Lambda - 1",    
+            r"\to",            
+            r"\dots",          
+            r"\to",            
+            r"1",              
             font_size=48)
 
         cascade_math[0].set_color(LAMBDA_COLOR)
@@ -3673,7 +3892,127 @@ class ContinuousHDerivation(Scene):
         boundary_group.next_to(boundary_title, DOWN, buff=0.6)
         self.play(Write(boundary_title), Write(boundary_group))
         self.wait(5)
-        self.play(FadeOut(boundary_title), FadeOut(boundary_group))
+
+        combined_group = VGroup(boundary_title, boundary_group)
+        self.play(
+            Transform(boundary_group, combined_group),
+            combined_group.animate.scale(0.8)
+                        .to_edge(LEFT, buff=1.0)
+                        .set_y(combined_group.get_y()),  
+            run_time=1.5)
+        self.wait(0.5)
+
+
+        q_values_initial = [0.01, 0.5, 0.99]
+        N_INITIAL = 20
+        N_FINAL = 400
+
+        axes = Axes(
+            x_range=[0, 1.05, 0.2], 
+            y_range=[-1.5, 1.5, 1],
+            x_length=7.5,  
+            y_length=4, 
+            axis_config={
+                "color": BLUE,
+                "include_numbers": False,
+                "tick_size": 0,
+                "include_tip": True,}
+        ).scale(0.7).to_edge(RIGHT, buff=0.5)
+
+
+        PLUS_COLOR = BLUE_D
+        MINUS_COLOR = RED_D
+        DOMAIN_COLORS = [PLUS_COLOR, MINUS_COLOR]
+
+
+        def get_domain_info(n, q_vals):
+            if n <= 1: return [{'size': n, 'color': DOMAIN_COLORS[0], 'spin_val': 1}]
+            boundaries = sorted([0] + list(q_vals) + [1])
+            domain_info = []
+            bin_edges = [b * (n - 1) for b in boundaries]
+            spin_counts = np.histogram(np.arange(n), bins=bin_edges)[0].tolist()
+            if len(spin_counts) < len(boundaries) - 1:
+                spin_counts.append(n - sum(spin_counts))
+            for i, count in enumerate(spin_counts):
+                if count > 0:
+                    domain_info.append({
+                        'size': count, 'color': DOMAIN_COLORS[i % len(DOMAIN_COLORS)],
+                        'spin_val': 1 if i % 2 == 0 else -1
+                    })
+            return domain_info
+
+        def create_refined_s_T_group(n, domain_info):
+            if n == 0: return VGroup()
+            s_T_label = MathTex(r"\pmb{s}^T = ", font_size=40)
+            l_bracket = MathTex("[", font_size=72)
+            r_bracket = MathTex("]", font_size=72)
+            domain_blocks = VGroup()
+            for info in domain_info:
+                block = Rectangle(
+                    height=0.4, width=info['size'] * 0.02 + 0.1,
+                    fill_color=info['color'], fill_opacity=0.8,
+                    stroke_width=1, stroke_color=WHITE
+                )
+                brace = Brace(block, DOWN, buff=SMALL_BUFF)
+                counter = Integer(info['size'], font_size=28).next_to(brace, DOWN, buff=SMALL_BUFF)
+                counter.set_color(info['color'])
+                domain_blocks.add(VGroup(block, brace, counter))
+            domain_blocks.arrange(RIGHT, buff=0.1)
+            return VGroup(s_T_label, l_bracket, domain_blocks, r_bracket).arrange(RIGHT, buff=0.15)
+
+        def create_colored_discrete_plot(n, domain_info, axes_obj):
+            plot = VGroup()
+            if n <= 1: return plot
+            spin_index = 0
+            for info in domain_info:
+                for _ in range(info['size']):
+                    x_pos = spin_index / (n - 1)
+                    dot = Dot(axes_obj.c2p(x_pos, info['spin_val']), color=info['color'], radius=0.04)
+                    stem = Line(axes_obj.c2p(x_pos, 0), dot.get_center(), stroke_width=1.5, color=info['color'])
+                    plot.add(VGroup(stem, dot))
+                    spin_index += 1
+            return plot
+
+        N_tracker = ValueTracker(N_INITIAL)
+        
+        discrete_plot = VGroup()
+        discrete_plot.add_updater(lambda mob: mob.become(create_colored_discrete_plot(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial), axes)))
+        
+
+        x_label = MathTex(r"x = \frac{i}{N}", font_size=20)  
+        x_label.next_to(axes.x_axis.get_end(), RIGHT*0.3)
+
+        y_label = MathTex(r"s_i", font_size=25)  
+        y_label.next_to(axes.y_axis.get_end(), UP*0.2)
+
+        discrete_plot = VGroup()
+        discrete_plot.add_updater(lambda mob: mob.become(
+            create_colored_discrete_plot(
+                int(N_tracker.get_value()),
+                get_domain_info(int(N_tracker.get_value()), q_values_initial),
+                axes)))
+
+
+        plot_group = VGroup(axes, discrete_plot, x_label, y_label)
+
+        plot_group.next_to(combined_group, RIGHT, buff=1)
+        self.add(plot_group)
+
+        self.play(
+            Create(axes),
+            Write(x_label),
+            Write(y_label),
+            run_time=1)
+        self.play(
+            N_tracker.animate.set_value(N_FINAL),
+            run_time=5,
+            rate_func=rate_functions.ease_in_out_sine)
+        self.wait(0.5)
+
+        self.play(
+            FadeOut(axes,discrete_plot,x_label,y_label,combined_group),
+            run_time=1.5)
+
 
         # --- PART 5: Final Conclusion ---
         
@@ -3681,34 +4020,30 @@ class ContinuousHDerivation(Scene):
         line = Line(UP * 2.25, DOWN * 3.5, color=GRAY)
         self.play(Create(line))
         
-        # --- Left Column: The Winning Case (Λ=1) ---
         left_anchor = line.get_center() + LEFT * (self.camera.frame_width / 4)
-        
-        # Create the elements for the left column
+
         title_L1 = Tex(r"Case ",r"$\Lambda=1$",font_size=42)
 
-        title_L1[0].set_color(WHITE)           # "Case"
-        title_L1[1].set_color(LAMBDA_COLOR)    # "$\Lambda=1$"
+        title_L1[0].set_color(WHITE)         
+        title_L1[1].set_color(LAMBDA_COLOR)   
 
         result_L1 = MathTex(r"H_1", r"<", r"0", font_size=60)
 
-        result_L1[0].set_color(GREEN)         # "H_1"
-        result_L1[1].set_color(WHITE)         # "<"
-        result_L1[2].set_color(GREEN)         # "0"
+        result_L1[0].set_color(GREEN)         
+        result_L1[1].set_color(WHITE)         
+        result_L1[2].set_color(GREEN)         
 
         label_L1 = Tex("Stable, Energetically, Favorable Ground State", font_size=32)
         
-        # Group and position them relative to the anchor
         group_L1 = VGroup(title_L1, result_L1, label_L1).arrange(DOWN, buff=1)
         group_L1.move_to(left_anchor)
 
-        # --- Right Column: The Unstable Case (Λ>=2) ---
         
         right_anchor = line.get_center() + RIGHT * (self.camera.frame_width / 4)
 
         title_L2 = Tex(r"Case ",r"$\Lambda \geq 2$",font_size=42)
-        title_L2[0].set_color(WHITE)         # "Case"
-        title_L2[1].set_color(LAMBDA_COLOR)  # "$\Lambda \geq 2$"
+        title_L2[0].set_color(WHITE)         
+        title_L2[1].set_color(LAMBDA_COLOR)  
 
         part1 = MathTex(r"H_{\Lambda}", font_size=60).set_color(RED)
         part2 = MathTex(r"=", font_size=60).set_color(SIGN_COLOR)
@@ -3716,20 +4051,17 @@ class ContinuousHDerivation(Scene):
 
         result_L2 = VGroup(part1, part2, part3).arrange(RIGHT, buff=0.1)
 
-
         label_L2 = Tex("Unstable or Higher Energy (Decays to $\Lambda=1$)", font_size=32)
         
-        # Group and position them relative to the anchor
         group_L2 = VGroup(title_L2, result_L2, label_L2).arrange(DOWN, buff=1)
         group_L2.move_to(right_anchor)
 
-        # --- Animate the final comparison ---
         self.play(
             Write(group_L1),
             Write(group_L2),
             run_time=2)
         self.wait(6)
-# now in the next scene, we want to focus on this ordered J again. We want to show what this truly represents. We can show a table that has the name of richest people, and some other people that are poor. a ranked table. this rank is the index i, and we can show that again what interaction means. as an example, we can show number 1 and 2 have the interaction 1^d+2^d (with other constants) and the 1^d+1000^d, and so on (we'll show all of the possibilities for total of 4 people, two rich and two poor). and discuss how this can be extended to the other ranked systems. and show the obvious conclusion that such system turns into two opposing poles (such as class gap). we say each pole agrees with itself but disagrees with the other one. 
+
 
 from scipy.optimize import root
 import numpy as np
@@ -3745,15 +4077,14 @@ D_COLOR = ORANGE
 class TheGreatSchism(Scene):
     def _get_q_for_d(self, d):
         def equation(q):
-            # Clamp q to avoid math errors for d<0
             q_safe = np.clip(q, 1e-9, 1.0)
             return 1 + (1 + d) * q_safe**d - 2 * (2 + d) * q_safe**(d + 1)
         
-        # Use root finding to solve the equation for q
         sol = root(equation, x0=0.5, tol=1e-9)
         if sol.success:
             return np.clip(sol.x[0], 0, 1)
-        return 0.5 # Default to 0.5 on failure
+        return 0.5 
+    
     def construct(self):
         # --- SEQUENCE 1: The J_ij Rule and the Ranked Society Analogy ---
 
@@ -3764,14 +4095,15 @@ class TheGreatSchism(Scene):
         self.wait(3)
         self.play(FadeOut(interaction_formula))
         self.wait(0.5)
-        
+
         table_data = [
             [r"\text{Rank (i)}", r"\text{Name}", r"\text{Status/Wealth}"],
             ["1", r"\text{Titan Corp.}", r"\$1.2 \text{ Trillion}"],
             ["2", r"\text{Innovate Inc.}", r"\$980 \text{ Billion}"],
             [r"\vdots", r"\vdots", r"\vdots"],
             ["999", r"\text{Alice}", r"\$52,000"],
-            ["1000", r"\text{Bob}", r"\$48,000"],]
+            ["1000", r"\text{Bob}", r"\$48,000"]]
+        
         table = Table(
             table_data, include_outer_lines=True, line_config={"stroke_width": 2, "color": TEAL},
             h_buff=0.5, element_to_mobject=MathTex
@@ -3781,7 +4113,7 @@ class TheGreatSchism(Scene):
         self.wait(4)
         self.play(FadeOut(table))
         self.wait(0.5)
-        
+
         def create_interaction_viz(rank1_str, rank2_str, is_high_tension=False):
             node1 = VGroup(
                 Circle(radius=0.4, color=WHITE), 
@@ -3823,6 +4155,7 @@ class TheGreatSchism(Scene):
         self.play(FadeIn(top_bottom_viz, shift=DOWN))
         self.wait(4)
 
+
         self.play(FadeOut(top_top_viz, bottom_bottom_viz, top_bottom_viz))
         self.wait(1)
 
@@ -3846,7 +4179,7 @@ class TheGreatSchism(Scene):
         viz_height = 4
         
         d_tracker = ValueTracker(1.0) 
-        
+
         polarization_viz = always_redraw(lambda: 
             VGroup(
                 Rectangle(
@@ -3876,7 +4209,7 @@ class TheGreatSchism(Scene):
                 f"q = {self._get_q_for_d(d_tracker.get_value()):.2f}",
                 font_size=42, color=Q_COLOR
             ).next_to(polarization_viz, UP, buff=0.4))
-
+        
         self.play(
             Create(polarization_viz),
             Create(d_dial),
@@ -3884,7 +4217,7 @@ class TheGreatSchism(Scene):
             GrowArrow(pointer),
             Write(q_value_text))
         self.wait(2)
-        
+
         self.play(
             d_tracker.animate.set_value(4.0),
             run_time=3, rate_func=rate_functions.ease_in_out_sine)
@@ -3912,8 +4245,7 @@ class TheGreatSchism(Scene):
         pol_group = VGroup(polarization_viz, d_dial, d_label, pointer, q_value_text)
         
         self.play(
-            pol_group.animate.scale(0.7).to_edge(UP, buff=1.0)
-        )
+            pol_group.animate.scale(0.7).to_edge(UP, buff=1.0))
         self.wait(1)
 
         schism_text = Text("The Great Schism", font_size=48, color=YELLOW)
@@ -3926,11 +4258,13 @@ class TheGreatSchism(Scene):
         self.wait(1)
         self.play(Write(conclusion_text))
         self.wait(5)
-    
+        
         self.play(FadeOut(pol_group, final_text_group))
         self.wait(1)
 
+
 # Now, in the next and final scene, we reveal that this student is Amirhossein Rezaei, which is me! me! And reveal this picture (I'm the one on right, the middle is Alireza Rezaei, the left is Mahmood Hasani). (We don't mention Halataei as he's not in the picture.) and we also show a picture of the paper (https://arxiv.org/abs/2411.19604). I want it to be poetic, like the end of AlphaGo documentary. To show them how significant and incredible this is.
+
 
 class TheFinalReveal(Scene):
     def construct(self):
@@ -3951,21 +4285,14 @@ class TheFinalReveal(Scene):
             photo.set_height(6.0)
             self.play(FadeIn(photo, shift=DOWN)); self.wait(2)
 
-            # --- THIS IS THE FIX ---
-            # 1. Create the labels first, without positioning them.
-            # The narration order is Mahmood, Alireza, Amirhossein.
             mahmood_label = Text("Mahmood Hasani", font_size=28)
             alireza_label = Text("Alireza Rezaei", font_size=28)
             amir_label = Text("Amirhossein Rezaei", font_size=28)
 
-            # 2. Group them and arrange them relative to each other.
             names_group = VGroup(mahmood_label, alireza_label, amir_label)
-            names_group.arrange(RIGHT, buff=0.5) # Arrange them horizontally with a buffer
-
-            # 3. Now, position the entire group cleanly under the photo.
+            names_group.arrange(RIGHT, buff=0.5)
             names_group.next_to(photo, DOWN, buff=0.3)
             
-            # The LaggedStart animation will still work on the individual elements.
             self.play(LaggedStart(
                 Write(mahmood_label), Write(alireza_label), Write(amir_label),
                 lag_ratio=0.7, run_time=3
@@ -3976,11 +4303,10 @@ class TheFinalReveal(Scene):
             paper_image.move_to(photo.get_center())
 
             self.play(
-                FadeOut(name_text, names_group),
+                FadeOut( names_group),
                 FadeOut(photo, scale=0.95),
                 FadeIn(paper_image, scale=1.05),
-                run_time=2
-            )
+                run_time=2)
             self.wait(5)
             
             # --- SEQUENCE 3: The Coda ---
@@ -3990,7 +4316,7 @@ class TheFinalReveal(Scene):
             final_quote = Text(
                 "The journey of discovery only leads to new, more beautiful questions.",
                 font_size=32, slant=ITALIC, color=GRAY_B
-            ).next_to(final_photo, DOWN, buff=0.5)
+            ).next_to(final_photo, DOWN, buff=0.3)
 
             self.play(FadeIn(final_photo))
             self.wait(2)
