@@ -3619,7 +3619,6 @@ class TheContinuousLeap(Scene):
 
 
 
-
 H_COLOR = GREEN
 J_COLOR = BLUE
 Q_COLOR = GREEN
@@ -3676,14 +3675,13 @@ class ContinuousHDerivation(Scene):
         self.wait(2)
         self.play(analytical_H_formula.animate.to_edge(UP, buff=0.5).scale(0.7))
         line = Line(
-        start=analytical_H_formula.get_corner(DL) + LEFT*0.2,  
-        end=analytical_H_formula.get_corner(DR) + RIGHT*0.2,   
-        color=GRAY).next_to(analytical_H_formula, DOWN, buff=0.4)  
+            start=analytical_H_formula.get_corner(DL) + LEFT*0.2,  
+            end=analytical_H_formula.get_corner(DR) + RIGHT*0.2,   
+            color=GRAY).next_to(analytical_H_formula, DOWN, buff=0.4)  
 
         self.play(Create(line))
         self.wait(2)
 
-        
         # --- PART 2: The Λ=1 Case (Appendix C) ---
         title_case1 = MathTex(
             r"\text{Case }", r"1", r"\text{: Two Clusters }", r"(\Lambda = 1)",
@@ -3747,7 +3745,6 @@ class ContinuousHDerivation(Scene):
             MathTex(r"=", font_size=48).set_color(WHITE),
             MathTex(r"0", font_size=48).set_color(YELLOW),
         ).arrange(RIGHT, buff=0.3).scale(0.9)
-
 
         step1_group = VGroup(insight_text, sum_deriv_full_eq).arrange(DOWN, buff=0.4)
         step1_group.next_to(title_case2, DOWN, buff=0.6)
@@ -3909,11 +3906,7 @@ class ContinuousHDerivation(Scene):
             run_time=1.5)
         self.wait(0.5)
 
-
-        q_values_initial = [0.01, 0.5, 0.99]
-        N_INITIAL = 20
-        N_FINAL = 400
-
+        # --- PART 5: Spin Visualization ---
         axes = Axes(
             x_range=[0, 1.05, 0.2], 
             y_range=[-1.5, 1.5, 1],
@@ -3926,103 +3919,71 @@ class ContinuousHDerivation(Scene):
                 "include_tip": True,}
         ).scale(0.7).to_edge(RIGHT, buff=0.5)
 
+        # تابع ایجاد نقاط اسپین (بهینه‌شده)
+        def create_spins(q1, q2, q3, n=100):
+            spins = VGroup()
+            boundaries = sorted([0, q1, q2, q3, 1])
+            signs = [1, -1, 1, -1]  # الگوی چرخشی اسپین‌ها
+            
+            for i in range(n):
+                x = i/(n-1)
+                spin = next((s for j,s in enumerate(signs) if boundaries[j] <= x < boundaries[j+1]), signs[-1])
+                color = BLUE_D if spin == 1 else RED_D
+                dot = Dot(axes.c2p(x, spin), radius=0.04, color=color)
+                stem = Line(axes.c2p(x, 0), dot.get_center(), color=color, stroke_width=1.5)
+                spins.add(VGroup(stem, dot))
+            return spins
 
-        PLUS_COLOR = BLUE_D
-        MINUS_COLOR = RED_D
-        DOMAIN_COLORS = [PLUS_COLOR, MINUS_COLOR]
-
-
-        def get_domain_info(n, q_vals):
-            if n <= 1: return [{'size': n, 'color': DOMAIN_COLORS[0], 'spin_val': 1}]
-            boundaries = sorted([0] + list(q_vals) + [1])
-            domain_info = []
-            bin_edges = [b * (n - 1) for b in boundaries]
-            spin_counts = np.histogram(np.arange(n), bins=bin_edges)[0].tolist()
-            if len(spin_counts) < len(boundaries) - 1:
-                spin_counts.append(n - sum(spin_counts))
-            for i, count in enumerate(spin_counts):
-                if count > 0:
-                    domain_info.append({
-                        'size': count, 'color': DOMAIN_COLORS[i % len(DOMAIN_COLORS)],
-                        'spin_val': 1 if i % 2 == 0 else -1
-                    })
-            return domain_info
-
-        def create_refined_s_T_group(n, domain_info):
-            if n == 0: return VGroup()
-            s_T_label = MathTex(r"\pmb{s}^T = ", font_size=40)
-            l_bracket = MathTex("[", font_size=72)
-            r_bracket = MathTex("]", font_size=72)
-            domain_blocks = VGroup()
-            for info in domain_info:
-                block = Rectangle(
-                    height=0.4, width=info['size'] * 0.02 + 0.1,
-                    fill_color=info['color'], fill_opacity=0.8,
-                    stroke_width=1, stroke_color=WHITE
-                )
-                brace = Brace(block, DOWN, buff=SMALL_BUFF)
-                counter = Integer(info['size'], font_size=28).next_to(brace, DOWN, buff=SMALL_BUFF)
-                counter.set_color(info['color'])
-                domain_blocks.add(VGroup(block, brace, counter))
-            domain_blocks.arrange(RIGHT, buff=0.1)
-            return VGroup(s_T_label, l_bracket, domain_blocks, r_bracket).arrange(RIGHT, buff=0.15)
-
-        def create_colored_discrete_plot(n, domain_info, axes_obj):
-            plot = VGroup()
-            if n <= 1: return plot
-            spin_index = 0
-            for info in domain_info:
-                for _ in range(info['size']):
-                    x_pos = spin_index / (n - 1)
-                    dot = Dot(axes_obj.c2p(x_pos, info['spin_val']), color=info['color'], radius=0.04)
-                    stem = Line(axes_obj.c2p(x_pos, 0), dot.get_center(), stroke_width=1.5, color=info['color'])
-                    plot.add(VGroup(stem, dot))
-                    spin_index += 1
-            return plot
-
-        N_tracker = ValueTracker(N_INITIAL)
+        # نقاط اولیه
+        q1, q2, q3 = 0.3, 0.65, 0.85
+        spin_dots = create_spins(q1, q2, q3)
         
-        discrete_plot = VGroup()
-        discrete_plot.add_updater(lambda mob: mob.become(create_colored_discrete_plot(int(N_tracker.get_value()), get_domain_info(int(N_tracker.get_value()), q_values_initial), axes)))
-        
+        # برچسب‌های محور
+        x_label = MathTex(r"x = \frac{i}{N}", font_size=20).next_to(axes.x_axis.get_end(), RIGHT*0.3)
+        y_label = MathTex(r"s_i", font_size=25).next_to(axes.y_axis.get_end(), UP*0.2)
 
-        x_label = MathTex(r"x = \frac{i}{N}", font_size=20)  
-        x_label.next_to(axes.x_axis.get_end(), RIGHT*0.3)
-
-        y_label = MathTex(r"s_i", font_size=25)  
-        y_label.next_to(axes.y_axis.get_end(), UP*0.2)
-
-        discrete_plot = VGroup()
-        discrete_plot.add_updater(lambda mob: mob.become(
-            create_colored_discrete_plot(
-                int(N_tracker.get_value()),
-                get_domain_info(int(N_tracker.get_value()), q_values_initial),
-                axes)))
-
-
-        plot_group = VGroup(axes, discrete_plot, x_label, y_label)
-
+        # گروه نمایش
+        plot_group = VGroup(axes, spin_dots, x_label, y_label)
         plot_group.next_to(combined_group, RIGHT, buff=1)
-        self.add(plot_group)
-
+        
         self.play(
             Create(axes),
             Write(x_label),
             Write(y_label),
-            run_time=1)
-        self.play(
-            N_tracker.animate.set_value(N_FINAL),
-            run_time=5,
-            rate_func=rate_functions.ease_in_out_sine)
-        self.wait(0.5)
+            FadeIn(spin_dots),
+            run_time=1.5
+        )
+        self.wait(1)
+
+        # انیمیشن‌های کاهش مرزها
+        # 1. حرکت q3 به 1
+        q3_tracker = ValueTracker(q3)
+        spin_dots.add_updater(lambda m: m.become(create_spins(q1, q2, q3_tracker.get_value())))
+        self.play(q3_tracker.animate.set_value(1), run_time=3)
+        spin_dots.clear_updaters()
+        self.wait(1)
+
+        # 2. حرکت q2 به q1
+        q2_tracker = ValueTracker(q2)
+        spin_dots.add_updater(lambda m: m.become(create_spins(q1, q2_tracker.get_value(), 1)))
+        self.play(q2_tracker.animate.set_value(q1), run_time=3)
+        spin_dots.clear_updaters()
+        self.wait(1)
+
+        # 3. حرکت q1 به 0
+        q1_tracker = ValueTracker(q1)
+        spin_dots.add_updater(lambda m: m.become(create_spins(q1_tracker.get_value(), q1, 1)))
+        self.play(q1_tracker.animate.set_value(0), run_time=3)
+        spin_dots.clear_updaters()
+        self.wait(2)
 
         self.play(
-            FadeOut(axes,discrete_plot,x_label,y_label,combined_group),
-            run_time=1.5)
+            FadeOut(plot_group),
+            FadeOut(combined_group),
+            run_time=1.5
+        )
 
-
-        # --- PART 5: Final Conclusion ---
-        
+        # --- PART 6: Final Conclusion ---
         self.play(analytical_H_formula.animate.scale(0.9).to_edge(UP, buff=0.7))
         line = Line(UP * 2.25, DOWN * 3.5, color=GRAY)
         self.play(Create(line))
@@ -4030,12 +3991,10 @@ class ContinuousHDerivation(Scene):
         left_anchor = line.get_center() + LEFT * (self.camera.frame_width / 4)
 
         title_L1 = Tex(r"Case ",r"$\Lambda=1$",font_size=42)
-
         title_L1[0].set_color(WHITE)         
         title_L1[1].set_color(LAMBDA_COLOR)   
 
         result_L1 = MathTex(r"H_1", r"<", r"0", font_size=60)
-
         result_L1[0].set_color(GREEN)         
         result_L1[1].set_color(WHITE)         
         result_L1[2].set_color(GREEN)         
@@ -4045,7 +4004,6 @@ class ContinuousHDerivation(Scene):
         group_L1 = VGroup(title_L1, result_L1, label_L1).arrange(DOWN, buff=1)
         group_L1.move_to(left_anchor)
 
-        
         right_anchor = line.get_center() + RIGHT * (self.camera.frame_width / 4)
 
         title_L2 = Tex(r"Case ",r"$\Lambda \geq 2$",font_size=42)
@@ -4068,7 +4026,7 @@ class ContinuousHDerivation(Scene):
             Write(group_L2),
             run_time=2)
         self.wait(6)
-
+        
 
 from scipy.optimize import root
 import numpy as np
