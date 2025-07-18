@@ -2715,7 +2715,6 @@ def calculate_min_J_o(J):
 import math
 
 
-
 class GroundStateCalculationPart2(Scene):
     def construct(self):
         # --- CONFIGURATION & FORMULAE SETUP ---
@@ -3117,7 +3116,7 @@ class GroundStateCalculationPart2(Scene):
 
         final_equation.set_color(GOLD) 
 
-        final_title = Text('The Master Equation of Ground State', font_size=36, color=WHITE)
+        final_title = Text('The Master Equation of Ground State', font_size=36, color=PURPLE_A)
         final_title.to_edge(UP, buff=1.5)
 
         self.play(
@@ -3126,6 +3125,8 @@ class GroundStateCalculationPart2(Scene):
             Write(final_title))
 
         self.wait(8)
+
+
 
 
 from scipy.optimize import root
