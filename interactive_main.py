@@ -3341,9 +3341,11 @@ PLUS_ONE_COLOR = BLUE_D
 MINUS_ONE_COLOR = RED_D
 J_COLOR = YELLOW
 H_COLOR = GREEN
-Q_COLOR = YELLOW # For the 'q' ratio and domain walls
-D_COLOR = ORANGE # For the 'd' parameter
-DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR, GREEN_D, ORANGE]
+Q_COLOR = YELLOW
+D_COLOR = ORANGE
+DOMAIN_COLORS = [PLUS_ONE_COLOR, MINUS_ONE_COLOR]
+SIGN_COLOR = WHITE
+
 
 class TheContinuousLeap(Scene):
     def construct(self):
@@ -3365,10 +3367,13 @@ class TheContinuousLeap(Scene):
                 spin_counts.append(n - sum(spin_counts))
             for i, count in enumerate(spin_counts):
                 if count > 0:
+                    spin_val = 1 if i % 2 == 0 else -1
                     domain_info.append({
-                        'size': count, 'color': DOMAIN_COLORS[i % len(DOMAIN_COLORS)],
-                        'spin_val': 1 if i % 2 == 0 else -1
+                        'size': count,
+                        'color': PLUS_ONE_COLOR if spin_val == 1 else MINUS_ONE_COLOR,
+                        'spin_val': spin_val
                     })
+
             return domain_info
 
         def create_refined_s_T_group(n, domain_info):
@@ -3611,6 +3616,7 @@ class TheContinuousLeap(Scene):
             Transform(discrete_H, continuous_H_group),
             run_time=2.5)
         self.wait(5)
+
 
 
 
