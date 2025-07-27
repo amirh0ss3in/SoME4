@@ -12,8 +12,8 @@ Now, Let's start simple, with just two people, Alice and Bob. Suppose they both 
 
 ### Agreement and Disagreement
 
-Now, let's explore the possible outcomes of their choices. To keep things simple, we’ll label Alice’s decision as *s₁* and Bob’s as *s₂*.
-There's an interesting mathematical property here. What happens if we multiply their choices together?
+From here, we can explore the possible outcomes of their choices. To keep things simple, we’ll label Alice’s decision as *s₁* and Bob’s as *s₂*.
+This leads us to an interesting mathematical property: what happens if we multiply their choices together?
 
 If Alice and Bob both choose +1, their product is +1. We can think of this as a state of 'agreement'.
 
@@ -21,7 +21,7 @@ If Alice chooses +1 and Bob chooses –1, their product is –1. This is a state
 
 The same is true if their roles were reversed.
 
-And if they both choose –1, the product is once again +1. They still 'agree', in this case, on "no". So the product *s₁* times *s₂* gives us a wonderfully elegant way to tell whether they agree or not.
+And if they both choose –1, the product is once again +1. They still agree — but this time, on saying "no." So the product *s₁* times *s₂* gives us an elegant way to tell whether they agree or not.
 
 ### Introducing Tension
 
@@ -29,13 +29,13 @@ But in the real world, people aren't isolated. Their decisions are often influen
 
 Let's represent this tension with a value, which we'll call *J₁₂*, that lives on the connection between Alice and Bob.
 
-We can think of *J₁₂* as a dial that sets the tone of their relationship.. If *J* is positive, let's say their relationship is 'tense'—maybe even competetive and they are rivals. If *J* is negative, their relationship is 'cozy' or friendly,  and they are cooperative. And if *J* is zero, they have no influence on each other at all.
+We can think of *J₁₂* as a dial that sets the *tone* of their relationship.. If *J* is positive, we can say their relationship is 'tense'—maybe even competetive and they are rivals. If *J* is negative, their relationship is 'cozy' or friendly,  and they are cooperative. And if *J* is zero, they have no influence on each other at all.
 
 ### Defining Conflict (The Hamiltonian)
 
 So, how do we combine all these ideas? We've got Alice's choice, Bob's choice, and the tension in their relationship.
 
-We can define a single number that captures the state of the whole system. Let's call it the "Conflict", or for those with a physics background, the Hamiltonian, denoted by a capital *H*.
+We can define a single number that captures the state of the whole system. Let's call it the "Conflict", or for those with a physics background like me, the Hamiltonian, denoted by a capital *H*.
 
 The conflict is simply the product of Alice's choice, the tension *J*, and Bob's choice.
 
