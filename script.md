@@ -170,28 +170,27 @@ There is no known algorithm that can efficiently find the exact ground state for
 
 However, for a few, very special cases where the network of connections is highly structured, mathematicians and physicists *have* discover clever ways to solve it exactly. The most famous example is the **2D planar graph**—any graph that can be drawn flat on a plane without its edges crossing. In a landmark 1944 paper, Lars Onsager unveiled a stunning analytical solution for these systems .But that level of precision only works because of the strict, two-dimensional structure of the grid. The moment we move into 3D or allow more complex connectivity, an exact solution once again slips out of reach.
 
-Things get even stranger for **spin glasses**, where the tensions are completely random. Finding the ground state for any *one* specific spin glass is still incredibly hard. However, thanks to the monumental work of physicists like Giorgio Parisi, we now have a profound mathematical understanding of their *statistical* nature—what the energy landscape looks like on average. Parisi's Nobel-winning work revealed the incredibly complex structure of the low-energy states, even if it doesn't give us a simple recipe to find the single ground state for any given instance.
+Things get even stranger when we move to **spin glasses**, where the tensions between spins are completely random. Finding the ground state of *any* specific spin glass  remains incredibly difficult. However, thanks to the monumental work of physicists like Giorgio Parisi, we now have a profound mathematical understanding of their *statistical* nature— how the energy landscape looks like on average. Parisi's Nobel-winning contributions revealed the incredibly complex structure of the low-energy states. While this doesn’t provide a straightforward method for locating the ground state of a given instance, it offers profound insight into the nature of complexity itself.
 
-But these are the exceptions—beautiful, clean, mathematical worlds. What about the messy, real-world problems we saw earlier?
+But these are the exceptions— elegant, neat, mathematical constructions. What about the messy, complex real-world problems we saw earlier?
 
-For those, we need a different approach. If you can't *calculate* the answer, maybe you can *build* a physical system that naturally *finds* the answer for you.
+For those, we need a different approach. If you can't *compute* the answer directly, perhaps you could *build* a physical system that naturally *finds* the answer for you.
 
-This is precisely the goal of machines like this one: a **quantum annealer**. It's not a general-purpose computer. It's a highly specialized piece of hardware designed to do one thing, and one thing only: find the lowest energy state of a physical system that is programmed to behave just like our Ising model.
+This is precisely the idea behind machines like this one: a **quantum annealer**. It's not a general-purpose computer, but a highly specialized piece of hardware designed to do just one thing: to find the lowest energy state of a physical system that is programmed to behave just like our Ising model.
 
 It tackles the problem not by crunching numbers, but by using the laws of quantum mechanics to "feel out" the entire landscape of possibilities at once and settle into the valley of lowest energy—the ground state.
 
 
 ### A New Kind of Order
 
-So, how do you make progress on a problem that seems fundamentally impossible? Sometimes, the answer is to step back and change the question entirely.
+So, how do you make progress on a problem that seems fundamentally unsolvable? Sometimes, the answer is to step back and change the question entirely.
 
-The Ising model is defined by its matrix of tensions, the $J_{ji}$ values. For decades, the most studied cases were those where these tensions were either uniform and repeating, or completely random.
+The Ising model is defined by its matrix of tensions, the $J_{ji}$ values. For decades, researchers focused on cases where these tensions were either uniform and regular, or completely random.
+But then, a young physics student began to wonder about the nature of this `J` matrix itself. What other kinds of structure could it have?
 
-But a young physics student began to wonder about the nature of that `J` matrix itself. What other kinds of structures could it have?
+He imagined a system where the components weren't all identical, but had distinct ranks or identities—a hierarchy. And he posed a simple, imaginative question: "What if the interaction between any two spins was a direct function of their rank?"
 
-He imagined a system where the components weren't all identical, but had an intrinsic rank or identity. A hierarchy. And he posed a simple, creative question: "What if the interaction between any two spins was a direct function of their rank?"
-
-He started with the simplest rule he could think of: the tension between any two spins is just the sum of their ranks, $J_{ji}$ equals `i` plus `j`. He had defined a new mathematical world. But what were its laws? What did its most stable state—its ground state—look like?
+He began with the simplest rule he could think of: the tension between any two spins is just the sum of their ranks, $J_{ji}$ equals `i` plus `j`. He had defined a new mathematical world. But what were the laws? What did the most stable state—the ground state—look like there?
 
 With a small computer, he could begin to explore. He set the number of spins to 10 and had the machine search through all 1,024 possible configurations to find the one with the lowest energy. The result was surprisingly simple. A clean split. Two blocks of spins, all aligned together.
 
