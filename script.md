@@ -258,21 +258,21 @@ This visual understanding leads us naturally to an analytical expression for the
 
 ### **The Analytical Solution**
 
-To simplify this intimidating expression, he could use a well-known mathematical tool called Faulhaber's formula, which gives a closed-form expression for the sum of powers of integers. This formula, which involves the famous Bernoulli numbers, allows us to rewrite the giant mess of sums into a much more compact form.
+To simplify this intimidating expression for the Hamiltonian, he used a well-known mathematical tool called Faulhaber's formula, which gives a closed-form expression for sums of integer powers. This formula, which involves the famous Bernoulli numbers, allows us to rewrite the giant mess of sums into a much more compact form.
 
 The Hamiltonian now depends only on `N`, `d`, and our single variable of interest, `M`.
 
-Since we know the ground state is the configuration with the lowest energy, the problem is now reduced to finding the value of `M` that minimizes this function. This is a huge leap. A problem that required searching an exponential `2^N` space has been reduced—thanks to the two-cluster postulate—to just checking `N` possible values of `M`. This is a polynomial-time problem.
+Since the ground state corresponds to the configuration with the lowest energy, the problem now reduces to finding the value of `M` that minimizes this function. This is a huge leap. What was originally an exponential search over `2^N` configurations, has been reduced—thanks to the two-cluster postulate—to just checking `N` possible values of `M`. This is a polynomial-time problem.
 
-We can see this minimization in action. For a given `N` and `d`, we can just calculate the energy `H` for every possible cluster split, from `M=0` all the way to `M=N`, and find the one that gives the lowest value.
+We can observe this minimization process directly. For a given `N` and `d`, we can calculate the energy `H` for every possible cluster split, from `M=0` all the way to `M=N`, and find the one that yields the minimum energy.
 
-As we increase the size of the system, from N=10 to 15, to 30, and beyond, the process remains the same. We just sweep through all possible values of M and find the minimum.
+As we increase the size of the system, from N equals 10, to 15, 30, and beyond, the process remains the same. We just sweep through all possible values of M and find the minimum.
 
-But for very large systems, there's an even better way. The student took his next great leap. Instead of treating `M` as a discrete integer, he considered the limit where `N` is huge. In this limit, the ratio `q = M/N` becomes a continuous variable. And finding the minimum of a continuous function is a classic problem from calculus.
+But for very large systems, a more elegant method emerges. The student took his next great leap. Instead of treating `M` as a discrete integer, he considered the limit where `N` is huge. In this regime, the ratio `q = M/N` becomes a continuous variable. And finding the minimum of a continuous function is a classic problem from calculus.
 
-We just need to take the derivative of the Hamiltonian with respect to `q` and set it to zero.
+We just need to take the derivative of the Hamiltonian with respect to `q` and set it equal to zero.
 
-To do this, we only need the parts of the Hamiltonian that actually depend on `M`, which we can call `H-tilde`.
+However, we only need to differentiate the portion of the Hamiltonian that depends on M, we’ll call this simplified expression `H-tilde`.
 
 Taking the derivative of this expression with respect to `q` gives us this rather complicated equation.
 
