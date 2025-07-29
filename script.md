@@ -90,7 +90,7 @@ This is what that compact formula actually represents: a neat, clean way to capt
 
 ### The Complexity of Finding the Ground State
 
-So, we return to our central question: how do you find the ground state of a system like this? The most direct, brute-force approach would be to check the conflict value for every single possible configuration of spins.
+The astute among you may ask me, but how do you find the ground state of a system like this? Well, the most direct, brute-force approach would be to check the conflict value for every single possible configuration of spins.
 
 But just how many configurations are there?
 
@@ -111,7 +111,7 @@ So, simply checking every possibility is not just slow; for any reasonably sized
 
 So, we've established one thing clearly: Finding the ground state is an impossibly hard problem, at least if we try by checking every single possibility. The number of states grows so fast and it's far beyond the reach of any computer.
 
-But you might be wondering... so what? Is this just a niche problem(###obscure challenge ?) for physicists studying magnets? Or is there something deeper going on here?
+But you might be wondering... so what? Is this just a niche problem for physicists studying magnets? Or is there something deeper going on here?
 
 It turns out, this "Ising Problem" is actually a universal puzzle, one that secretly describes a huge number of other difficult problems that seem completely unrelated at first glance.
 
@@ -127,7 +127,7 @@ Now, here comes the magic trick. How on earth does this connect to our spins?
 
 Let's try to reframe the problem. Instead of thinking about putting numbers into bins, let's think about assigning a spin to each number. Let's say that if a number goes into the first group, we'll assign it a spin of +1. And if it goes into the second group, we'll assign it a spin of –1.
 
-Now, what happens if we calculate something interesting. Take each number, multiply it by its assigned spin,
+You might see where this is going... Take each number, multiply it by its assigned spin,
 and add them all up.
 
 In our example, that would be (+1) times 8, (plus) (–1) times 7, (plus) (–1) times 6, (plus) (+1) times 5 and we add them all up.
