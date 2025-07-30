@@ -1186,9 +1186,10 @@ class Introduction(Scene):
         self.play(Write(line2_group))
         self.wait(5)
 
-
 class LinkToNPHardness(Scene):
     def construct(self):
+        # --- CONFIGURATION ---
+
         PLUS_ONE_COLOR = BLUE_D
         MINUS_ONE_COLOR = RED_D
         TEXT_COLOR = YELLOW
@@ -1196,11 +1197,23 @@ class LinkToNPHardness(Scene):
         H_COLOR = GREEN
         SIGN_COLOR = WHITE
         LIGHT_YELLOW = YELLOW_D
+        H_COLOR = GREEN
+        ZOOM_FACTOR = 1.8
 
-        # --- SEQUENCE 1: INTRO AND WHY WE CARE ---
-        
+        # --- NEW SCENE: ISING PROBLEM INTRO ---
+        ising_intro = MarkupText(
+            "<span color='white'>This is </span><span color='#90ee90'> The Ising Problem</span>.",
+            font_size=44
+        )
+
+        self.play(Write(ising_intro))
+        self.wait(2)
+        self.play(FadeOut(ising_intro))
+        self.wait(0.5)
+
+        # --- ORIGINAL SCENE CONTINUES ---
         title_text = MarkupText(
-            'Why is this <span color="YELLOW">Ising Problem</span> important?',
+            'But why is this <span color="#90ee90">Ising Problem</span> so important?',
             font_size=38)
         subtitle_text = MarkupText(
             "It's a <span color='TEAL'>universal puzzle</span> that describes many other hard problems.",
@@ -1213,6 +1226,7 @@ class LinkToNPHardness(Scene):
         self.wait(3)
         self.play(FadeOut(title_text, subtitle_text))
         self.wait(0.5)
+
 
         # --- SEQUENCE 2: THE NUMBER PARTITIONING PROBLEM ---
         
@@ -1367,10 +1381,8 @@ class LinkToNPHardness(Scene):
         rect1.set_stroke(width=1)
         rect2 = SurroundingRectangle(hamiltonian[2], color=ORANGE, buff=0.05)
         rect2.set_stroke(width=1)
-
         
         arrow = MathTex(r"\to", color=WHITE, font_size=60)
-
         equivalence_map = MathTex(
             r"J_{ij}", "=", r"a_i", r"a_j",
             font_size=60,
@@ -1414,65 +1426,147 @@ class LinkToNPHardness(Scene):
         self.wait(1)
         self.play(GrowArrow(arrow), Write(arrow_text))
         self.wait(1)
+
+        # Show the replacement transform
         self.play(ReplacementTransform(problem1.copy(), problem2))
-        self.wait(5)
+        self.wait(1.5)
+
+        # Fade out everything except problem2
+        self.play(*[FadeOut(mob) for mob in self.mobjects if mob != problem2])
+        self.wait(0.5)
 
 
-        # --- NEW SEQUENCE: THE ROGUES' GALLERY  ---
 
-        # Define a consistent helper function for creating problem boxes
+        # --- CREATE PROBLEM BOXES ---
         def create_problem_box(text, color, height=1.3, width=4.0):
-            box = RoundedRectangle(height=height, width=width, corner_radius=0.2, color=color)
-            label = Text(text, font_size=33).scale_to_fit_width(width * 0.85)
+            box = RoundedRectangle(height=height, width=width, 
+                                 corner_radius=0.2, color=color)
+            label = Text(text, font_size=28).scale_to_fit_width(width * 0.85)
             label.move_to(box.get_center())
             return VGroup(box, label)
         
-        central_hub_final = create_problem_box("Ising Ground State", H_COLOR, height=1.5, width=5.2)
-        central_hub_final.move_to(ORIGIN) 
+        # Central hub
+        central_hub = create_problem_box("Ising Ground State", H_COLOR, 
+                                       height=1.5, width=5.2)
+        # Transform problem2 into central_hub
+        self.play(ReplacementTransform(problem2, central_hub))
+        self.wait(0.2)
+        central_hub.move_to(ORIGIN)
 
-        np_box_final = create_problem_box("Number Partitioning", TEAL)
-        np_box_final.move_to(central_hub_final.get_center() + DOWN * 2.2 + LEFT * 3.5)
-
-        np_arrow_final = Arrow(
-            np_box_final.get_top(), central_hub_final.get_corner(DL),
-            buff=0.2, color=YELLOW)
-
-        self.play(
-            FadeOut(arrow_text),
-            Transform(problem1, np_box_final),     
-            Transform(problem2, central_hub_final),  
-            Transform(arrow, np_arrow_final),        
-            run_time=2.0)
+        # Problem boxes
+        np_box = create_problem_box("Number Partitioning", TEAL)
+        np_box.move_to(DOWN*2.2 + LEFT*3.5)
         
-        self.wait(1)
-
-        central_hub = problem2
-        np_box = problem1
-        
-        # Max-Cut
-        max_cut_box = create_problem_box("Max-Cut", PURPLE)
-        max_cut_box.move_to(central_hub.get_center() + UP * 2.2 + LEFT * 3.5)
-        max_cut_arrow = Arrow(max_cut_box.get_bottom(), central_hub.get_corner(UL), buff=0.2, color=YELLOW)
-        self.play(FadeIn(max_cut_box))
-        self.play(GrowArrow(max_cut_arrow))
-        self.wait(2.5)
-
-        # Traveling Salesman
-        tsp_box = create_problem_box("Traveling Salesman", MAROON_B)
-        tsp_box.move_to(central_hub.get_center() + UP * 2.2 + RIGHT * 3.5)
-        tsp_arrow = Arrow(tsp_box.get_bottom(), central_hub.get_corner(UR), buff=0.2, color=YELLOW)
-        self.play(FadeIn(tsp_box))
-        self.play(GrowArrow(tsp_arrow))
-        self.wait(2.5)
-
-        # ksat
         ksat_box = create_problem_box("k-SAT", GOLD_D)
-        ksat_box.move_to(central_hub.get_center() + DOWN * 2.2 + RIGHT * 3.5)
-        ksat_arrow = Arrow(ksat_box.get_top(), central_hub.get_corner(DR), buff=0.2, color=YELLOW)
-        self.play(FadeIn(ksat_box))
-        self.play(GrowArrow(ksat_arrow))
-        self.wait(2.5)
+        ksat_box.move_to(DOWN*2.2 + RIGHT*3.5)
         
+        tsp_box = create_problem_box("Traveling Salesman", MAROON_B)
+        tsp_box.move_to(UP*2.2 + RIGHT*3.5)
+        
+        max_cut_box = create_problem_box("Max-Cut", PURPLE)
+        max_cut_box.move_to(UP*2.2 + LEFT*3.5)
+
+        # Arrows
+        np_arrow = Arrow(np_box.get_top(), central_hub.get_corner(DL), 
+                        buff=0.2, color=YELLOW)
+        ksat_arrow = Arrow(ksat_box.get_top(), central_hub.get_corner(DR), 
+                          buff=0.2, color=YELLOW)
+        tsp_arrow = Arrow(tsp_box.get_bottom(), central_hub.get_corner(UR), 
+                         buff=0.2, color=YELLOW)
+        max_cut_arrow = Arrow(max_cut_box.get_bottom(), central_hub.get_corner(UL), 
+                             buff=0.2, color=YELLOW)
+
+        # --- MAIN SCENE ---
+        
+        # Show all boxes and arrows
+        self.play(
+            FadeIn(np_box),
+            GrowArrow(np_arrow),
+            FadeIn(max_cut_box),
+            GrowArrow(max_cut_arrow),
+            FadeIn(tsp_box),
+            GrowArrow(tsp_arrow),
+            FadeIn(ksat_box),
+            GrowArrow(ksat_arrow),
+            run_time=2
+        )
+        self.wait(1.75)
+        
+        # Define problems with their assets
+        problems = [
+            (max_cut_box, max_cut_arrow, "max_cut.png", "Partitioning graph\nto maximize edge weights"),
+            (tsp_box, tsp_arrow, "tsp.png", "Finding shortest route\nvisiting all cities once"),
+            (ksat_box, ksat_arrow, "ksat.png", "Boolean satisfiability\nwith k variables per clause"),
+            (np_box, np_arrow, "numpart.png", "Dividing numbers\ninto equal sum subsets")]
+        
+        # Store all original objects
+        all_objects = Group(*self.mobjects)
+        
+        for box, arrow, img_file, explanation in problems:
+            # Create copies for perfect restoration
+            box_copy = box.copy()
+            arrow_copy = arrow.copy()
+            central_hub_copy = central_hub.copy()
+            
+            # Step 1: Fade out everything except selected box
+            # First make sure box is visible (in case it was faded out)
+            self.add(box)
+            self.play(
+                *[FadeOut(mob) for mob in self.mobjects if mob != box],
+                run_time=1.3)
+            
+            # Step 2: Zoom box to center (keeping original color)
+            self.play(
+                box.animate.move_to(ORIGIN).scale(ZOOM_FACTOR),
+                run_time=1.5)
+            self.wait(0.9)
+            
+            # Step 3: Fade out the box itself (both rectangle and label)
+            self.play(
+                FadeOut(box),
+                run_time=0.8
+            )
+            
+            # Step 4: Show content (image + text)
+            try:
+                image = ImageMobject(img_file)
+                image.height = 5
+                image.move_to(ORIGIN)
+                
+                desc = Paragraph(*explanation.split("\n"), 
+                                alignment="center", 
+                                font_size=30)
+                desc.next_to(image, DOWN, buff=0.4)
+                
+                self.play(
+                    FadeIn(image),
+                    Write(desc),
+                    run_time=3.5
+                )
+                self.wait(1)
+                
+                # Step 5: Fade out content
+                self.play(
+                    FadeOut(image),
+                    FadeOut(desc),
+                    run_time=1
+                )
+            except Exception as e:
+                print(f"Error loading {img_file}: {e}")
+            
+            # Step 6: Restore full original scene
+            self.play(
+                FadeIn(all_objects),
+                Transform(box, box_copy),
+                Transform(arrow, arrow_copy),
+                Transform(central_hub, central_hub_copy),
+                run_time=1.5
+            )
+            self.wait(0.5)
+        
+        self.wait(2)
+
+
         # 5. Final shot - group everything for a clean end frame
         
         all_problems_group = VGroup(
@@ -1482,10 +1576,6 @@ class LinkToNPHardness(Scene):
             tsp_box, tsp_arrow,
             ksat_box, ksat_arrow)
         
-
-        self.play(all_problems_group.animate.move_to(ORIGIN))
-        self.wait(5)
-    
 
         # --- NEW SEQUENCE: THE ESSENCE OF THE ISING PROBLEM ---
 
@@ -1669,6 +1759,8 @@ class LinkToNPHardness(Scene):
         except FileNotFoundError:
             self.play(Write(Text("Image 'dwave_computer.jpeg' not found.", color=RED)))
             self.wait(3)
+
+
 
 
 
