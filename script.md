@@ -268,7 +268,7 @@ We can observe this minimization process directly. For a given `N` and `d`, we c
 
 As we increase the size of the system, from N equals 10, to 15, 30, and beyond, the process remains the same. We just sweep through all possible values of M and find the minimum.
 
-But for very large systems, a more elegant method emerges. The student took his next great leap. Instead of treating `M` as a discrete integer, he considered the limit where `N` is huge. In this regime, the ratio `q = M/N` becomes a continuous variable. And finding the minimum of a continuous function is a classic problem from calculus.
+But for very large systems, a more elegant method emerges. The student took his next great leap. Instead of treating `M` as a discrete integer, he considered the limit where `N` is huge. In this regime, the ratio `q = M/N` becomes a continuous variable. And finding the minimum of a continuous function is a classic problem from calculus. As we can see, as the value of N increases, the system begins to resemble a continuous distribution of points.
 
 We just need to take the derivative of the Hamiltonian with respect to `q` and set it equal to zero.
 
