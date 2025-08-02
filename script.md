@@ -398,3 +398,22 @@ The unity of the poor is not born of cooperation. It is a forced peace, a strate
 
 ### The Final Reveal
 
+So, who was this student who dared to solve an impossible problem with a single, imaginative leap of faith?
+
+(slow, thoughtful music begins)
+
+The reason I know his story so well… the excitement of discovery, the nagging weight of doubt, and the final relief of the proof…
+
+(a beat of silence)
+
+…is because that student… was me.
+
+(music swells, becoming more personal)
+
+I began this journey in the final year of my physics degree, a curiosity that grew into a full-blown obsession. I was fortunate to be joined on this path by my brilliant collaborators, Mahmood and Alireza, who helped turn that initial spark into a rigorous mathematical theory.
+
+In the end, that's what this story is really about. It's a testament to the idea that sometimes, the hardest problems aren't a wall. They're an invitation.
+
+An invitation to take a leap of faith...
+
+(music swells to a hopeful, epic conclusion and fades)
