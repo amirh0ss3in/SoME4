@@ -1,4 +1,4 @@
-# This weird approximation solves an impossible problem
+# How a Leap of Faith solved an imppossible problem
 
 (intro music)
 
