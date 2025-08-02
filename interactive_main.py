@@ -4386,3 +4386,98 @@ class TheFinalReveal(Scene):
             error_msg = Text(error_msg_text, color=RED)
             self.play(Write(error_msg))
             self.wait(3)
+
+
+class TheReveal(Scene):
+    def construct(self):
+        # 1. Load and set up the image
+        image = ImageMobject("us.jpg")
+        image.set_height(6)
+
+        # --- Define the initial cropped view ---
+        visible_start_frac = 0.24
+        visible_end_frac = 0.57
+        buffer = 0.05
+
+        common_rect_config = {
+            "height": image.get_height() + buffer,
+            "fill_color": self.camera.background_color,
+            "fill_opacity": 1,
+            "stroke_width": 0,
+        }
+        
+        reveal_start_point = image.get_left() + RIGHT * image.get_width() * visible_start_frac
+        reveal_end_point = image.get_left() + RIGHT * image.get_width() * visible_end_frac
+
+        left_curtain = Rectangle(
+            width=image.get_width() * visible_start_frac + buffer, **common_rect_config
+        )
+        left_curtain.move_to(reveal_start_point, aligned_edge=RIGHT)
+
+        right_curtain = Rectangle(
+            width=image.get_width() * (1 - visible_end_frac) + buffer, **common_rect_config
+        )
+        right_curtain.move_to(reveal_end_point, aligned_edge=LEFT)
+        left_curtain.set_z_index(1)
+        right_curtain.set_z_index(1)
+        # Group the visual elements for easy manipulation
+        cropped_view = Group(image, left_curtain, right_curtain)
+        
+        # --- Create the text Mobjects ---
+
+        # Text for the initial state
+        names_text = Text(
+            "Mahmood, Alireza, Amirhossein & Dr. Halataei",
+            font_size=28,
+            line_spacing=0.9,
+            font="Times New Roman"
+        )
+        
+        # Text for the final state (use \n for line break)
+        title_text = Text(
+            "Quantum Information & Computation Group of Shahid Beheshti University",
+            font_size=28,
+            line_spacing=0.9,
+            font="Times New Roman"
+        )
+
+        # --- Position the initial elements ---
+        
+        # Center the *visible sliver* of the image on the screen
+        visible_center_point = (reveal_start_point + reveal_end_point) / 2
+        cropped_view.shift(-visible_center_point)
+        
+        # Place the names below the initially centered cropped view
+        names_text.to_edge(DOWN, buff=0.4)
+        
+        # Add the initial setup to the scene
+        self.add(left_curtain, right_curtain)
+        self.play(FadeIn(image), LaggedStart(*[Write(text) for text in names_text]))
+        self.wait(1.5)
+
+        # --- Animate the transition ---
+
+        # Animation 1: Move the image to its final centered position AND fade out the names
+        self.play(
+            cropped_view.animate.move_to(ORIGIN),
+            FadeOut(names_text, shift=DOWN * 0.5), # Fade out while moving down slightly
+            run_time=2,
+            rate_func=rate_functions.ease_in_out_sine
+        )
+        
+        # Animation 2: Reveal the full image by opening the curtains
+        self.play(
+            left_curtain.animate.scale((0, 1, 1), about_edge=LEFT),
+            right_curtain.animate.scale((0, 1, 1), about_edge=RIGHT),
+            run_time=3,
+            rate_func=rate_functions.ease_out_cubic
+        )
+
+        # Animation 3: Fade in the final title above the image
+        # Position the title relative to the now-centered view
+        title_text.to_edge(UP, buff=0.3)
+        self.play(
+            Write(title_text) # Use Write for a "typing" effect
+        )
+
+        self.wait(3)
