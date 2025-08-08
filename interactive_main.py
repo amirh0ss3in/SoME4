@@ -4386,8 +4386,6 @@ class TheFinalReveal(Scene):
             error_msg = Text(error_msg_text, color=RED)
             self.play(Write(error_msg))
             self.wait(3)
-
-
 class TheReveal(Scene):
     def construct(self):
         # 1. Load and set up the image
@@ -4411,61 +4409,61 @@ class TheReveal(Scene):
 
         left_curtain = Rectangle(
             width=image.get_width() * visible_start_frac + buffer, **common_rect_config
-        )
-        left_curtain.move_to(reveal_start_point, aligned_edge=RIGHT)
+        ).move_to(reveal_start_point, aligned_edge=RIGHT)
 
         right_curtain = Rectangle(
             width=image.get_width() * (1 - visible_end_frac) + buffer, **common_rect_config
-        )
-        right_curtain.move_to(reveal_end_point, aligned_edge=LEFT)
+        ).move_to(reveal_end_point, aligned_edge=LEFT)
+
         left_curtain.set_z_index(1)
         right_curtain.set_z_index(1)
-        # Group the visual elements for easy manipulation
-        cropped_view = Group(image, left_curtain, right_curtain)
-        
-        # --- Create the text Mobjects ---
 
-        # Text for the initial state
+        cropped_view = Group(image, left_curtain, right_curtain)
+
+        # --- Create the text exactly as before ---
         names_text = Text(
             "Mahmood, Alireza, Amirhossein & Dr. Halataei",
             font_size=28,
             line_spacing=0.9,
             font="Times New Roman"
         )
-        
-        # Text for the final state (use \n for line break)
-        title_text = Text(
-            "Quantum Information & Computation Group of Shahid Beheshti University",
-            font_size=28,
-            line_spacing=0.9,
-            font="Times New Roman"
-        )
 
-        # --- Position the initial elements ---
-        
         # Center the *visible sliver* of the image on the screen
         visible_center_point = (reveal_start_point + reveal_end_point) / 2
         cropped_view.shift(-visible_center_point)
-        
+
         # Place the names below the initially centered cropped view
         names_text.to_edge(DOWN, buff=0.4)
+
+        # --- Make groups for the chunks we want ---
+        amir_group    = VGroup(*names_text[16:27])  # Amirhossein + space
+        mahmood_group = VGroup(*names_text[0:8])    # Mahmood + comma+space
+        alireza_group = VGroup(*names_text[8:16])   # Alireza + comma+space
+        dr_group      = VGroup(*names_text[27:44])  # & Dr. Halataei
         
-        # Add the initial setup to the scene
+        # Add cropped image & curtains first
         self.add(left_curtain, right_curtain)
-        self.play(FadeIn(image), LaggedStart(*[Write(text) for text in names_text]))
+
+        # Fade in image
+        self.play(FadeIn(image))
+
+        # Write the chunks in custom order
+        self.play(Write(amir_group))
+        self.play(Write(mahmood_group))
+        self.play(Write(alireza_group))
+        self.play(Write(dr_group))
+
         self.wait(1.5)
 
-        # --- Animate the transition ---
-
-        # Animation 1: Move the image to its final centered position AND fade out the names
+        # Move image to full center & fade out names
         self.play(
             cropped_view.animate.move_to(ORIGIN),
-            FadeOut(names_text, shift=DOWN * 0.5), # Fade out while moving down slightly
+            FadeOut(names_text, shift=DOWN * 0.5),
             run_time=2,
             rate_func=rate_functions.ease_in_out_sine
         )
-        
-        # Animation 2: Reveal the full image by opening the curtains
+
+        # Open curtains
         self.play(
             left_curtain.animate.scale((0, 1, 1), about_edge=LEFT),
             right_curtain.animate.scale((0, 1, 1), about_edge=RIGHT),
@@ -4473,11 +4471,13 @@ class TheReveal(Scene):
             rate_func=rate_functions.ease_out_cubic
         )
 
-        # Animation 3: Fade in the final title above the image
-        # Position the title relative to the now-centered view
-        title_text.to_edge(UP, buff=0.3)
-        self.play(
-            Write(title_text) # Use Write for a "typing" effect
+        # Final title
+        title_text = Text(
+            "Quantum Information & Computation Group of Shahid Beheshti University",
+            font_size=28,
+            font="Times New Roman",
+            line_spacing=0.9
         )
-
+        title_text.to_edge(UP, buff=0.3)
+        self.play(Write(title_text))
         self.wait(3)
