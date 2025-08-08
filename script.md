@@ -396,12 +396,11 @@ This is **The Great Schism**.
 
 The unity of the poor is not born of cooperation. It is a forced peace, a strategic arrangement imposed on them by the system's cold, global logic. And the unity of the elites is simply the low-cost foundation for this grand structure. The polarization of this society isn't a choice—it's the only way to solve an impossible puzzle of competing tensions.
 
-
-What we’ve just uncovered together… isn’t just a story.
-It this..
-
-A paper published just a few days ago in the prestigious journal Physical Review E.
-
+But where does this strange and beautiful theory come from? Is it just a mathematical fable, a thought experiment I’ve constructed for this video?
+The answer is no. What we’ve just uncovered together... isn’t just a story.
+It is this.
+(Image of "Continuous Approximation of the Ising Hamiltonian" paper appears on screen)
+A paper, published just recently in the prestigious journal Physical Review E, that lays out the entire proof and the principle of the Great Schism. 
 
 ### The Final Reveal
 
