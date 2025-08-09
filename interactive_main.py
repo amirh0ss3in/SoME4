@@ -4394,7 +4394,7 @@ class TheReveal(Scene):
 
         # --- Define the initial cropped view ---
         visible_start_frac = 0.24
-        visible_end_frac = 0.57
+        visible_end_frac = 0.61
         buffer = 0.05
 
         common_rect_config = {
